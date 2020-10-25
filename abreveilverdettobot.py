@@ -29,7 +29,7 @@ import os
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 AUTH_TOKEN = '1132815578:AAHx0IW2ZpPAChG9Yo-7mQVJL_8NqezQFY8'
-APP_NAME = 'abreveilverdetto'
+APP_NAME = 'https://abreveilverdetto.herokuapp.com/'
 GREETINGS = 'Buongiorno {}, siamo consapevoli dei sacrifici'
 HELP = '{} non verrai abbandonato a te stesso'
 THE_SENTENCE = 'a breve il verdetto'
