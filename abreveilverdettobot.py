@@ -33,7 +33,8 @@ APP_NAME = 'https://abreveilverdetto.herokuapp.com/'
 GREETINGS = 'Buongiorno {}, siamo consapevoli dei sacrifici'
 HELP = '{} non verrai abbandonato a te stesso'
 THE_SENTENCE = 'a breve il verdetto'
-KEYWORDS = ['furla', 'zoggia', 'daniele', 'verdetto', 'decreto', 'dpcm', 'conte', 'governo', 'casalino', 'rocco']
+KEYWORDS_VERDETTO = ['furla', 'zoggia', 'daniele', 'verdetto', 'decreto', 'dpcm', 'conte', 'governo', 'casalino', 'rocco']
+KEYWORDS_AUTOCERTIFICAZIONE = ['autocertificazione', 'cazzo', 'tiro', 'tiri', 'tira', 'foglio', 'fogli', 'coprifuoco']
 
 BASE_URL = 'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-json/'
 REGIONI= 'dpc-covid19-ita-regioni-latest.json'
@@ -47,6 +48,10 @@ logger = logging.getLogger(__name__)
 
 
 PORT = int(os.environ.get('PORT', '8443'))
+
+script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+rel_path = "/media/photo_2020-10-25_23-05-49.jpg"
+abs_file_path = os.path.join(script_dir, rel_path)
 
 
 # Define a few command handlers. These usually take the two arguments update and
@@ -79,8 +84,11 @@ def update_command(update, context):
 
 
 def handle_message(update, context):
-    if update.message.text.lower() in KEYWORDS:
+    text = update.message.text.lower()
+    if text in KEYWORDS_VERDETTO:
         echo_sentence(update, context, THE_SENTENCE)
+    elif text in KEYWORDS_AUTOCERTIFICAZIONE:
+        update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(abs_file_path, 'rb'))
 
 
 def echo_sentence(update, context, sentence=THE_SENTENCE):
