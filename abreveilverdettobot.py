@@ -68,7 +68,7 @@ def start(update, context):
     """Send a message when the command /start is issued."""
     user = update.message.from_user
     logger.info('User {} started the conversation.'.format(user.first_name))
-    update.message.reply_text('{} {}'.format(greetings(user.first_name), content['greetings']))
+    update.message.reply_text(content['greetings'].format(greetings(user.first_name)))
 
 
 def conte_command(update, context):
