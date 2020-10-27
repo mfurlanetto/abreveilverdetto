@@ -121,9 +121,10 @@ def greetings(name):
 
 def handle_message(update, context):
     text = update.message.text.lower()
-    if text in KEYWORDS_VERDETTO:
+    splitText = text.split()
+    if any(x in KEYWORDS_VERDETTO for x in splitText):
         echo_sentence(update, context, THE_SENTENCE)
-    elif text in KEYWORDS_AUTOCERTIFICAZIONE:
+    elif any(x in KEYWORDS_AUTOCERTIFICAZIONE for x in splitText):
         update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("/media/photo_2020-10-25_23-05-49.jpg"), 'rb'))
 
 
