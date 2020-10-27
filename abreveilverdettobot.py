@@ -41,6 +41,7 @@ content = json.load(open(buildPath('conf/appContent.json')))
 timezone = pytz.timezone('Europe/Rome')
 
 numFrasiConte = len(content['sentences']['conte'])
+numSalutiConte = len(content['greetings'])
 
 
 HELP = '{} non verrai abbandonato a te stesso'
@@ -69,14 +70,16 @@ START OF COMMANDS SECTION
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
     """Send a message when the command /start is issued."""
+    randomIndex = randrange(numSalutiConte)
     user = update.message.from_user
     logger.info('User {} started the conversation.'.format(user.first_name))
-    update.message.reply_text(content['greetings'].format(greetings(user.first_name)))
+    update.message.reply_text(content['greetings'][randomIndex].format(greetings(user.first_name)))
 
 
 def conte_command(update, context):
+    randomIndex = randrange(numFrasiConte)
     # update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open("/home/marco/Documenti/python-telegram-bot/examples/photo_2020-10-25_13-46-43.jpg", 'rb'))
-    update.message.reply_text(content['sentences']['conte'][randrange(numFrasiConte)])
+    update.message.reply_text(content['sentences']['conte'][randomIndex])
 
 
 def help_command(update, context):
