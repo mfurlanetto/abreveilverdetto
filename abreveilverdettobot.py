@@ -28,6 +28,7 @@ import os
 import datetime
 import pytz
 
+from random import randrange
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 script_dir = os.path.dirname(__file__)
@@ -38,6 +39,8 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 timezone = pytz.timezone('Europe/Rome')
+
+numFrasiConte = len(content['sentences']['conte'])
 
 
 HELP = '{} non verrai abbandonato a te stesso'
@@ -73,7 +76,7 @@ def start(update, context):
 
 def conte_command(update, context):
     # update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open("/home/marco/Documenti/python-telegram-bot/examples/photo_2020-10-25_13-46-43.jpg", 'rb'))
-    update.message.reply_text('a breve la foto')
+    update.message.reply_text(content['sentences']['conte'][randrange(numFrasiConte)])
 
 
 def help_command(update, context):
