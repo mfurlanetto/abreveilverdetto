@@ -25,18 +25,25 @@ import logging
 import json
 import urllib.request
 import os
+import datetime
+import pytz
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-AUTH_TOKEN = '1132815578:AAHx0IW2ZpPAChG9Yo-7mQVJL_8NqezQFY8'
-APP_NAME = 'https://abreveilverdetto.herokuapp.com/'
-GREETINGS = 'Buongiorno {}, siamo consapevoli dei sacrifici'
+script_dir = os.path.dirname(__file__)
+
+config = json.load(open(buildPath('conf/appConfig.json')))
+content = json.load(open(buildPath('conf/appContent.json')))
+timezone = pytz.timezone('Europe/Rome')
+
+
 HELP = '{} non verrai abbandonato a te stesso'
 THE_SENTENCE = 'a breve il verdetto'
 KEYWORDS_VERDETTO = ['furla', 'zoggia', 'daniele', 'verdetto', 'decreto', 'dpcm', 'conte', 'governo', 'casalino', 'rocco']
 KEYWORDS_AUTOCERTIFICAZIONE = ['autocertificazione', 'cazzo', 'tiro', 'tiri', 'tira', 'foglio', 'fogli', 'coprifuoco']
 
 BASE_URL = 'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-json/'
+URL_COMUNI = 'https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json'
 REGIONI= 'dpc-covid19-ita-regioni-latest.json'
 
 # Enable logging
@@ -47,11 +54,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-PORT = int(os.environ.get('PORT', '8443'))
-
-script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-rel_path = "/media/photo_2020-10-25_23-05-49.jpg"
-abs_file_path = os.path.join(script_dir, rel_path)
+"""
+START OF COMMANDS SECTION
+"""
 
 
 # Define a few command handlers. These usually take the two arguments update and
@@ -60,7 +65,7 @@ def start(update, context):
     """Send a message when the command /start is issued."""
     user = update.message.from_user
     logger.info('User {} started the conversation.'.format(user.first_name))
-    update.message.reply_text(GREETINGS.format(user.first_name))
+    update.message.reply_text('{} {}'.format(greetings(user.first_name), content['greetings']))
 
 
 def conte_command(update, context):
@@ -83,12 +88,37 @@ def update_command(update, context):
         print('Totale positivi {}'.format(regioni[indice]["totale_casi"]))
 
 
+"""
+END OF COMMANDS SECTION
+"""
+
+#================================================================================
+
+"""
+START OF UTILITY SECTION
+"""
+
+def buildPath(relativePath):
+    return os.path.join(script_dir, relativePath)
+
+def greetings(name):
+    rome_now = datetime.datetime.now(timezone)
+    actualHour = rome_now.hour
+    if (actualHour >= 13 and actualHour < 17):
+      return 'Buon pomeriggio {}'.format(name)
+    elif (actualHour >= 17):
+        return 'Buona sera {}'.format(name)
+    elif (actualHour >= 6 and actualHour < 13):
+        return 'Buongiorno {}'.format(name)
+    else:
+         pass
+
 def handle_message(update, context):
     text = update.message.text.lower()
     if text in KEYWORDS_VERDETTO:
         echo_sentence(update, context, THE_SENTENCE)
     elif text in KEYWORDS_AUTOCERTIFICAZIONE:
-        update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(abs_file_path, 'rb'))
+        update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("/media/photo_2020-10-25_23-05-49.jpg"), 'rb'))
 
 
 def echo_sentence(update, context, sentence=THE_SENTENCE):
@@ -101,12 +131,26 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
+"""
+END OF UTILITY SECTION
+"""
+
+#==============================================================================
+
+
 def main():
+    """ Get configurations """
+    token = config['token']
+    appName = config['name']
+    port = config['port']
+    listen = config['listen']
+
+
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater(AUTH_TOKEN, use_context=True)
+    updater = Updater(token, use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -124,11 +168,11 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    updater.start_webhook(listen="0.0.0.0",
-                          port=PORT,
-                          url_path=AUTH_TOKEN)
+    updater.start_webhook(listen=listen,
+                          port=int(os.environ.get('PORT', port)),
+                          url_path=token)
     # updater.bot.set_webhook(url=settings.WEBHOOK_URL)
-    updater.bot.set_webhook(APP_NAME + AUTH_TOKEN)
+    updater.bot.set_webhook(appName + token)
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
