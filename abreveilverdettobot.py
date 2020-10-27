@@ -77,9 +77,11 @@ def start(update, context):
 
 
 def conte_command(update, context):
-    randomIndex = randrange(numFrasiConte)
+    randomIndex = randrange(7)
     # update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open("/home/marco/Documenti/python-telegram-bot/examples/photo_2020-10-25_13-46-43.jpg", 'rb'))
-    update.message.reply_text(content['sentences']['conte'][randomIndex])
+    #update.message.reply_text(content['sentences']['conte'][randomIndex])
+    update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/conte/{}.jpg".format(randomIndex)), 'rb'))
+
 
 
 def help_command(update, context):
@@ -97,9 +99,6 @@ def update_command(update, context):
         print('Totale positivi {}'.format(regioni[indice]["totale_casi"]))
 
 
-"""
-END OF COMMANDS SECTION
-"""
 
 #================================================================================
 
@@ -107,21 +106,23 @@ END OF COMMANDS SECTION
 START OF UTILITY SECTION
 """
 
+def isMorning(hour):
+    return hour >= 6 and hour < 13
+
+def isAfternoon(hour):
+    return hour >= 13 and hour < 17
+
 def greetings(name):
-    rome_now = datetime.datetime.now(timezone)
-    actualHour = rome_now.hour
-    if (actualHour >= 13 and actualHour < 17):
-      return 'Buon pomeriggio {}'.format(name)
-    elif (actualHour >= 17):
-        return 'Buona sera {}'.format(name)
-    elif (actualHour >= 6 and actualHour < 13):
+    actualHour = datetime.datetime.now(timezone).hour
+    if isMorning(actualHour):
         return 'Buongiorno {}'.format(name)
+    elif isAfternoon(actualHour):
+        return 'Buon pomeriggio {}'.format(name)
     else:
-         pass
+        return 'Buona sera {}'.format(name)
 
 def handle_message(update, context):
-    text = update.message.text.lower()
-    splitText = text.split()
+    splitText = update.message.text.lower().split()
     if any(x in KEYWORDS_VERDETTO for x in splitText):
         echo_sentence(update, context, THE_SENTENCE)
     elif any(x in KEYWORDS_AUTOCERTIFICAZIONE for x in splitText):
@@ -138,9 +139,6 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
-"""
-END OF UTILITY SECTION
-"""
 
 #==============================================================================
 
@@ -169,7 +167,7 @@ def main():
     dp.add_handler(CommandHandler('help', help_command))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+    dp.add_handler(MessageHandler(Filters.text, handle_message))
 
      # log all errors
     dp.add_error_handler(error)
