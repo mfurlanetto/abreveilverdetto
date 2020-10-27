@@ -46,8 +46,8 @@ numSalutiConte = len(content['greetings'])
 
 HELP = '{} non verrai abbandonato a te stesso'
 THE_SENTENCE = 'a breve il verdetto'
-KEYWORDS_VERDETTO = ['furla', 'zoggia', 'daniele', 'verdetto', 'decreto', 'dpcm', 'conte', 'governo', 'casalino', 'rocco']
-KEYWORDS_AUTOCERTIFICAZIONE = ['autocertificazione', 'cazzo', 'tiro', 'tiri', 'tira', 'foglio', 'fogli', 'coprifuoco']
+KEYWORDS_VERDETTO = ['furla', 'zoggia', 'daniele', 'verdetto', 'conte', 'governo', 'casalino', 'rocco']
+KEYWORDS_AUTOCERTIFICAZIONE = ['decreto', 'dpcm', 'autocertificazione', 'cazzo', 'tiro', 'coprifuoco']
 
 BASE_URL = 'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-json/'
 URL_COMUNI = 'https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json'
@@ -125,7 +125,7 @@ def handle_message(update, context):
     if any(x in KEYWORDS_VERDETTO for x in splitText):
         echo_sentence(update, context, THE_SENTENCE)
     elif any(x in KEYWORDS_AUTOCERTIFICAZIONE for x in splitText):
-        update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("/media/photo_2020-10-25_23-05-49.jpg"), 'rb'))
+        update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/photo_2020-10-25_23-05-49.jpg"), 'rb'))
 
 
 def echo_sentence(update, context, sentence=THE_SENTENCE):
