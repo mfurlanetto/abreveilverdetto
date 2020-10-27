@@ -32,6 +32,9 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 script_dir = os.path.dirname(__file__)
 
+def buildPath(relativePath):
+    return os.path.join(script_dir, relativePath)
+
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 timezone = pytz.timezone('Europe/Rome')
@@ -97,9 +100,6 @@ END OF COMMANDS SECTION
 """
 START OF UTILITY SECTION
 """
-
-def buildPath(relativePath):
-    return os.path.join(script_dir, relativePath)
 
 def greetings(name):
     rome_now = datetime.datetime.now(timezone)
