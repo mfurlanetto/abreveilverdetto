@@ -16,8 +16,9 @@ bot.
 
 Telegram commands:
 start - Buongiorno da Conte
-help - Aiuto da Conte
+cts - Estrazione casuale di 5 membri del Comitato Tecnico Scientifico
 conte - Foto di Conte
+help - Aiuto da Conte
 update - Aggiornamenti da Conte
 """
 
@@ -29,7 +30,7 @@ import datetime
 import pytz
 
 from random import randrange
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ParseMode
 
 script_dir = os.path.dirname(__file__)
 
@@ -42,7 +43,20 @@ timezone = pytz.timezone('Europe/Rome')
 
 numFrasiConte = len(content['sentences']['conte'])
 numSalutiConte = len(content['greetings'])
+ctsMaxLen = 5
+ctsSize = len(content['CTS'])
+ctsList = content['CTS']
 
+thunderstorm = u'\U0001F4A8'    # Code: 200's, 900, 901, 902, 905
+drizzle = u'\U0001F4A7'         # Code: 300's
+rain = u'\U00002614'            # Code: 500's
+snowflake = u'\U00002744'       # Code: 600's snowflake
+snowman = u'\U000026C4'         # Code: 600's snowman, 903, 906
+atmosphere = u'\U0001F301'      # Code: 700's foogy
+clearSky = u'\U00002600'        # Code: 800 clear sky
+fewClouds = u'\U000026C5'       # Code: 801 sun behind clouds
+clouds = u'\U00002601'          # Code: 802-803-804 clouds general
+hot = u'\U0001F525'             # Code: 904
 
 HELP = '{} non verrai abbandonato a te stesso'
 THE_SENTENCE = 'a breve il verdetto'
@@ -81,6 +95,13 @@ def conte_command(update, context):
     update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/conte/{}.jpg".format(randomIndex)), 'rb'))
 
 
+def cts_command(update, context):
+    """Send a message when the command /cts is issued."""    
+    user = update.message.from_user
+    message = buildCtsMessage(user)
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
+                  parse_mode=ParseMode.HTML)
+
 
 def help_command(update, context):
     """Send a message when the command /help is issued."""
@@ -118,6 +139,25 @@ def greetings(name):
         return 'Buon pomeriggio {}'.format(name)
     else:
         return 'Buona sera {}'.format(name)
+
+def generateList():
+    i = 0
+    list = []
+    while i < ctsMaxLen:
+        randIndex = randrange(ctsSize)
+        if randIndex not in list:
+            list.append(randIndex)
+            i += 1
+        else:
+            continue
+
+def buildCtsMessage(user):
+    message = '<b>{}</b>'.format(greetings(user))
+    message += '<p>Di seguito la lista:</p>'
+    list = generateList()
+    for name in list:
+        message += '<p>{}</p>'.format(name)
+    return message
 
 def handle_message(update, context):
     splitText = update.message.text.lower().split()
@@ -168,6 +208,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('conte', conte_command))
+    dp.add_handler(CommandHandler('cts', cts_command))
     dp.add_handler(CommandHandler('update', echo_sentence))
     dp.add_handler(CommandHandler('help', help_command))
 
