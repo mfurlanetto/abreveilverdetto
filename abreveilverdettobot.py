@@ -189,8 +189,6 @@ def handle_message(update, context):
         echo_sentence(update, context, THE_SENTENCE)
     elif any(x in content['keywords']['autocert'] for x in splitText):
         update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/photo_2020-10-25_23-05-49.jpg"), 'rb'))
-    elif any(x in content['keywords']['sad'] for x in splitText):
-        update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/sad.jpg"), 'rb'))
     else:
         pass
 
