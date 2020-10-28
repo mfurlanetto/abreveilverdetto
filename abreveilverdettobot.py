@@ -116,7 +116,7 @@ def comune_command(update, context):
     comune = COMUNI[randIndex]
     message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
     message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
-    message += 'CAP: {}\n'.format(', '.join(comune['cap'].split()))
+    message += 'CAP: {}\n'.format(', '.join(comune['cap']))
     message += 'Abitanti: {}'.format(comune['popolazione'])
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                   parse_mode=ParseMode.HTML)
