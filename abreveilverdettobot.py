@@ -15,10 +15,11 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 
 Telegram commands:
-start - Buongiorno da Conte
+saluti - Saluti da Conte
 cts - Estrazione casuale di 5 membri del Comitato Tecnico Scientifico
 conte - Foto di Conte
-comune - Un comune a casp
+tortadimele - Foto di una torta di mele
+comune - Un comune a caso
 help - Aiuto da Conte
 update - Aggiornamenti da Conte
 """
@@ -96,6 +97,10 @@ def start(update, context):
     logger.info('User {} started the conversation.'.format(user.first_name))
     update.message.reply_text(content['greetings'][randomIndex].format(greetings(user.first_name)))
 
+
+def torta_command(update, context):
+    randomIndex = randrange(5)
+    update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb'))
 
 def conte_command(update, context):
     randomIndex = randrange(7)
@@ -228,6 +233,7 @@ def main():
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('cts', cts_command))
+    dp.add_handler(CommandHandler('tortadimele', torta_command))
     dp.add_handler(CommandHandler('comune', comune_command))
     dp.add_handler(CommandHandler('update', echo_sentence))
     dp.add_handler(CommandHandler('help', help_command))
