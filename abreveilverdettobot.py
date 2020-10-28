@@ -59,12 +59,19 @@ fewClouds = u'\U000026C5'       # Code: 801 sun behind clouds
 clouds = u'\U00002601'          # Code: 802-803-804 clouds general
 hot = u'\U0001F525'             # Code: 904
 
+COMUNI = {}
+TOT_COMUNI = 0
+
 HELP = '{} non verrai abbandonato a te stesso'
 THE_SENTENCE = 'a breve il verdetto'
 
 BASE_URL = 'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-json/'
 URL_COMUNI = 'https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json'
 REGIONI= 'dpc-covid19-ita-regioni-latest.json'
+
+with urllib.request.urlopen(URL_COMUNI) as url:
+    COMUNI = json.loads(url.read().decode())
+    TOT_COMUNI = len(COMUNI)
 
 # Enable logging
 logging.basicConfig(
@@ -100,6 +107,16 @@ def cts_command(update, context):
     """Send a message when the command /cts is issued."""    
     user = update.message.from_user
     message = buildCtsMessage(user)
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
+                  parse_mode=ParseMode.HTML)
+
+def comune_command(update, context):
+    randIndex = randrange(TOT_COMUNI)
+    comune = COMUNI[randIndex]
+    message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
+    message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
+    message += 'CAP: {}'.format(comune['cap'])
+    message += 'Abitanti: {}'.format(comune['popolazione'])
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                   parse_mode=ParseMode.HTML)
 
@@ -157,7 +174,7 @@ def buildCtsMessage(user):
     message = '<b>Comitato Tecnico-Scientifico</b>\n'
     indexlist = generateIndexList()
     for index in indexlist:
-        message += '- {}\n'.format(ctsList[index])
+        message += '∘ {}\n'.format(ctsList[index])
     return message
 
 def handle_message(update, context):
@@ -210,6 +227,7 @@ def main():
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('cts', cts_command))
+    dp.add_handler(CommandHandler('comune', comune_command))
     dp.add_handler(CommandHandler('update', echo_sentence))
     dp.add_handler(CommandHandler('help', help_command))
 
