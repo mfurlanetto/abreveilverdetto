@@ -134,7 +134,7 @@ def help_command(update, context):
 def update_command(update, context):
     """Send a message when the command /update is issued."""
     user = update.message.from_user
-    update.message.reply_text(THE_SENTENCE)
+    echo_sentence(update, context)
 
 
 
@@ -151,13 +151,15 @@ def isAfternoon(hour):
     return hour >= 13 and hour < 17
 
 def greetings(name):
+    greetings = ''
     actualHour = datetime.datetime.now(timezone).hour
     if isMorning(actualHour):
-        return 'Buongiorno {}'.format(name)
+        greetings = 'Buongiorno'
     elif isAfternoon(actualHour):
-        return 'Buon pomeriggio {}'.format(name)
+        greetings = 'Buon pomeriggio'
     else:
-        return 'Buona sera {}'.format(name)
+        greetings = 'Buona sera'
+    return '{} {}'.format(greetings, name)
 
 def generateIndexList():
     i = 0
@@ -167,8 +169,6 @@ def generateIndexList():
         if randIndex not in list:
             list.append(randIndex)
             i += 1
-        else:
-            continue
     return list
 
 def buildCtsMessage(user):
