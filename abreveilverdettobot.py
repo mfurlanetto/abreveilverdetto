@@ -18,6 +18,7 @@ Telegram commands:
 start - Buongiorno da Conte
 cts - Estrazione casuale di 5 membri del Comitato Tecnico Scientifico
 conte - Foto di Conte
+comune - Un comune a casp
 help - Aiuto da Conte
 update - Aggiornamenti da Conte
 """
@@ -115,7 +116,7 @@ def comune_command(update, context):
     comune = COMUNI[randIndex]
     message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
     message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
-    message += 'CAP: {}'.format(comune['cap'])
+    message += 'CAP: {}\n'.format(', '.join(comune['cap'].split()))
     message += 'Abitanti: {}'.format(comune['popolazione'])
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                   parse_mode=ParseMode.HTML)
