@@ -141,7 +141,7 @@ def greetings(name):
     else:
         return 'Buona sera {}'.format(name)
 
-def generateList():
+def generateIndexList():
     i = 0
     list = []
     while i < ctsMaxLen:
@@ -155,9 +155,9 @@ def generateList():
 
 def buildCtsMessage(user):
     message = '<b>Comitato Tecnico-Scientifico</b>\n'
-    list = generateList()
-    for name in list:
-        message += '- {}\n'.format(name)
+    indexlist = generateIndexList()
+    for index in indexlist:
+        message += '- {}\n'.format(ctsList[index])
     return message
 
 def handle_message(update, context):
