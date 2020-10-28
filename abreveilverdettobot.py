@@ -151,10 +151,11 @@ def generateList():
             i += 1
         else:
             continue
+    return list
 
 def buildCtsMessage(user):
-    message = '<b>{}</b>'.format(greetings(user))
-    message += '<p>Di seguito la lista:</p>'
+    message = '<b>Comitato Tecnico-Scientifico</b>'
+    message += '<br>'
     list = generateList()
     for name in list:
         message += '<p>{}</p>'.format(name)
