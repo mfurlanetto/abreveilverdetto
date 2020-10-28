@@ -155,7 +155,6 @@ def generateList():
 
 def buildCtsMessage(user):
     message = '<b>Comitato Tecnico-Scientifico</b>'
-    message += '<br>'
     list = generateList()
     for name in list:
         message += '<p>{}</p>'.format(name)
