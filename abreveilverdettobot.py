@@ -101,10 +101,11 @@ def torta_command(update, context):
     update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb'))
 
 def conte_command(update, context):
-    randomIndex = randrange(7)
-    # update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open("/home/marco/Documenti/python-telegram-bot/examples/photo_2020-10-25_13-46-43.jpg", 'rb'))
-    #update.message.reply_text(content['sentences']['conte'][randomIndex])
-    update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/conte/{}.jpg".format(randomIndex)), 'rb'))
+    randomIndexImage = randrange(7)
+    randomIndexCaption = randrange(numFrasiConte)
+    update.message.bot.send_photo(chat_id=update.effective_chat.id, 
+        photo=open(buildPath("media/conte/{}.jpg".format(randomIndexImage)), 'rb'),
+        caption=content['sentences']['conte'][randomIndexCaption])
 
 
 def cts_command(update, context):
