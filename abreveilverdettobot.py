@@ -30,7 +30,8 @@ import datetime
 import pytz
 
 from random import randrange
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ParseMode
+from telegram import ParseMode
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 script_dir = os.path.dirname(__file__)
 
