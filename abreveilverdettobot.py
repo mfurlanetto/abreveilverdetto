@@ -154,10 +154,10 @@ def generateList():
     return list
 
 def buildCtsMessage(user):
-    message = '<b>Comitato Tecnico-Scientifico</b>'
+    message = '<b>Comitato Tecnico-Scientifico</b>\n'
     list = generateList()
     for name in list:
-        message += '<p>{}</p>'.format(name)
+        message += '- {}\n'.format(name)
     return message
 
 def handle_message(update, context):
