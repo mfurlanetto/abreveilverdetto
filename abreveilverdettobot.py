@@ -61,17 +61,15 @@ fewClouds = u'\U000026C5'       # Code: 801 sun behind clouds
 clouds = u'\U00002601'          # Code: 802-803-804 clouds general
 hot = u'\U0001F525'             # Code: 904
 
-COMUNI = {}
-TOT_COMUNI = 0
 
 HELP = '{} non verrai abbandonato a te stesso'
 THE_SENTENCE = 'a breve il verdetto'
 
-BASE_URL = 'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-json/'
 URL_COMUNI = 'https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json'
-REGIONI= 'dpc-covid19-ita-regioni-latest.json'
 
 with urllib.request.urlopen(URL_COMUNI) as url:
+    global COMUNI
+    global TOT_COMUNI
     COMUNI = json.loads(url.read().decode())
     TOT_COMUNI = len(COMUNI)
 
@@ -136,10 +134,7 @@ def help_command(update, context):
 def update_command(update, context):
     """Send a message when the command /update is issued."""
     user = update.message.from_user
-    with urllib.request.urlopen(BASE_URL + REGIONI) as url:
-        regioni = json.loads(url.read().decode())
-        indice = next((i for i, item in enumerate(regioni) if item.codice_regione == '5'), -1)
-        print('Totale positivi {}'.format(regioni[indice]["totale_casi"]))
+    update.message.reply_text(THE_SENTENCE)
 
 
 
