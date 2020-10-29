@@ -121,7 +121,8 @@ def comune_command(update, context):
     message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
     message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
     message += 'CAP: {}\n'.format(', '.join(comune['cap']))
-    message += 'Abitanti: {}'.format(comune['popolazione'])
+    message += 'Abitanti: {}\n'.format(comune['popolazione'])
+    message += 'I bar chiudono alle ore 18:00'
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                   parse_mode=ParseMode.HTML)
 
