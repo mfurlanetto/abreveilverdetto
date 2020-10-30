@@ -131,7 +131,7 @@ def fibonacci_command(update, context):
     result = [1, 1]
     for _ in range(randrange(10)):
         result.append(result[-1] + result[-2])
-    update.message.bot.send_message(chat_id=update.effective_chat.id, text=', '.join(result), 
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text=', '.join(map(str, result)), 
                   parse_mode=ParseMode.HTML)
 
 def help_command(update, context):
