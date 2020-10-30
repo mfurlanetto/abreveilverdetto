@@ -134,7 +134,11 @@ def fibonacci_command(update, context):
         maxNumberOfIterations = int(context.args[0])
     except (IndexError, ValueError):
         maxNumberOfIterations = 10
+        response.append("maxNumberOfIterations parameter not passed")
+        response.append("Default will be {}".format(maxNumberOfIterations))
+    except:
         response.append("Exception reading maxNumberOfIterations parameter")
+        response.append("Received value is {}".format(context.args[0]))
         response.append("Default will be {}".format(maxNumberOfIterations))
     numberOfIterations = randrange(maxNumberOfIterations)
     sequence = [1, 1]
