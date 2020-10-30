@@ -131,7 +131,7 @@ def comune_command(update, context):
 def fibonacci_command(update, context):
     response = []
     try:
-        maxNumberOfIterations = context.args[0]
+        maxNumberOfIterations = int(context.args[0])
     except (IndexError, ValueError):
         maxNumberOfIterations = 10
         response.append("Exception reading maxNumberOfIterations parameter")
