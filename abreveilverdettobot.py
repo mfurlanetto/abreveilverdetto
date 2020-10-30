@@ -182,8 +182,9 @@ START OF UTILITY SECTION
 def button(update, context):
     query = update.callback_query
     query.answer()
-    message = buildCtsMessage(query.data)
     query.edit_message_text(text="Selected option: {}".format(query.data))
+    message = buildCtsMessage(query.data)
+    #query.edit_message_text(text="Selected option: {}".format(query.data))
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                   parse_mode=ParseMode.HTML)
 
@@ -207,7 +208,7 @@ def greetings(name):
 def generateIndexList(qty):
     i = 0
     list = []
-    while i < qty:
+    while i < int(qty):
         randIndex = randrange(ctsSize)
         if randIndex not in list:
             list.append(randIndex)
