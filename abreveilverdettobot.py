@@ -182,11 +182,10 @@ START OF UTILITY SECTION
 def button(update, context):
     query = update.callback_query
     query.answer()
-    query.edit_message_text(text="Selected option: {}".format(query.data))
     message = buildCtsMessage(query.data)
-    #query.edit_message_text(text="Selected option: {}".format(query.data))
-    update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
-                  parse_mode=ParseMode.HTML)
+    query.edit_message_text(text=message, parse_mode=ParseMode.HTML)
+    #update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
+                #  parse_mode=ParseMode.HTML)
 
 def isMorning(hour):
     return hour >= 6 and hour < 13
