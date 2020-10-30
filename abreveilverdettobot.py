@@ -129,11 +129,22 @@ def comune_command(update, context):
                   parse_mode=ParseMode.HTML)
 
 def fibonacci_command(update, context):
-    result = [1, 1]
-    for _ in range(randrange(10)):
-        result.append(result[-1] + result[-2])
-    update.message.bot.send_message(chat_id=update.effective_chat.id, text=', '.join(map(str, result)), 
-                  parse_mode=ParseMode.HTML)
+    response = []
+    try:
+        maxNumberOfIterations = context.args[0]
+    except (IndexError, ValueError):
+        maxNumberOfIterations = 10
+        response.append("Exception reading maxNumberOfIterations parameter")
+        response.append("Default will be {}".format(maxNumberOfIterations))
+    numberOfIterations = randrange(maxNumberOfIterations)
+    sequence = [1, 1]
+    if (numberOfIterations <= len(sequence)):
+        sequence = sequence[:numberOfIterations]
+    else:
+        for _ in range(numberOfIterations):
+            sequence.append(sequence[-1] + sequence[-2])
+    response.append(', '.join(map(str, sequence)))
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text="\n".join(response), parse_mode=ParseMode.HTML)
 
 def help_command(update, context):
     """Send a message when the command /help is issued."""
