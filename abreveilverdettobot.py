@@ -126,6 +126,12 @@ def comune_command(update, context):
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                   parse_mode=ParseMode.HTML)
 
+def fibonacci_command(update, context):
+    result = [1, 1]
+    for _ in range(randrange(10)):
+        result.append(result[-1] + result[-2])
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text=', '.join(result), 
+                  parse_mode=ParseMode.HTML)
 
 def help_command(update, context):
     """Send a message when the command /help is issued."""
@@ -231,6 +237,7 @@ def main():
     dp.add_handler(CommandHandler('tortadimele', torta_command))
     dp.add_handler(CommandHandler('comune', comune_command))
     dp.add_handler(CommandHandler('update', echo_sentence))
+    dp.add_handler(CommandHandler('fibonacci', fibonacci_command))
     dp.add_handler(CommandHandler('help', help_command))
 
     # on noncommand i.e message - echo the message on Telegram
