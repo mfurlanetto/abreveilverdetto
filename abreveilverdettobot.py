@@ -130,15 +130,21 @@ def comune_command(update, context):
 
 def fibonacci_command(update, context):
     response = []
+    error = False
     try:
         maxNumberOfIterations = int(context.args[0])
-    except (IndexError, ValueError):
-        maxNumberOfIterations = 10
+    except (IndexError):    
         response.append("maxNumberOfIterations parameter not passed")
-        response.append("Default will be {}".format(maxNumberOfIterations))
-    except:
-        response.append("Exception reading maxNumberOfIterations parameter")
+        error = True
+    except (ValueError):
+        response.append("Exception converting maxNumberOfIterations parameter")
         response.append("Received value is {}".format(context.args[0]))
+        error = True
+    except:
+        response.append("Generic exception while reading maxNumberOfIterations parameter")
+        error = True
+    if (error == True):
+        maxNumberOfIterations = 10
         response.append("Default will be {}".format(maxNumberOfIterations))
     numberOfIterations = randrange(maxNumberOfIterations)
     sequence = [1, 1]
@@ -158,7 +164,6 @@ def help_command(update, context):
 
 def update_command(update, context):
     """Send a message when the command /update is issued."""
-    user = update.message.from_user
     echo_sentence(update, context)
 
 
