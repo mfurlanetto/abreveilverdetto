@@ -21,6 +21,7 @@ conte - Foto di Conte
 tortadimele - Foto di una torta di mele
 comune - Un comune a caso
 help - Aiuto da Conte
+fibonacci - un prefisso di lunghezza variabile della successione di fibonacci
 update - Aggiornamenti da Conte
 """
 
