@@ -77,8 +77,8 @@ with urllib.request.urlopen(URL_COMUNI) as url:
 
 keyboard = [
     [
-        InlineKeyboardButton("5 membri", callback_data='5'),
-        InlineKeyboardButton("10 membri", callback_data='10'),
+        InlineKeyboardButton("5 membri", callback_data=5),
+        InlineKeyboardButton("10 membri", callback_data=10),
     ]
 ]
 reply_markup = InlineKeyboardMarkup(keyboard)
@@ -120,7 +120,7 @@ def conte_command(update, context):
 
 def cts_command(update, context):
     """Send a message when the command /cts is issued."""
-    update.message.reply_text('Quanti membri desideri? :', reply_markup=reply_markup)
+    update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
 
 def comune_command(update, context):
     randIndex = randrange(TOT_COMUNI)
@@ -183,9 +183,9 @@ def button(update, context):
     query = update.callback_query
     query.answer()
     message = buildCtsMessage(query.data)
+    query.edit_message_text(text="Selected option: {}".format(query.data))
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                   parse_mode=ParseMode.HTML)
-    #query.edit_message_text(text="Selected option: {}".format(query.data))
 
 def isMorning(hour):
     return hour >= 6 and hour < 13
@@ -207,7 +207,7 @@ def greetings(name):
 def generateIndexList(qty):
     i = 0
     list = []
-    while i < int(qty):
+    while i < qty:
         randIndex = randrange(ctsSize)
         if randIndex not in list:
             list.append(randIndex)
