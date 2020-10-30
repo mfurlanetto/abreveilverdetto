@@ -207,7 +207,7 @@ def greetings(name):
 def generateIndexList(qty):
     i = 0
     list = []
-    while i < qty:
+    while i < int(qty):
         randIndex = randrange(ctsSize)
         if randIndex not in list:
             list.append(randIndex)
