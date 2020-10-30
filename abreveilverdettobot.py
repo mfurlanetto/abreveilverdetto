@@ -33,8 +33,8 @@ import datetime
 import pytz
 
 from random import randrange
-from telegram import ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 
 script_dir = os.path.dirname(__file__)
 
@@ -75,6 +75,14 @@ with urllib.request.urlopen(URL_COMUNI) as url:
     COMUNI = json.loads(url.read().decode())
     TOT_COMUNI = len(COMUNI)
 
+keyboard = [
+    [
+        InlineKeyboardButton("5 membri", callback_data='5'),
+        InlineKeyboardButton("10 membri", callback_data='10'),
+    ]
+]
+reply_markup = InlineKeyboardMarkup(keyboard)
+
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -111,11 +119,8 @@ def conte_command(update, context):
 
 
 def cts_command(update, context):
-    """Send a message when the command /cts is issued."""    
-    user = update.message.from_user
-    message = buildCtsMessage(user)
-    update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
-                  parse_mode=ParseMode.HTML)
+    """Send a message when the command /cts is issued."""
+    update.message.reply_text('Quanti membri desideri? :', reply_markup=reply_markup)
 
 def comune_command(update, context):
     randIndex = randrange(TOT_COMUNI)
@@ -169,6 +174,14 @@ def update_command(update, context):
 START OF UTILITY SECTION
 """
 
+def button(update, context):
+    query = update.callback_query
+    query.answer()
+    message = buildCtsMessage(query.data)
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
+                  parse_mode=ParseMode.HTML)
+    #query.edit_message_text(text="Selected option: {}".format(query.data))
+
 def isMorning(hour):
     return hour >= 6 and hour < 13
 
@@ -186,19 +199,19 @@ def greetings(name):
         greetings = 'Buona sera'
     return '{} {}'.format(greetings, name)
 
-def generateIndexList():
+def generateIndexList(qty):
     i = 0
     list = []
-    while i < ctsMaxLen:
+    while i < qty:
         randIndex = randrange(ctsSize)
         if randIndex not in list:
             list.append(randIndex)
             i += 1
     return list
 
-def buildCtsMessage(user):
+def buildCtsMessage(qty):
     message = '<b>Comitato Tecnico-Scientifico</b>\n'
-    indexlist = generateIndexList()
+    indexlist = generateIndexList(qty)
     for index in indexlist:
         message += '∘ {}\n'.format(ctsList[index])
     return message
@@ -254,6 +267,7 @@ def main():
     dp.add_handler(CommandHandler('saluti', start))
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('cts', cts_command))
+    dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('tortadimele', torta_command))
     dp.add_handler(CommandHandler('comune', comune_command))
     dp.add_handler(CommandHandler('update', echo_sentence))
