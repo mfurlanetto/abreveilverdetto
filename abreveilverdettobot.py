@@ -35,7 +35,7 @@ import pytz
 
 from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
 
 script_dir = os.path.dirname(__file__)
 
@@ -54,16 +54,11 @@ ctsList = content['CTS']
 dpcmSize = len(content['DPCM'])
 dpcmList = content['DPCM']
 
-thunderstorm = u'\U0001F4A8'    # Code: 200's, 900, 901, 902, 905
-drizzle = u'\U0001F4A7'         # Code: 300's
-rain = u'\U00002614'            # Code: 500's
-snowflake = u'\U00002744'       # Code: 600's snowflake
-snowman = u'\U000026C4'         # Code: 600's snowman, 903, 906
-atmosphere = u'\U0001F301'      # Code: 700's foogy
-clearSky = u'\U00002600'        # Code: 800 clear sky
-fewClouds = u'\U000026C5'       # Code: 801 sun behind clouds
-clouds = u'\U00002601'          # Code: 802-803-804 clouds general
-hot = u'\U0001F525'             # Code: 904
+# Stages
+FIRST, SECOND = range(2)
+# Callback data
+FIVE = 5
+TEN = 10
 
 
 HELP = '{} non verrai abbandonato a te stesso'
@@ -71,20 +66,13 @@ BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te cop
 THE_SENTENCE = 'a breve il verdetto'
 
 URL_COMUNI = 'https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json'
+URL_WEATHER = 'api.openweathermap.org/data/2.5/weather?zip={},IT&units=metric&appid=2b712f823ee54b5bad72047b1ea65ce3'
 
 with urllib.request.urlopen(URL_COMUNI) as url:
     global COMUNI
     global TOT_COMUNI
     COMUNI = json.loads(url.read().decode())
     TOT_COMUNI = len(COMUNI)
-
-keyboard = [
-    [
-        InlineKeyboardButton("5 membri", callback_data=5),
-        InlineKeyboardButton("10 membri", callback_data=10),
-    ]
-]
-reply_markup = InlineKeyboardMarkup(keyboard)
 
 # Enable logging
 logging.basicConfig(
@@ -123,7 +111,15 @@ def conte_command(update, context):
 
 def cts_command(update, context):
     """Send a message when the command /cts is issued."""
+    keyboard = [
+        [
+            InlineKeyboardButton("5", callback_data=str(FIVE)),
+            InlineKeyboardButton("10", callback_data=str(TEN)),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
+    return FIRST
 
 def dpcm_command(update, context):
     """Send a message when the command /dpcm is issued."""
@@ -133,16 +129,19 @@ def dpcm_command(update, context):
     update.message.reply_text('\"{}\"'.format(message))
 
 
-def comune_command(update, context):
+def comune_command(update, context):    
     randIndex = randrange(TOT_COMUNI)
     comune = COMUNI[randIndex]
-    message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
-    message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
-    message += 'CAP: {}\n'.format(', '.join(comune['cap']))
-    message += 'Abitanti: {}\n'.format(comune['popolazione'])
-    message += 'I bar chiudono alle ore 18:00'
-    update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
-                  parse_mode=ParseMode.HTML)
+    with urllib.request.urlopen(URL_WEATHER.format(comune['cap'][0])) as url:
+        weather = json.loads(url.read().decode())
+        message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
+        message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
+        message += 'CAP: {}\n'.format(', '.join(comune['cap']))
+        message += 'Abitanti: {}\n'.format(comune['popolazione'])
+        message += 'Meteo: {}\n'.format(weather['weather']['description'])
+        message += 'I bar chiudono alle ore 18:00'
+        update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
+                    parse_mode=ParseMode.HTML)
 
 def fibonacci_command(update, context):
     response = []
@@ -184,31 +183,6 @@ def help_command(update, context):
 START OF UTILITY SECTION
 """
 
-def button(update, context):
-    query = update.callback_query
-    query.answer()
-    message = buildCtsMessage(query.data)
-    query.edit_message_text(text=message, parse_mode=ParseMode.HTML)
-    #update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
-                #  parse_mode=ParseMode.HTML)
-
-def isMorning(hour):
-    return hour >= 6 and hour < 13
-
-def isAfternoon(hour):
-    return hour >= 13 and hour < 17
-
-def greetings(name):
-    greetings = ''
-    actualHour = datetime.datetime.now(timezone).hour
-    if isMorning(actualHour):
-        greetings = 'Buongiorno'
-    elif isAfternoon(actualHour):
-        greetings = 'Buon pomeriggio'
-    else:
-        greetings = 'Buona sera'
-    return '{} {}'.format(greetings, name)
-
 def generateIndexList(qty):
     i = 0
     list = []
@@ -225,6 +199,30 @@ def buildCtsMessage(qty):
     for index in indexlist:
         message += '∘ {}\n'.format(ctsList[index])
     return message
+
+def ctsCommandHandler(update, context):
+    query = update.callback_query
+    query.answer()
+    message = buildCtsMessage(query.data)
+    query.edit_message_text(text=message, parse_mode=ParseMode.HTML)
+    return ConversationHandler.END
+
+def isMorning(hour):
+    return hour >= 6 and hour < 13
+
+def isAfternoon(hour):
+    return hour >= 13 and hour < 17
+
+def greetings(name):
+    greetings = ''
+    actualHour = datetime.datetime.now(timezone).hour
+    if isMorning(actualHour):
+        greetings = 'Buongiorno'
+    elif isAfternoon(actualHour):
+        greetings = 'Buon pomeriggio'
+    else:
+        greetings = 'Buonasera'
+    return '{} {}'.format(greetings, name)
 
 def handle_message(update, context):
     message = update.message.text.replace('?', '')
@@ -283,7 +281,7 @@ def main():
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('cts', cts_command))
     dp.add_handler(CommandHandler('dpcm', dpcm_command))
-    dp.add_handler(CallbackQueryHandler(button))
+    #dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('tortadimele', torta_command))
     dp.add_handler(CommandHandler('comune', comune_command))
     dp.add_handler(CommandHandler('update', echo_sentence))
@@ -293,6 +291,16 @@ def main():
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
     dp.add_handler(MessageHandler(Filters.sticker, handle_sticker))
+    dp.add_handler(ConversationHandler(
+        entry_points=[CommandHandler('cts', cts_command)],
+        states={
+            FIRST: [
+                CallbackQueryHandler(ctsCommandHandler, pattern='^' + str(FIVE) + '$'),
+                CallbackQueryHandler(ctsCommandHandler, pattern='^' + str(TEN) + '$')
+            ]
+        },
+        fallbacks=[CommandHandler('help', help_command)]
+    ))
 
      # log all errors
     dp.add_error_handler(error)
