@@ -119,7 +119,6 @@ def cts_command(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
-    return FIRST
 
 def dpcm_command(update, context):
     """Send a message when the command /dpcm is issued."""
@@ -205,7 +204,6 @@ def ctsCommandHandler(update, context):
     query.answer()
     message = buildCtsMessage(query.data)
     query.edit_message_text(text=message, parse_mode=ParseMode.HTML)
-    return ConversationHandler.END
 
 def isMorning(hour):
     return hour >= 6 and hour < 13
@@ -281,7 +279,7 @@ def main():
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('cts', cts_command))
     dp.add_handler(CommandHandler('dpcm', dpcm_command))
-    #dp.add_handler(CallbackQueryHandler(button))
+    dp.add_handler(CallbackQueryHandler(ctsCommandHandler))
     dp.add_handler(CommandHandler('tortadimele', torta_command))
     dp.add_handler(CommandHandler('comune', comune_command))
     dp.add_handler(CommandHandler('update', echo_sentence))
@@ -291,7 +289,7 @@ def main():
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
     dp.add_handler(MessageHandler(Filters.sticker, handle_sticker))
-    dp.add_handler(ConversationHandler(
+    """dp.add_handler(ConversationHandler(
         entry_points=[CommandHandler('cts', cts_command)],
         states={
             FIRST: [
@@ -300,7 +298,7 @@ def main():
             ]
         },
         fallbacks=[CommandHandler('help', help_command)]
-    ))
+    ))"""
 
      # log all errors
     dp.add_error_handler(error)
