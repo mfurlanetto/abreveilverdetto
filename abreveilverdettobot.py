@@ -125,8 +125,9 @@ def cts_command(update, context):
     update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
 
 def dpcm_command(update, context):
-    randIndex = randrange(ctsSize)
-    message = format(dpcmList[randIndex])
+    """Send a message when the command /dpcm is issued."""
+    randIndex = randrange(dpcmSize)
+    message = dpcmList[randIndex]
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, parse_mode=ParseMode.HTML)
 
 
@@ -175,7 +176,8 @@ def help_command(update, context):
     update.message.reply_text(HELP.format(user.first_name))
 
 
-def update_command(update, context):
+def 
+(update, context):
     """Send a message when the command /update is issued."""
     echo_sentence(update, context)
 
