@@ -227,7 +227,6 @@ def buildCtsMessage(qty):
     return message
 
 def handle_message(update, context):
-    logger.info('MESSAGE SENT: {}'.format(update.message.text))
     message = update.message.text.replace('?', '')
     splitText = message.lower().split()
     if any(x in content['keywords']['verdetto'] for x in splitText):
@@ -243,7 +242,8 @@ def handle_message(update, context):
 
 def handle_sticker(update, context):
     logger.info('[STICKER] - UPDATE OBJ : {}'.format(update))
-    logger.info('[STICKER] - CONTEXT OBJ : {}'.format(context))
+    update.message.bot.send_sticker(chat_id=update.message.chat_id, 
+        sticker='AgADBAADJS9ZAg')
 
 
 def echo_sentence(update, context, sentence=THE_SENTENCE):
