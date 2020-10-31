@@ -227,6 +227,7 @@ def buildCtsMessage(qty):
     return message
 
 def handle_message(update, context):
+    logger.info('MESSAGE SENT: {}'.format(update.message.text))
     message = update.message.text.replace('?', '')
     splitText = message.lower().split()
     if any(x in content['keywords']['verdetto'] for x in splitText):
