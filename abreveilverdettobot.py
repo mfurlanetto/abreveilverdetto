@@ -50,6 +50,8 @@ numSalutiConte = len(content['greetings'])
 ctsMaxLen = 5
 ctsSize = len(content['CTS'])
 ctsList = content['CTS']
+dpcmSize = len(content['DPCM'])
+dpcmList = content['DPCM']
 
 thunderstorm = u'\U0001F4A8'    # Code: 200's, 900, 901, 902, 905
 drizzle = u'\U0001F4A7'         # Code: 300's
@@ -121,6 +123,12 @@ def conte_command(update, context):
 def cts_command(update, context):
     """Send a message when the command /cts is issued."""
     update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
+
+def dpcm_command(update, context):
+    randIndex = randrange(ctsSize)
+    message = format(dpcmList[randIndex])
+    update.message.reply_text(message)
+
 
 def comune_command(update, context):
     randIndex = randrange(TOT_COMUNI)
@@ -272,6 +280,7 @@ def main():
     dp.add_handler(CommandHandler('saluti', start))
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('cts', cts_command))
+    dp.add_handler(CommandHandler('dpcm', dpcm_command))
     dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('tortadimele', torta_command))
     dp.add_handler(CommandHandler('comune', comune_command))
