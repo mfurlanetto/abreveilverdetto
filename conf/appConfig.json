@@ -2,5 +2,6 @@
     "token": "1132815578:AAHx0IW2ZpPAChG9Yo-7mQVJL_8NqezQFY8",
     "name": "https://abreveilverdetto.herokuapp.com/",
     "port": "8443",
-    "listen": "0.0.0.0"
+    "listen": "0.0.0.0",
+    "openweathermap_token": "2b712f823ee54b5bad72047b1ea65ce3"
 }

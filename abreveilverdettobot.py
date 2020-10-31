@@ -66,7 +66,7 @@ BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te cop
 THE_SENTENCE = 'a breve il verdetto'
 
 URL_COMUNI = 'https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json'
-URL_WEATHER = 'api.openweathermap.org/data/2.5/weather?zip={},IT&units=metric&appid=2b712f823ee54b5bad72047b1ea65ce3'
+URL_WEATHER = 'https://api.openweathermap.org/data/2.5/weather?zip={},IT&units=metric&lang=it&appid={}'
 
 with urllib.request.urlopen(URL_COMUNI) as url:
     global COMUNI
@@ -132,7 +132,7 @@ def dpcm_command(update, context):
 def comune_command(update, context):    
     randIndex = randrange(TOT_COMUNI)
     comune = COMUNI[randIndex]
-    with urllib.request.urlopen(URL_WEATHER.format(comune['cap'][0])) as url:
+    with urllib.request.urlopen(URL_WEATHER.format(comune['cap'][0], config['openweathermap_token'])) as url:
         weather = json.loads(url.read().decode())
         message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
         message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
