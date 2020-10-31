@@ -16,7 +16,7 @@ bot.
 
 Telegram commands:
 saluti - Saluti da Conte
-cts - Estrazione casuale di 5 membri del Comitato Tecnico Scientifico
+cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
 dpcm - Un DPCM a caso
 conte - Foto di Conte
 tortadimele - Foto di una torta di mele
@@ -241,6 +241,10 @@ def handle_message(update, context):
     else:
         pass
 
+def handle_sticker(update, context):
+    logger.info('[STICKER] - UPDATE OBJ : {}'.format(update))
+    logger.info('[STICKER] - CONTEXT OBJ : {}'.format(context))
+
 
 def echo_sentence(update, context, sentence=THE_SENTENCE):
     """Echo the user message."""
@@ -290,6 +294,7 @@ def main():
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
+    dp.add_handler(MessageHandler(Filters.sticker, handle_sticker))
 
      # log all errors
     dp.add_error_handler(error)
