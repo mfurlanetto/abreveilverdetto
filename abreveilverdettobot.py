@@ -127,7 +127,7 @@ def cts_command(update, context):
 def dpcm_command(update, context):
     randIndex = randrange(ctsSize)
     message = format(dpcmList[randIndex])
-    update.message.reply_text(message)
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, parse_mode=ParseMode.HTML)
 
 
 def comune_command(update, context):
