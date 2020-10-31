@@ -17,6 +17,7 @@ bot.
 Telegram commands:
 saluti - Saluti da Conte
 cts - Estrazione casuale di 5 membri del Comitato Tecnico Scientifico
+dpcm - Un DPCM a caso
 conte - Foto di Conte
 tortadimele - Foto di una torta di mele
 comune - Un comune a caso
