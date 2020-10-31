@@ -232,9 +232,11 @@ def handle_message(update, context):
     if any(x in content['keywords']['verdetto'] for x in splitText):
         echo_sentence(update, context, THE_SENTENCE)
     elif any(x in content['keywords']['autocert'] for x in splitText):
-        update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/photo_2020-10-25_23-05-49.jpg"), 'rb'))
+        update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/others/doraemon.jpg"), 'rb'))
     elif all(x in splitText for x in ['15', '18']):
-        echo_sentence(update, context, BRISCOLA)
+        update.message.bot.send_photo(chat_id=update.effective_chat.id, 
+            photo=open(buildPath("media/others/15e18.png"), 'rb'),
+            caption=BRISCOLA)
     else:
         pass
 
