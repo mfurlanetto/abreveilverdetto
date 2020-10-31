@@ -147,11 +147,14 @@ def comune_command(update, context):
     with urllib.request.urlopen(URL_WEATHER.format(comune['cap'][0], config['openweathermap_token'])) as url:
         weather = json.loads(url.read().decode())
         weatherObj = weather['weather'][0]
-        message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
-        message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
-        message += 'CAP: {}\n'.format(', '.join(comune['cap']))
-        message += 'Abitanti: {}\n'.format(comune['popolazione'])
-        message += 'Meteo: {} ({})\n'.format(getEmoji(weatherObj['id']), weatherObj['description'].capitalize())
+        message = '<b>{}</b>\n'.format(comune['nome'])
+        message += '\n'
+        message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
+        message += '{} abitanti\n'.format(comune['popolazione'])
+        message += '{} ({}) ܁ {} °C\n'.format(getEmoji(weatherObj['id']), 
+            weatherObj['description'].capitalize(),
+            weather['main']['temp'])
+        message += '\n'
         message += 'I bar chiudono alle ore 18:00'
         update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                     parse_mode=ParseMode.HTML)
