@@ -19,6 +19,7 @@ saluti - Saluti da Conte
 cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
 dpcm - Un DPCM a caso
 conte - Foto di Conte
+bimbe - Foto per le Bimbe di Conte
 tortadimele - Foto torte di mele
 comune - Un comune a caso
 help - Aiuto da Conte
@@ -115,11 +116,16 @@ def torta_command(update, context):
     update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb'))
 
 def conte_command(update, context):
-    randomIndexImage = randrange(7)
+    randomIndexImage = randrange(12)
     randomIndexCaption = randrange(numFrasiConte)
     update.message.bot.send_photo(chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/conte/{}.jpg".format(randomIndexImage)), 'rb'),
         caption=content['sentences']['conte'][randomIndexCaption])
+
+def bimbe_command(update, context):
+    randomIndexImage = randrange(9)
+    update.message.bot.send_photo(chat_id=update.effective_chat.id, 
+        photo=open(buildPath("media/bimbe/{}.jpg".format(randomIndexImage)), 'rb'))
 
 
 def cts_command(update, context):
@@ -322,6 +328,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler('saluti', start))
     dp.add_handler(CommandHandler('conte', conte_command))
+    dp.add_handler(CommandHandler('bimbe', conte_command))
     dp.add_handler(CommandHandler('cts', cts_command))
     dp.add_handler(CommandHandler('dpcm', dpcm_command))
     dp.add_handler(CallbackQueryHandler(ctsCommandHandler))
