@@ -132,8 +132,10 @@ def dpcm_command(update, context):
 def comune_command(update, context):    
     randIndex = randrange(TOT_COMUNI)
     comune = COMUNI[randIndex]
+    logger.info(URL_WEATHER.format(comune['cap'][0], config['openweathermap_token']))
     with urllib.request.urlopen(URL_WEATHER.format(comune['cap'][0], config['openweathermap_token'])) as url:
         weather = json.loads(url.read().decode())
+        logger.info(weather)
         message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
         message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
         message += 'CAP: {}\n'.format(', '.join(comune['cap']))
