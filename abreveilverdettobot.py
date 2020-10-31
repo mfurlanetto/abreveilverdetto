@@ -126,8 +126,9 @@ def cts_command(update, context):
 
 def dpcm_command(update, context):
     """Send a message when the command /dpcm is issued."""
-    randIndex = randrange(dpcmSize)
-    message = dpcmList[randIndex]
+    #randIndex = randrange(dpcmSize)
+    #message = dpcmList[randIndex]
+    message = 'ghesboro'
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, parse_mode=ParseMode.HTML)
 
 
