@@ -19,7 +19,7 @@ saluti - Saluti da Conte
 cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
 dpcm - Un DPCM a caso
 conte - Foto di Conte
-tortadimele - Foto di una torta di mele
+tortadimele - Foto torte di mele
 comune - Un comune a caso
 help - Aiuto da Conte
 fibonacci - un prefisso di lunghezza variabile della successione di fibonacci
@@ -67,6 +67,19 @@ THE_SENTENCE = 'a breve il verdetto'
 
 URL_COMUNI = 'https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json'
 URL_WEATHER = 'https://api.openweathermap.org/data/2.5/weather?zip={},IT&units=metric&lang=it&appid={}'
+
+# Openweathermap Weather codes and corressponding emojis
+thunderstorm = u'\U0001F4A8'    # Code: 200's, 900, 901, 902, 905
+drizzle = u'\U0001F4A7'         # Code: 300's
+rain = u'\U00002614'            # Code: 500's
+snowflake = u'\U00002744'       # Code: 600's snowflake
+snowman = u'\U000026C4'         # Code: 600's snowman, 903, 906
+atmosphere = u'\U0001F301'      # Code: 700's foogy
+clearSky = u'\U00002600'        # Code: 800 clear sky
+fewClouds = u'\U000026C5'       # Code: 801 sun behind clouds
+clouds = u'\U00002601'          # Code: 802-803-804 clouds general
+hot = u'\U0001F525'             # Code: 904
+defaultEmoji = u'\U0001F300'    # default emojis
 
 with urllib.request.urlopen(URL_COMUNI) as url:
     global COMUNI
@@ -133,11 +146,12 @@ def comune_command(update, context):
     comune = COMUNI[randIndex]
     with urllib.request.urlopen(URL_WEATHER.format(comune['cap'][0], config['openweathermap_token'])) as url:
         weather = json.loads(url.read().decode())
+        weatherObj = weather['weather'][0]
         message = 'Comune di <b>{}</b>\n'.format(comune['nome'])
         message += 'Provincia: {} ({})\n'.format(comune['provincia']['nome'], comune['sigla'])
         message += 'CAP: {}\n'.format(', '.join(comune['cap']))
         message += 'Abitanti: {}\n'.format(comune['popolazione'])
-        message += 'Meteo: {}\n'.format(weather['weather'][0]['description'])
+        message += 'Meteo: {} ({})\n'.format(getEmoji(weatherObj['id']), weatherObj['description'].capitalize())
         message += 'I bar chiudono alle ore 18:00'
         update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                     parse_mode=ParseMode.HTML)
@@ -243,6 +257,35 @@ def handle_sticker(update, context):
 def echo_sentence(update, context, sentence=THE_SENTENCE):
     """Echo the user message."""
     update.message.reply_text(sentence)
+
+"""
+    Return related emojis according to weather
+"""
+def getEmoji(weatherID):
+    if weatherID:
+        if str(weatherID)[0] == '2' or weatherID == 900 or weatherID==901 or weatherID==902 or weatherID==905:
+            return thunderstorm
+        elif str(weatherID)[0] == '3':
+            return drizzle
+        elif str(weatherID)[0] == '5':
+            return rain
+        elif str(weatherID)[0] == '6' or weatherID==903 or weatherID== 906:
+            return snowflake + ' ' + snowman
+        elif str(weatherID)[0] == '7':
+            return atmosphere
+        elif weatherID == 800:
+            return clearSky
+        elif weatherID == 801:
+            return fewClouds
+        elif weatherID==802 or weatherID==803 or weatherID==803:
+            return clouds
+        elif weatherID == 904:
+            return hot
+        else:
+            return defaultEmoji    # Default emoji
+
+    else:
+        return defaultEmoji   # Default emoji
 
 
 def error(update, context):
