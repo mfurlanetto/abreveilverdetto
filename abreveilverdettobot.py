@@ -243,7 +243,7 @@ def handle_message(update, context):
 def handle_sticker(update, context):
     logger.info('[STICKER] - UPDATE OBJ : {}'.format(update))
     update.message.bot.send_sticker(chat_id=update.message.chat_id, 
-        sticker='AgADBAADJS9ZAg')
+        sticker='CAACAgQAAxkBAAICnF-deU_Oz5zDUlvHGqYR-Six1U_dAAIEAAMlL1kCBq-yiTezrtIbBA')
 
 
 def echo_sentence(update, context, sentence=THE_SENTENCE):
