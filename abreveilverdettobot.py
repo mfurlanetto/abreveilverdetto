@@ -82,6 +82,38 @@ clouds = u'\U00002601'          # Code: 802-803-804 clouds general
 hot = u'\U0001F525'             # Code: 904
 defaultEmoji = u'\U0001F300'    # default emojis
 
+beaHeart = u'\U0001F493'        # beating heart
+grwHeart = u'\U0001F497'        # growing heart
+shiHeart = u'\U0001F496'        # shining heart
+bowHeart = u'\U0001F49D'        # heart with bow
+arrHeart = u'\U0001F498'        # heart with arrow
+redHeart = u'\U00002764'        # red heart
+trnHeart = u'\U0001F49E'        # turning hearts
+twoHeart = u'\U0001F495'        # two hearts
+excHeart = u'\U00002763'        # exclamation heart
+loveMail = u'\U0001F48C'        # love mail
+kissMark = u'\U0001F48B'        # kiss mark
+heartCat = u'\U0001F63B'        # cat with heart eyes
+heartFac = u'\U0001F60D'        # face with heart eyes
+loveFace = u'\U0001F970'        # face full of hearts
+
+loveEmoji = [
+    beaHeart,
+    grwHeart,
+    shiHeart,
+    bowHeart,
+    arrHeart,
+    redHeart,
+    trnHeart,
+    twoHeart,
+    excHeart,
+    loveMail,
+    kissMark,
+    heartCat,
+    heartFac,
+    loveFace
+]
+
 with urllib.request.urlopen(URL_COMUNI) as url:
     global COMUNI
     global TOT_COMUNI
@@ -123,9 +155,13 @@ def conte_command(update, context):
         caption=content['sentences']['conte'][randomIndexCaption])
 
 def bimbe_command(update, context):
-    randomIndexImage = randrange(9)
+    randomIndexImage = randrange(20)
+    rndIndexEmoji1 = randrange(15)
+    rndIndexEmoji2 = randrange(15)
+    rndIndexEmoji3 = randrange(15)
     update.message.bot.send_photo(chat_id=update.effective_chat.id, 
-        photo=open(buildPath("media/bimbe/{}.jpg".format(randomIndexImage)), 'rb'))
+        photo=open(buildPath("media/bimbe/{}.jpg".format(randomIndexImage)), 'rb'),
+        caption=loveEmoji[rndIndexEmoji1]+loveEmoji[rndIndexEmoji2]+loveEmoji[rndIndexEmoji3])
 
 
 def cts_command(update, context):
