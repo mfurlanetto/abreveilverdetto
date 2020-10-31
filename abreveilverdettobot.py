@@ -148,12 +148,11 @@ def comune_command(update, context):
         weather = json.loads(url.read().decode())
         weatherObj = weather['weather'][0]
         message = '<b>{}</b>\n'.format(comune['nome'])
-        message += '\n'
         message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
         message += '{} abitanti\n'.format(comune['popolazione'])
-        message += '{} ({}) ܁ {} °C\n'.format(getEmoji(weatherObj['id']), 
+        message += '{} ({}) - {} °C\n'.format(getEmoji(weatherObj['id']), 
             weatherObj['description'].capitalize(),
-            weather['main']['temp'])
+            str(weather['main']['temp']))
         message += '\n'
         message += 'I bar chiudono alle ore 18:00'
         update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
