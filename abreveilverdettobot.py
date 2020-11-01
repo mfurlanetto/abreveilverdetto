@@ -21,6 +21,7 @@ dpcm - Un DPCM a caso
 conte - Foto di Conte con frase
 bimbe - Foto per le Bimbe di Conte
 comune - Un comune a caso
+covid - Dati nazionali sul COVID-19
 giurato - Una frase a caso di Luca Giurato
 tortadimele - Foto torte di mele
 help - Aiuto da Conte
@@ -93,6 +94,9 @@ defaultEmoji = u'\U0001F300'    # default emojis
 reqComuni = Request(config['url']['comuni'])
 COMUNI = json.loads(urlopen(reqComuni).read().decode())
 TOT_COMUNI = len(COMUNI)
+
+reqCovid = Request(config['url']['covid'])
+COVID = json.loads(urlopen(reqCovid).read().decode())
 
 beaHeart = u'\U0001F493'        # beating heart
 grwHeart = u'\U0001F497'        # growing heart
@@ -190,6 +194,10 @@ def giurato_command(update, context):
     #message = 'ghesboro'
     update.message.reply_text('\"{}\"'.format(message))
 
+def covid_command(update, context):
+    lastIndex = len(COVID) - 1
+    varDeceduti= COVID[lastIndex][deceduti] - COVID[lastIndex - 1][deceduti]
+    nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
 
 def comune_command(update, context):    
     randIndex = randrange(TOT_COMUNI)
@@ -389,6 +397,7 @@ def main():
     dp.add_handler(CallbackQueryHandler(ctsCommandHandler))
     dp.add_handler(CommandHandler('tortadimele', torta_command))
     dp.add_handler(CommandHandler('comune', comune_command))
+    dp.add_handler(CommandHandler('covid', covid_command))
     dp.add_handler(CommandHandler('update', echo_sentence))
     dp.add_handler(CommandHandler('fibonacci', fibonacci_command))
     dp.add_handler(CommandHandler('help', help_command))
