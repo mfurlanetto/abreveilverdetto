@@ -370,7 +370,8 @@ def main():
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler('saluti', start))
-    dp.add_handler(CommandHandler('bimbe', conte_command))
+    dp.add_handler(CommandHandler('conte', conte_command))
+    dp.add_handler(CommandHandler('bimbe', bimbe_command))
     dp.add_handler(CommandHandler('cts', cts_command))
     dp.add_handler(CommandHandler('dpcm', dpcm_command))
     dp.add_handler(CallbackQueryHandler(ctsCommandHandler))
