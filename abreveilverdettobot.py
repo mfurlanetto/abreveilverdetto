@@ -130,6 +130,9 @@ loveEmoji = [
     loveFace
 ]
 
+headstone = u'\U0001FAA6'
+hospital = u'\U0001F3E5'
+
 logger = logging.getLogger(__name__)
 
 
@@ -198,6 +201,10 @@ def covid_command(update, context):
     lastIndex = len(COVID) - 1
     varDeceduti= COVID[lastIndex][deceduti] - COVID[lastIndex - 1][deceduti]
     nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
+    message = hospital + ' ' + nuoviPositivi
+    message = headstone + ' ' + varDeceduti
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
+                parse_mode=ParseMode.HTML)
 
 def comune_command(update, context):    
     randIndex = randrange(TOT_COMUNI)
