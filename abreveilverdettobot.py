@@ -195,6 +195,7 @@ def comune_command(update, context):
     randIndex = randrange(TOT_COMUNI)
     comune = COMUNI[randIndex]
     reqMeteo = Request(config['url']['meteo'].format(comune['cap'][0], config['openweathermap_token']))
+    logger.info(reqMeteo)
     meteoStr = ''
 
     try:
@@ -206,9 +207,8 @@ def comune_command(update, context):
         meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
     except URLError as e:
         meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
-    else:
-        meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
 
+    logger.info(meteoStr)
     message = '<b>{}</b>\n'.format(comune['nome'])
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
     message += '{} abitanti\n'.format(comune['popolazione'])
