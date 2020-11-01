@@ -18,7 +18,7 @@ Telegram commands:
 saluti - Saluti da Conte
 cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
 dpcm - Un DPCM a caso
-conte - Foto di Conte
+bimbe - Foto per le Bimbe di Conte
 tortadimele - Foto torte di mele
 comune - Un comune a caso
 help - Aiuto da Conte
@@ -90,6 +90,40 @@ reqComuni = Request(config['url']['comuni'])
 COMUNI = json.loads(urlopen(reqComuni).read().decode())
 TOT_COMUNI = len(COMUNI)
 
+beaHeart = u'\U0001F493'        # beating heart
+grwHeart = u'\U0001F497'        # growing heart
+shiHeart = u'\U0001F496'        # shining heart
+bowHeart = u'\U0001F49D'        # heart with bow
+arrHeart = u'\U0001F498'        # heart with arrow
+redHeart = u'\U00002764'        # red heart
+trnHeart = u'\U0001F49E'        # turning hearts
+twoHeart = u'\U0001F495'        # two hearts
+excHeart = u'\U00002763'        # exclamation heart
+loveMail = u'\U0001F48C'        # love mail
+kissMark = u'\U0001F48B'        # kiss mark
+heartCat = u'\U0001F63B'        # cat with heart eyes
+heartFac = u'\U0001F60D'        # face with heart eyes
+loveFace = u'\U0001F970'        # face full of hearts
+
+loveEmoji = [
+    beaHeart,
+    grwHeart,
+    shiHeart,
+    bowHeart,
+    arrHeart,
+    redHeart,
+    trnHeart,
+    twoHeart,
+    excHeart,
+    loveMail,
+    kissMark,
+    heartCat,
+    heartFac,
+    loveFace
+]
+
+logger = logging.getLogger(__name__)
+
 
 """
 START OF COMMANDS SECTION
@@ -111,11 +145,20 @@ def torta_command(update, context):
     update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb'))
 
 def conte_command(update, context):
-    randomIndexImage = randrange(7)
+    randomIndexImage = randrange(12)
     randomIndexCaption = randrange(numFrasiConte)
     update.message.bot.send_photo(chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/conte/{}.jpg".format(randomIndexImage)), 'rb'),
         caption=content['sentences']['conte'][randomIndexCaption])
+
+def bimbe_command(update, context):
+    randomIndexImage = randrange(20)
+    rndIndexEmoji1 = randrange(15)
+    rndIndexEmoji2 = randrange(15)
+    rndIndexEmoji3 = randrange(15)
+    update.message.bot.send_photo(chat_id=update.effective_chat.id, 
+        photo=open(buildPath("media/bimbe/{}.jpg".format(randomIndexImage)), 'rb'),
+        caption=loveEmoji[rndIndexEmoji1]+loveEmoji[rndIndexEmoji2]+loveEmoji[rndIndexEmoji3])
 
 
 def cts_command(update, context):
@@ -327,7 +370,7 @@ def main():
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler('saluti', start))
-    dp.add_handler(CommandHandler('conte', conte_command))
+    dp.add_handler(CommandHandler('bimbe', conte_command))
     dp.add_handler(CommandHandler('cts', cts_command))
     dp.add_handler(CommandHandler('dpcm', dpcm_command))
     dp.add_handler(CallbackQueryHandler(ctsCommandHandler))
