@@ -28,14 +28,23 @@ update - Aggiornamenti da Conte
 
 import logging
 import json
-import urllib.request
 import os
 import datetime
 import pytz
 
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
+
 from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
+
+# Enable logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
+
+logger = logging.getLogger(__name__)
 
 script_dir = os.path.dirname(__file__)
 
@@ -46,6 +55,7 @@ config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 timezone = pytz.timezone('Europe/Rome')
 
+
 numFrasiConte = len(content['sentences']['conte'])
 numSalutiConte = len(content['greetings'])
 ctsMaxLen = 5
@@ -54,19 +64,14 @@ ctsList = content['CTS']
 dpcmSize = len(content['DPCM'])
 dpcmList = content['DPCM']
 
-# Stages
-FIRST, SECOND = range(2)
-# Callback data
-FIVE = 5
-TEN = 10
-
 
 HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
 THE_SENTENCE = 'a breve il verdetto'
 
-URL_COMUNI = 'https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json'
-URL_WEATHER = 'https://api.openweathermap.org/data/2.5/weather?zip={},IT&units=metric&lang=it&appid={}'
+FIVE = 5
+TEN = 10
+
 
 # Openweathermap Weather codes and corressponding emojis
 thunderstorm = u'\U0001F4A8'    # Code: 200's, 900, 901, 902, 905
@@ -81,18 +86,9 @@ clouds = u'\U00002601'          # Code: 802-803-804 clouds general
 hot = u'\U0001F525'             # Code: 904
 defaultEmoji = u'\U0001F300'    # default emojis
 
-with urllib.request.urlopen(URL_COMUNI) as url:
-    global COMUNI
-    global TOT_COMUNI
-    COMUNI = json.loads(url.read().decode())
-    TOT_COMUNI = len(COMUNI)
-
-# Enable logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
-
-logger = logging.getLogger(__name__)
+reqComuni = Request(config['url']['comuni'])
+COMUNI = json.loads(urlopen(reqComuni).read().decode())
+TOT_COMUNI = len(COMUNI)
 
 
 """
@@ -144,19 +140,29 @@ def dpcm_command(update, context):
 def comune_command(update, context):    
     randIndex = randrange(TOT_COMUNI)
     comune = COMUNI[randIndex]
-    with urllib.request.urlopen(URL_WEATHER.format(comune['cap'][0], config['openweathermap_token'])) as url:
-        weather = json.loads(url.read().decode())
-        weatherObj = weather['weather'][0]
-        message = '<b>{}</b>\n'.format(comune['nome'])
-        message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
-        message += '{} abitanti\n'.format(comune['popolazione'])
-        message += '{} ({}) - {} °C\n'.format(getEmoji(weatherObj['id']), 
-            weatherObj['description'].capitalize(),
+    reqMeteo = Request(config['url']['meteo'])
+    meteoStr = ''
+
+    try:
+        weather = json.loads(urlopen(reqMeteo).read().decode())
+        meteoStr = '{} ({}) - {} °C\n'.format(getEmoji(weather['weather'][0]['id']), 
+            weather['weather'][0]['description'].capitalize(),
             str(weather['main']['temp']))
-        message += '\n'
-        message += 'I bar chiudono alle ore 18:00'
-        update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
-                    parse_mode=ParseMode.HTML)
+    except HTTPError as e:
+        meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
+    except URLError as e:
+        meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
+    else:
+        meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
+
+    message = '<b>{}</b>\n'.format(comune['nome'])
+    message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
+    message += '{} abitanti\n'.format(comune['popolazione'])
+    message += meteoStr
+    message += '\n'
+    message += 'I bar chiudono alle ore 18:00'
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
+                parse_mode=ParseMode.HTML)
 
 def fibonacci_command(update, context):
     response = []
@@ -334,16 +340,6 @@ def main():
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
     dp.add_handler(MessageHandler(Filters.sticker, handle_sticker))
-    """dp.add_handler(ConversationHandler(
-        entry_points=[CommandHandler('cts', cts_command)],
-        states={
-            FIRST: [
-                CallbackQueryHandler(ctsCommandHandler, pattern='^' + str(FIVE) + '$'),
-                CallbackQueryHandler(ctsCommandHandler, pattern='^' + str(TEN) + '$')
-            ]
-        },
-        fallbacks=[CommandHandler('help', help_command)]
-    ))"""
 
      # log all errors
     dp.add_error_handler(error)

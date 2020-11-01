@@ -3,5 +3,9 @@
     "name": "https://abreveilverdetto.herokuapp.com/",
     "port": "8443",
     "listen": "0.0.0.0",
-    "openweathermap_token": "2b712f823ee54b5bad72047b1ea65ce3"
+    "openweathermap_token": "2b712f823ee54b5bad72047b1ea65ce3",
+    "url": {
+        "comuni": "https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json",
+        "meteo": "https://api.openweathermap.org/data/2.5/weather?zip={},IT&units=metric&lang=it&appid={}"
+    }
 }
