@@ -18,6 +18,7 @@ Telegram commands:
 saluti - Saluti da Conte
 cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
 dpcm - Un DPCM a caso
+conte - Foto di Conte con frase
 bimbe - Foto per le Bimbe di Conte
 comune - Un comune a caso
 giurato - Una frase a caso di Luca Giurato
@@ -182,7 +183,7 @@ def dpcm_command(update, context):
     #message = 'ghesboro'
     update.message.reply_text('\"{}\"'.format(message))
 
-def giurato_dpcm(update, context):
+def giurato_command(update, context):
     """Send a message when the command /dpcm is issued."""
     randIndex = randrange(giuratoSize)
     message = giuratoList[randIndex]
