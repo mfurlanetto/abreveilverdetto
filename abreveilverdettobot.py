@@ -19,8 +19,9 @@ saluti - Saluti da Conte
 cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
 dpcm - Un DPCM a caso
 bimbe - Foto per le Bimbe di Conte
-tortadimele - Foto torte di mele
 comune - Un comune a caso
+giurato - Una frase a caso di Luca Giurato
+tortadimele - Foto torte di mele
 help - Aiuto da Conte
 fibonacci - un prefisso di lunghezza variabile della successione di fibonacci
 update - Aggiornamenti da Conte
@@ -63,6 +64,8 @@ ctsSize = len(content['CTS'])
 ctsList = content['CTS']
 dpcmSize = len(content['DPCM'])
 dpcmList = content['DPCM']
+giuratoList = content['sentences']['giurato']
+giuratoSize = len(giuratoList)
 
 
 HELP = '{} non verrai abbandonato a te stesso'
@@ -179,11 +182,18 @@ def dpcm_command(update, context):
     #message = 'ghesboro'
     update.message.reply_text('\"{}\"'.format(message))
 
+def giurato_dpcm(update, context):
+    """Send a message when the command /dpcm is issued."""
+    randIndex = randrange(giuratoSize)
+    message = giuratoList[randIndex]
+    #message = 'ghesboro'
+    update.message.reply_text('\"{}\"'.format(message))
+
 
 def comune_command(update, context):    
     randIndex = randrange(TOT_COMUNI)
     comune = COMUNI[randIndex]
-    reqMeteo = Request(config['url']['meteo'])
+    reqMeteo = Request(config['url']['meteo'].format(comune['cap'][0], config['openweathermap_token']))
     meteoStr = ''
 
     try:
@@ -373,6 +383,7 @@ def main():
     dp.add_handler(CommandHandler('bimbe', conte_command))
     dp.add_handler(CommandHandler('cts', cts_command))
     dp.add_handler(CommandHandler('dpcm', dpcm_command))
+    dp.add_handler(CommandHandler('giurato', giurato_command))
     dp.add_handler(CallbackQueryHandler(ctsCommandHandler))
     dp.add_handler(CommandHandler('tortadimele', torta_command))
     dp.add_handler(CommandHandler('comune', comune_command))
