@@ -199,7 +199,7 @@ def giurato_command(update, context):
 
 def covid_command(update, context):
     lastIndex = len(COVID) - 1
-    varDeceduti= COVID[lastIndex][deceduti] - COVID[lastIndex - 1][deceduti]
+    varDeceduti= COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
     nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
     message = hospital + ' ' + nuoviPositivi
     message = headstone + ' ' + varDeceduti
