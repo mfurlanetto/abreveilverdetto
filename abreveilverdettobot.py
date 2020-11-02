@@ -204,12 +204,17 @@ def giurato_command(update, context):
 
 def covid_command(update, context):
     lastIndex = len(COVID) - 1
+    latestData = COVID[lastIndex]['data']
+    latestUpdate = latestData[0:10]
     varDeceduti = COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
+    varTerapieI = COVID[lastIndex]['terapia_intensiva'] - COVID[lastIndex - 1]['terapia_intensiva']
     varOspedalizzati = COVID[lastIndex]['totale_ospedalizzati'] - COVID[lastIndex - 1]['totale_ospedalizzati']
     varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
     nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
-    message = biohazard + ' ' + nuoviPositivi + '\n'
+    message = latestUpdate + '\n'
+    message += biohazard + ' ' + nuoviPositivi + '\n'
     message += medical + ' ' + varOspedalizzati + '\n'
+    message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
     message += headstone + ' ' + varDeceduti + '\n'
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
