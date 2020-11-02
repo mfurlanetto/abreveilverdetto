@@ -187,14 +187,13 @@ def dpcm_command(update, context):
     """Send a message when the command /dpcm is issued."""
     randIndex = randrange(dpcmSize)
     message = dpcmList[randIndex]
-    #message = 'ghesboro'
     update.message.reply_text('\"{}\"'.format(message))
 
 def giurato_command(update, context):
-    """Send a message when the command /dpcm is issued."""
+    """Send a message when the command /giurato is issued."""
+    logger.info(update)
     randIndex = randrange(giuratoSize)
     message = giuratoList[randIndex]
-    #message = 'ghesboro'
     update.message.reply_text('\"{}\"'.format(message))
 
 def covid_command(update, context):
@@ -211,7 +210,6 @@ def comune_command(update, context):
     comune = COMUNI[randIndex]
     urlWeather = config['url']['meteo'].format(comune['cap'][0], config['openweathermap_token'])
     reqMeteo = Request(urlWeather)
-    logger.info(urlWeather)
     meteoStr = ''
 
     try:
@@ -226,7 +224,6 @@ def comune_command(update, context):
         logger.error('Reason: ', e.reason)
         meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
 
-    logger.info(meteoStr)
     message = '<b>{}</b>\n'.format(comune['nome'])
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
     message += '{} abitanti\n'.format(comune['popolazione'])
