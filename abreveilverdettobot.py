@@ -194,18 +194,21 @@ def giurato_command(update, context):
 def comune_command(update, context):    
     randIndex = randrange(TOT_COMUNI)
     comune = COMUNI[randIndex]
-    reqMeteo = Request(config['url']['meteo'].format(comune['cap'][0], config['openweathermap_token']))
-    logger.info(reqMeteo)
+    urlWeather = config['url']['meteo'].format(comune['cap'][0], config['openweathermap_token'])
+    reqMeteo = Request(urlWeather)
+    logger.info(urlWeather)
     meteoStr = ''
 
     try:
         weather = json.loads(urlopen(reqMeteo).read().decode())
-        meteoStr = '{} ({}) - {} °C\n'.format(getEmoji(weather['weather'][0]['id']), 
+        meteoStr = '{} ({}) ᛫ {} °C\n'.format(getEmoji(weather['weather'][0]['id']), 
             weather['weather'][0]['description'].capitalize(),
-            str(weather['main']['temp']))
+            '%.1f' % str(weather['main']['temp']))
     except HTTPError as e:
+        logger.error('Error code: ', e.code)
         meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
     except URLError as e:
+        logger.error('Reason: ', e.reason)
         meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
 
     logger.info(meteoStr)
