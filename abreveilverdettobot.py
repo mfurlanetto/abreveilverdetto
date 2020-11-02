@@ -218,7 +218,7 @@ def comune_command(update, context):
         weather = json.loads(urlopen(reqMeteo).read().decode())
         meteoStr = '{} ({}) ᛫ {} °C\n'.format(getEmoji(weather['weather'][0]['id']), 
             weather['weather'][0]['description'].capitalize(),
-            '%.1f' % str(weather['main']['temp']))
+            '%.1f' % weather['main']['temp'])
     except HTTPError as e:
         logger.error('Error code: ', e.code)
         meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
