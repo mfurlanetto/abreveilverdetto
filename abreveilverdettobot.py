@@ -130,8 +130,14 @@ loveEmoji = [
     loveFace
 ]
 
+medical = u'\U00002695'
+maskFace = u'\U0001F637'
+thermoFace = u'\U0001F912'
 headstone = u'\U0001FAA6'
 hospital = u'\U0001F3E5'
+latinCrosso = u'\U0000271D'
+biohazard = u'\U00002623'
+house = u'\U0001F3E0'
 
 logger = logging.getLogger(__name__)
 
@@ -198,10 +204,14 @@ def giurato_command(update, context):
 
 def covid_command(update, context):
     lastIndex = len(COVID) - 1
-    varDeceduti= COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
+    varDeceduti = COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
+    varOspedalizzati = COVID[lastIndex]['totale_ospedalizzati'] - COVID[lastIndex - 1]['totale_ospedalizzati']
+    varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
     nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
-    message = hospital + ' ' + nuoviPositivi
-    message = headstone + ' ' + varDeceduti
+    message = biohazard + ' ' + nuoviPositivi + '\n'
+    message += medical + ' ' + varOspedalizzati + '\n'
+    message += house + ' ' + varIsolamento + '\n'
+    message += headstone + ' ' + varDeceduti + '\n'
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                 parse_mode=ParseMode.HTML)
 
