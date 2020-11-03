@@ -212,14 +212,13 @@ def covid_command(update, context):
     varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
     nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
     message = latestUpdate + '\n'
-    message = '{} {}'.format(biohazard,nuoviPositivi)
-    message += '\n'
-    message += '{} {}'.format(hospital,varOspedalizzati)
-    message += '\n'
+    message += '{} {}{}\n'.format(biohazard,if(nuoviPositivi>0) : '+',nuoviPositivi)
+    message += '{} {}\n'.format(hospital,varOspedalizzati)
+    message += '{} {}\n'.format(house,varIsolamento)
+    message += '{} {}\n'.format(headstone,varDeceduti)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
-    message += headstone + ' ' + varDeceduti + '\n'
     """
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                 parse_mode=ParseMode.HTML)
