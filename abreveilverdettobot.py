@@ -228,7 +228,7 @@ def covid_command(update, context):
     message += '{}{} {}{}\n'.format(biohazard,thermoFace,signNuoviPositivi,nuoviPositivi)
     message += '{}{} **{}** ({}{})\n'.format(hospital,maskFace,COVID[lastIndex]['totale_ospedalizzati'],signVarOspedalizzati,varOspedalizzati)
     message += '{}{} **{}** ({}{})\n'.format(hospital,bed,COVID[lastIndex]['terapia_intensiva'],signVarTerapieI,varTerapieI)
-    message += '{}{} {} ({}{})\n'.format(house,,thermoFace,COVID[lastIndex]['isolamento_domiciliare'],signVarIsolamento,varIsolamento)
+    message += '{}{} {} ({}{})\n'.format(house,thermoFace,COVID[lastIndex]['isolamento_domiciliare'],signVarIsolamento,varIsolamento)
     message += '{}{} {} ({}{})\n'.format(latinCross,angel,COVID[lastIndex]['deceduti'], signVarDeceduti,varDeceduti)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
