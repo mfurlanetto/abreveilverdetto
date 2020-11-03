@@ -212,7 +212,7 @@ def covid_command(update, context):
     varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
     nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
     message = latestUpdate + '\n'
-    message += '{} {}{}\n'.format(biohazard,if(nuoviPositivi>0) : '+',nuoviPositivi)
+    message += '{} {}{}\n'.format(biohazard,(if nuoviPositivi>0 : '+'),nuoviPositivi)
     message += '{} {}\n'.format(hospital,varOspedalizzati)
     message += '{} {}\n'.format(house,varIsolamento)
     message += '{} {}\n'.format(headstone,varDeceduti)
