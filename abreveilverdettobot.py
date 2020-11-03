@@ -135,7 +135,7 @@ maskFace = u'\U0001F637'
 thermoFace = u'\U0001F912'
 headstone = u'\U0001FAA6'
 hospital = u'\U0001F3E5'
-latinCrosso = u'\U0000271D'
+latinCross = u'\U0000271D'
 biohazard = u'\U00002623'
 house = u'\U0001F3E0'
 
@@ -213,13 +213,17 @@ def covid_command(update, context):
     nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
     signNuoviPositivi = ''
     if nuoviPositivi>0 : signNuoviPositivi = '+'
+    signVarOspedalizzati = ''
+    if varOspedalizzati>0 : signVarOspedalizzati = '+'
+    signVarIsolamento = ''
+    if varIsolamento>0 : signVarIsolamento = '+'
     signVarDeceduti = ''
     if varDeceduti>0 : signVarDeceduti = '+'
     message = 'Ultimo aggiornamento: {}\n'.format(latestUpdate)
     message += '{} {}{}\n'.format(biohazard,signNuoviPositivi,nuoviPositivi)
-    message += '{} {}\n'.format(hospital,varOspedalizzati)
-    message += '{} {}\n'.format(house,varIsolamento)
-    message += '{} {}{}\n'.format(headstone,signVarDeceduti,varDeceduti)
+    message += '{} {} ({}{})\n'.format(hospital,COVID[lastIndex]['totale_ospedalizzati'],signVarOspedalizzati,varOspedalizzati)
+    message += '{} {} ({}{})\n'.format(house,COVID[lastIndex]['isolamento_domiciliare'],signVarIsolamento,varIsolamento)
+    message += '{} {} ({}{})\n'.format(latinCross,COVID[lastIndex]['deceduti'], signVarDeceduti,varDeceduti)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
