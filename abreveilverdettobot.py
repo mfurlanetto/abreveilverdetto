@@ -217,7 +217,7 @@ def covid_command(update, context):
     varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
     varDeceduti = COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
     varTamponi = COVID[lastIndex]['tamponi'] - COVID[lastIndex - 1]['tamponi']
-    percPosTamp = COVID[lastIndex]['nuovi_positivi']/COVID[lastIndex]['tamponi']*100
+    percPosTamp = 100*COVID[lastIndex]['nuovi_positivi']/COVID[lastIndex]['tamponi']
     signNuoviPositivi = ''
     if nuoviPositivi>0 : signNuoviPositivi = '+'
     signVarOspedalizzati = ''
@@ -237,7 +237,7 @@ def covid_command(update, context):
     message += '{}{} {} ({}{})\n'.format(house,thermoFace,COVID[lastIndex]['isolamento_domiciliare'],signVarIsolamento,varIsolamento)
     message += '{}{} {} ({}{})\n'.format(latinCross,angel,COVID[lastIndex]['deceduti'], signVarDeceduti,varDeceduti)
     message += '{}{} {} ({}{})\n'.format(nose,testTube,COVID[lastIndex]['tamponi'], signVarTamponi,varTamponi)
-    message += '{}\{} {}%'.format(biohazard,testTube,percPosTamp)
+    message += '{}\{} {:.3}%'.format(biohazard,testTube,percPosTamp)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
