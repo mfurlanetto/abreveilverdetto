@@ -141,6 +141,8 @@ house = u'\U0001F3E0'
 bed = u'\U0001F6CF'
 pill = u'\U0001F48A'
 angel = u'\U0001F47C'
+testTube = u'\U0001F9EA'
+nose = u'\U0001F443'
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +216,8 @@ def covid_command(update, context):
     varTerapieI = COVID[lastIndex]['terapia_intensiva'] - COVID[lastIndex - 1]['terapia_intensiva']
     varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
     varDeceduti = COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
+    varTamponi = COVID[lastIndex]['tamponi'] - COVID[lastIndex - 1]['tamponi']
+    percPosTamp = COVID[lastIndex]['nuovi_positivi']/COVID[lastIndex]['tamponi']*100
     signNuoviPositivi = ''
     if nuoviPositivi>0 : signNuoviPositivi = '+'
     signVarOspedalizzati = ''
@@ -224,12 +228,16 @@ def covid_command(update, context):
     if varIsolamento>0 : signVarIsolamento = '+'
     signVarDeceduti = ''
     if varDeceduti>0 : signVarDeceduti = '+'
+    signVarTamponi = ''
+    if varTamponi>0 : signVarTamponi = '+'
     message = 'Ultimo aggiornamento: {}\n'.format(latestUpdate)
     message += '{}{} {}{}\n'.format(biohazard,thermoFace,signNuoviPositivi,nuoviPositivi)
-    message += '{}{} **{}** ({}{})\n'.format(hospital,maskFace,COVID[lastIndex]['totale_ospedalizzati'],signVarOspedalizzati,varOspedalizzati)
-    message += '{}{} **{}** ({}{})\n'.format(hospital,bed,COVID[lastIndex]['terapia_intensiva'],signVarTerapieI,varTerapieI)
+    message += '{}{} {} ({}{})\n'.format(hospital,maskFace,COVID[lastIndex]['totale_ospedalizzati'],signVarOspedalizzati,varOspedalizzati)
+    message += '{}{} {} ({}{})\n'.format(hospital,bed,COVID[lastIndex]['terapia_intensiva'],signVarTerapieI,varTerapieI)
     message += '{}{} {} ({}{})\n'.format(house,thermoFace,COVID[lastIndex]['isolamento_domiciliare'],signVarIsolamento,varIsolamento)
     message += '{}{} {} ({}{})\n'.format(latinCross,angel,COVID[lastIndex]['deceduti'], signVarDeceduti,varDeceduti)
+    message += '{}{} {} ({}{})\n'.format(nose,testTube,COVID[lastIndex]['tamponi'], signVarTamponi,varTamponi)
+    message += '{}\{} {}%'.format(biohazard,testTube,percPosTamp)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
