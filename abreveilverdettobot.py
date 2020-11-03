@@ -138,6 +138,9 @@ hospital = u'\U0001F3E5'
 latinCross = u'\U0000271D'
 biohazard = u'\U00002623'
 house = u'\U0001F3E0'
+bed = u'\U0001F6CF'
+pill = u'\U0001F48A'
+angel = u'\U0001F47C'
 
 logger = logging.getLogger(__name__)
 
@@ -206,24 +209,27 @@ def covid_command(update, context):
     lastIndex = len(COVID) - 1
     latestData = COVID[lastIndex]['data']
     latestUpdate = latestData[0:10]
-    varDeceduti = COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
-    varTerapieI = COVID[lastIndex]['terapia_intensiva'] - COVID[lastIndex - 1]['terapia_intensiva']
-    varOspedalizzati = COVID[lastIndex]['totale_ospedalizzati'] - COVID[lastIndex - 1]['totale_ospedalizzati']
-    varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
     nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
+    varOspedalizzati = COVID[lastIndex]['totale_ospedalizzati'] - COVID[lastIndex - 1]['totale_ospedalizzati']
+    varTerapieI = COVID[lastIndex]['terapia_intensiva'] - COVID[lastIndex - 1]['terapia_intensiva']
+    varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
+    varDeceduti = COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
     signNuoviPositivi = ''
     if nuoviPositivi>0 : signNuoviPositivi = '+'
     signVarOspedalizzati = ''
     if varOspedalizzati>0 : signVarOspedalizzati = '+'
+    signVarTerapieI = ''
+    if varTerapieI>0 : signVarTerapieI = '+'
     signVarIsolamento = ''
     if varIsolamento>0 : signVarIsolamento = '+'
     signVarDeceduti = ''
     if varDeceduti>0 : signVarDeceduti = '+'
     message = 'Ultimo aggiornamento: {}\n'.format(latestUpdate)
-    message += '{} {}{}\n'.format(biohazard,signNuoviPositivi,nuoviPositivi)
-    message += '{} {} ({}{})\n'.format(hospital,COVID[lastIndex]['totale_ospedalizzati'],signVarOspedalizzati,varOspedalizzati)
-    message += '{} {} ({}{})\n'.format(house,COVID[lastIndex]['isolamento_domiciliare'],signVarIsolamento,varIsolamento)
-    message += '{} {} ({}{})\n'.format(latinCross,COVID[lastIndex]['deceduti'], signVarDeceduti,varDeceduti)
+    message += '{}{} {}{}\n'.format(biohazard,thermoFace,signNuoviPositivi,nuoviPositivi)
+    message += '{}{} **{}** ({}{})\n'.format(hospital,maskFace,COVID[lastIndex]['totale_ospedalizzati'],signVarOspedalizzati,varOspedalizzati)
+    message += '{}{} **{}** ({}{})\n'.format(hospital,bed,COVID[lastIndex]['terapia_intensiva'],signVarTerapieI,varTerapieI)
+    message += '{}{} {} ({}{})\n'.format(house,,thermoFace,COVID[lastIndex]['isolamento_domiciliare'],signVarIsolamento,varIsolamento)
+    message += '{}{} {} ({}{})\n'.format(latinCross,angel,COVID[lastIndex]['deceduti'], signVarDeceduti,varDeceduti)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
