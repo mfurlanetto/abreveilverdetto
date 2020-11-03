@@ -217,7 +217,7 @@ def covid_command(update, context):
     varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
     varDeceduti = COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
     varTamponi = COVID[lastIndex]['tamponi'] - COVID[lastIndex - 1]['tamponi']
-    percPosTamp = 100*COVID[lastIndex]['nuovi_positivi']/COVID[lastIndex]['tamponi']
+    percPosTamp = 100*COVID[lastIndex]['nuovi_positivi']/varTamponi
     signNuoviPositivi = ''
     if nuoviPositivi>0 : signNuoviPositivi = '+'
     signVarOspedalizzati = ''
