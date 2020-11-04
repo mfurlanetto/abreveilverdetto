@@ -265,7 +265,7 @@ def comune_command(update, context):
         meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
 
     covid_serverity_color = next((region["covid_serverity_color"] for region in content['ItalianRegions'] if region['name'] == comune['regione']['nome']), "black")
-    message = '<p style="font-weight: bold;color: {}">{}</p>\n'.format(covid_serverity_color, comune['nome'])
+    message = '<p style="font-weight:bold;color:{}">{}</p>\n'.format(covid_serverity_color, comune['nome'])
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
     message += '{} abitanti\n'.format(comune['popolazione'])
     message += meteoStr
