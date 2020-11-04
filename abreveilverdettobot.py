@@ -264,9 +264,12 @@ def comune_command(update, context):
         logger.error('Reason: ', e.reason)
         meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
 
-    covid_serverity_color = next((region["covid_serverity_color"] for region in content['ItalianRegions'] if region['name'] == comune['regione']['nome']), "black")
-    message = '<p style="font-weight:bold;color:{}">{}</p>\n'.format(covid_serverity_color, comune['nome'])
+    covid_serverity_color = next((region["covid_serverity_color"] for region in content['ItalianRegions'] if region['name'] == comune['regione']['nome']), None)
+
+    message = '<b>{}</b>\n'.format(comune['nome'])
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
+    if covid_serverity_color is not None:
+        message += 'Zone: {}\n'.format(covid_serverity_color)
     message += '{} abitanti\n'.format(comune['popolazione'])
     message += meteoStr
     message += '\n'
