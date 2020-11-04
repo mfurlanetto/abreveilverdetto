@@ -184,10 +184,19 @@ def bimbe_command(update, context):
 
 
 def cts_command(update, context):
-    """Send a message when the command /cts is issued."""    
-    keyboard = [['5', '10']]
+    """Send a message when the command /cts is issued."""
+    keyboard = [
+        [
+            InlineKeyboardButton("5", callback_data=str(FIVE)),
+            InlineKeyboardButton("10", callback_data=str(TEN)),
+        ]
+    ]
+    #reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('Quanti membri desideri?', 
-        reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True))
+        reply_markup=ReplyKeyboardMarkup(keyboard, 
+        one_time_keyboard=True,
+        resize_keyboard=True,
+        selective=True))
 
 def dpcm_command(update, context):
     """Send a message when the command /dpcm is issued."""
