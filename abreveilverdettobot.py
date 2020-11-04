@@ -39,7 +39,7 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 from random import randrange
-from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
 
 # Enable logging
@@ -184,15 +184,10 @@ def bimbe_command(update, context):
 
 
 def cts_command(update, context):
-    """Send a message when the command /cts is issued."""
-    keyboard = [
-        [
-            InlineKeyboardButton("5", callback_data=str(FIVE)),
-            InlineKeyboardButton("10", callback_data=str(TEN)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
+    """Send a message when the command /cts is issued."""    
+    keyboard = [['5', '10']]
+    update.message.reply_text('Quanti membri desideri?', 
+        reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True))
 
 def dpcm_command(update, context):
     """Send a message when the command /dpcm is issued."""
