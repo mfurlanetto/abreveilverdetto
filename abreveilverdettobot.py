@@ -39,7 +39,7 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 from random import randrange
-from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
+from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
 
 # Enable logging
@@ -191,12 +191,8 @@ def cts_command(update, context):
             InlineKeyboardButton("10", callback_data=str(TEN)),
         ]
     ]
-    #reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Quanti membri desideri?', 
-        reply_markup=ReplyKeyboardMarkup(keyboard, 
-        one_time_keyboard=True,
-        resize_keyboard=True,
-        selective=True))
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
 
 def dpcm_command(update, context):
     """Send a message when the command /dpcm is issued."""
