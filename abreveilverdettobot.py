@@ -26,6 +26,7 @@ giurato - Una frase a caso di Luca Giurato
 tortadimele - Foto torte di mele
 help - Aiuto da Conte
 fibonacci - un prefisso di lunghezza variabile della successione di fibonacci
+centocentocento - numero pseudocasuale multiplo di 5 nell'intervallo [5;100]
 update - Aggiornamenti da Conte
 """
 
@@ -272,7 +273,6 @@ def comune_command(update, context):
         message += 'Zone: {}\n'.format(covid_serverity_color)
     message += '{} abitanti\n'.format(comune['popolazione'])
     message += meteoStr
-    message += '\n'
     message += 'I bar chiudono alle ore 18:00'
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                 parse_mode=ParseMode.HTML)
@@ -304,6 +304,10 @@ def fibonacci_command(update, context):
             sequence.append(sequence[-1] + sequence[-2])
     response.append(', '.join(map(str, sequence)))
     update.message.bot.send_message(chat_id=update.effective_chat.id, text="\n".join(response), parse_mode=ParseMode.HTML)
+
+def centocentocento_command(update, context):
+    value = 5 + randrange(0, 100, 5)
+    update.message.bot.send_message(chat_id=update.effective_chat.id, text="{}".format(value), parse_mode=ParseMode.HTML)
 
 def help_command(update, context):
     """Send a message when the command /help is issued."""
@@ -451,6 +455,7 @@ def main():
     dp.add_handler(CommandHandler('covid', covid_command))
     dp.add_handler(CommandHandler('update', echo_sentence))
     dp.add_handler(CommandHandler('fibonacci', fibonacci_command))
+    dp.add_handler(CommandHandler('centocentocento', centocentocento_command))
     dp.add_handler(CommandHandler('help', help_command))
 
     # on noncommand i.e message - echo the message on Telegram
