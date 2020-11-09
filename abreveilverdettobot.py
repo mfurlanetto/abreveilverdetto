@@ -57,7 +57,7 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 
-dictionary = utils.emoji["dict"]
+dictionary = utils.emoji.dict
 
 numFrasiConte = len(content['sentences']['conte'])
 numSalutiConte = len(content['greetings'])
