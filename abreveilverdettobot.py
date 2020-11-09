@@ -99,7 +99,6 @@ def new_start(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('Seleziona comando', reply_markup=reply_markup)
-    return 0
 
 
 def start_command(update, context):
@@ -139,8 +138,8 @@ def saluti(update, context):
     query.answer()
     numSalutiConte = len(content['greetings'])
     randomIndex = randrange(numSalutiConte)
-    user = update.message.from_user
-    logger.info('User {} chose saluti.'.format(user.first_name))
+    user = update.effective_user
+    logger.info('User {} chose saluti.'.format(user.username))
     query.edit_message_text(
         text=content['greetings'][randomIndex].format(greetings(user.first_name))
     )
