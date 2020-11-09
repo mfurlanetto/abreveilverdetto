@@ -441,7 +441,7 @@ def main():
 
         
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', new_start)],
+        entry_points=[CommandHandler('test', new_start)],
         states={
             0: [
                 CallbackQueryHandler(saluti, pattern='^' + str(SALUTI) + '$')

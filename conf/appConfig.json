@@ -12,7 +12,7 @@
     "comuni": {
         "url": "https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json"
     },
-    "codiv": {
+    "covid": {
         "url": "https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-json/dpc-covid19-ita-andamento-nazionale.json"
     }
 }
