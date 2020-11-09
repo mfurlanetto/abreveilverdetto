@@ -15,19 +15,7 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 
 Telegram commands:
-saluti - Saluti da Conte
-cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
-dpcm - Un DPCM a caso
-conte - Foto di Conte con frase
-bimbe - Foto per le Bimbe di Conte
-comune - Un comune a caso
-covid - Dati nazionali sul COVID-19
-giurato - Una frase a caso di Luca Giurato
-tortadimele - Foto torte di mele
-help - Aiuto da Conte
-fibonacci - un prefisso di lunghezza variabile della successione di fibonacci
-centocentocento - numero pseudocasuale multiplo di 5 nell'intervallo [5;100]
-update - Aggiornamenti da Conte
+start - Lista dei comandi
 """
 
 import logging, json, os, time, utils.emoji
@@ -56,6 +44,9 @@ def buildPath(relativePath):
 
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
+
+
+SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO = range(11)
 
 
 HELP = '{} non verrai abbandonato a te stesso'
@@ -89,6 +80,24 @@ START OF COMMANDS SECTION
 # context. Error handlers also receive the raised TelegramError object in error.
 
 
+def new_start(update, context):
+    """Send a message when the command /start2 is issued."""
+    keyboard = [
+        [
+            InlineKeyboardButton("SALUTI", callback_data=str(SALUTI)),
+            InlineKeyboardButton("CTS", callback_data=str(10)),
+            InlineKeyboardButton("DPCM", callback_data=str(10)),
+        ],
+        [
+            InlineKeyboardButton("CONTE", callback_data=str(5)),
+            InlineKeyboardButton("BIMBE", callback_data=str(10)),
+            InlineKeyboardButton("COMUNE", callback_data=str(10))
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
+
+
 def start_command(update, context):
     """Send a message when the command /start is issued."""
     user = update.message.from_user
@@ -120,6 +129,27 @@ def saluti_command(update, context):
     logger.info('User {} started the conversation.'.format(user.first_name))
     update.message.reply_text(content['greetings'][randomIndex].format(greetings(user.first_name)))
 
+def saluti(update, context):
+    """Send a message when the command /saluti is issued."""
+    query = update.callback_query
+    query.answer()
+    numSalutiConte = len(content['greetings'])
+    randomIndex = randrange(numSalutiConte)
+    user = update.message.from_user
+    logger.info('User {} started the conversation.'.format(user.first_name))
+    query.edit_message_text(
+        text=content['greetings'][randomIndex].format(greetings(user.first_name))
+    )
+    update.message.reply_text(content['greetings'][randomIndex].format(greetings(user.first_name)))
+    return 1
+
+def end(update, context):
+    """Returns `ConversationHandler.END`, which tells the
+    ConversationHandler that the conversation is over"""
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(text="See you next time!")
+    return ConversationHandler.END
 
 def torta_command(update, context):
     randomIndex = randrange(5)
@@ -406,9 +436,28 @@ def main():
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
+    
+    #SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO = range(11)
+
+        
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', new_start)],
+        states={
+            0: [
+                CallbackQueryHandler(saluti, pattern='^' + str(SALUTI) + '$')
+            ],
+            1: [
+                CallbackQueryHandler(end)
+            ]
+        },
+        fallbacks=[CallbackQueryHandler(end)],
+    )
+
+    dp.add_handler(conv_handler)
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler('start', start_command))
+    dp.add_handler(CommandHandler('test', start_command))
     dp.add_handler(CommandHandler('saluti', saluti_command))
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('bimbe', bimbe_command))
