@@ -30,7 +30,7 @@ centocentocento - numero pseudocasuale multiplo di 5 nell'intervallo [5;100]
 update - Aggiornamenti da Conte
 """
 
-import logging, json, os, time
+import logging, json, os, time, utils.emoji
 
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -57,6 +57,7 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 
+dictionary = utils.emoji["dict"]
 
 numFrasiConte = len(content['sentences']['conte'])
 numSalutiConte = len(content['greetings'])
@@ -96,38 +97,6 @@ TOT_COMUNI = len(COMUNI)
 
 reqCovid = Request(config['url']['covid'])
 COVID = json.loads(urlopen(reqCovid).read().decode())
-
-beaHeart = u'\U0001F493'        # beating heart
-grwHeart = u'\U0001F497'        # growing heart
-shiHeart = u'\U0001F496'        # shining heart
-bowHeart = u'\U0001F49D'        # heart with bow
-arrHeart = u'\U0001F498'        # heart with arrow
-redHeart = u'\U00002764'        # red heart
-trnHeart = u'\U0001F49E'        # turning hearts
-twoHeart = u'\U0001F495'        # two hearts
-excHeart = u'\U00002763'        # exclamation heart
-loveMail = u'\U0001F48C'        # love mail
-kissMark = u'\U0001F48B'        # kiss mark
-heartCat = u'\U0001F63B'        # cat with heart eyes
-heartFac = u'\U0001F60D'        # face with heart eyes
-loveFace = u'\U0001F970'        # face full of hearts
-
-loveEmoji = [
-    beaHeart,
-    grwHeart,
-    shiHeart,
-    bowHeart,
-    arrHeart,
-    redHeart,
-    trnHeart,
-    twoHeart,
-    excHeart,
-    loveMail,
-    kissMark,
-    heartCat,
-    heartFac,
-    loveFace
-]
 
 medical = u'\U00002695'
 maskFace = u'\U0001F637'
@@ -173,13 +142,12 @@ def conte_command(update, context):
         caption=content['sentences']['conte'][randomIndexCaption])
 
 def bimbe_command(update, context):
+    loveEmojis = list(dictionary.get("love").values())
+    sizeLove = len(loveEmojis)
     randomIndexImage = randrange(20)
-    rndIndexEmoji1 = randrange(15)
-    rndIndexEmoji2 = randrange(15)
-    rndIndexEmoji3 = randrange(15)
     update.message.bot.send_photo(chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/bimbe/{}.jpg".format(randomIndexImage)), 'rb'),
-        caption=loveEmoji[rndIndexEmoji1]+loveEmoji[rndIndexEmoji2]+loveEmoji[rndIndexEmoji3])
+        caption=loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)])
 
 
 def cts_command(update, context):
