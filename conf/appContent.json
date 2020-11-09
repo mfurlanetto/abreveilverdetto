@@ -289,7 +289,7 @@
         },
         {
             "name": "Toscana",
-            "covid_serverity_color": "yellow"
+            "covid_serverity_color": "orange"
         },
         {
             "name": "Calabria",
@@ -301,7 +301,7 @@
         },
         {
             "name": "Liguria",
-            "covid_serverity_color": "yellow"
+            "covid_serverity_color": "orange"
         },
         {
             "name": "Marche",
@@ -309,7 +309,7 @@
         },
         {
             "name": "Abruzzo",
-            "covid_serverity_color": "yellow"
+            "covid_serverity_color": "orange"
         },
         {
             "name": "Friuli-Venezia Giulia",
@@ -321,11 +321,11 @@
         },
         {
             "name": "Umbria",
-            "covid_serverity_color": "yellow"
+            "covid_serverity_color": "orange"
         },
         {
             "name": "Basilicata",
-            "covid_serverity_color": "yellow"
+            "covid_serverity_color": "orange"
         },
         {
             "name": "Molise",
