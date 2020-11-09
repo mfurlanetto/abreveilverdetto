@@ -93,23 +93,23 @@ def start_command(update, context):
     """Send a message when the command /start is issued."""
     user = update.message.from_user
     logger.info('User {} started the conversation.'.format(user.first_name))
-    message = '''<b>{}</b>, di seguito la lista dei comandi:
-    /saluti - <i>Saluti da Conte</i>
-    /cts - <i>Estrazione casuale di membri del Comitato Tecnico Scientifico</i>
-    /dpcm - <i>Un DPCM a caso</i>
-    /conte - <i>Foto di Conte con frase</i>
-    /bimbe - <i>Foto per le Bimbe di Conte</i>
-    /comune - <i>Un comune a caso</i>
-    /covid - <i>Dati nazionali sul COVID-19</i>
-    /giurato - <i>Una frase a caso di Luca Giurato</i>
-    /tortadimele - <i>Foto torte di mele</i>
-    /help - <i>Aiuto da Conte</i>
-    /fibonacci - <i>un prefisso di lunghezza variabile della successione di fibonacci</i>
-    /centocentocento - <i>numero pseudocasuale multiplo di 5 nell'intervallo [5;100]</i>
-    /update - <i>Aggiornamenti da Conte</i>'''.format(greetings(user.first_name))
+    message = '<b>{}</b>, di seguito la lista dei comandi:\n'.format(greetings(user.first_name))
+    message += '/saluti - <i>Saluti da Conte</i>\n'
+    message += '/cts - <i>Membri del Comitato Tecnico Scientifico a caso</i>\n'
+    message += '/dpcm - <i>Un DPCM a caso</i>\n'
+    message += '/conte - <i>Foto di Conte con frase</i>\n'
+    message += '/bimbe - <i>Foto per le Bimbe di Conte</i>\n'
+    message += '/comune - <i>Un comune a caso</i>\n'
+    message += '/covid - <i>Dati nazionali sul COVID-19</i>\n'
+    message += '/giurato - <i>Una frase a caso di Luca Giurato</i>\n'
+    message += '/tortadimele - <i>Foto torte di mele</i>\n'
+    message += '/help - <i>Aiuto da Conte</i>\n'
+    message += '/fibonacci - <i>un prefisso di lunghezza variabile della successione di fibonacci</i>\n'
+    message += '/centocentocento - <i>numero pseudocasuale multiplo di 5 nell\'intervallo [5;100]</i>\n'
+    message += '/update - <i>Aggiornamenti da Conte</i>'
     update.message.bot.send_message(chat_id=update.effective_chat.id, 
-                text=message, 
-                parse_mode=ParseMode.HTML)
+        text=message, 
+        parse_mode=ParseMode.HTML)
 
 
 def saluti_command(update, context):
