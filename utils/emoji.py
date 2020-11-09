@@ -10,7 +10,6 @@ weather = {
     "clouds": u'\U00002601',          # Code: 802-803-804 clouds general
     "hot": u'\U0001F525',             # Code: 904
     "defaultEmoji": u'\U0001F300'    # default emojis
-
 }
 
 love = {

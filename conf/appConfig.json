@@ -1,12 +1,18 @@
 {
-    "token": "1132815578:AAHx0IW2ZpPAChG9Yo-7mQVJL_8NqezQFY8",
-    "name": "https://abreveilverdetto.herokuapp.com/",
-    "port": "8443",
-    "listen": "0.0.0.0",
-    "openweathermap_token": "2b712f823ee54b5bad72047b1ea65ce3",
-    "url": {
-        "comuni": "https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json",
-        "meteo": "https://api.openweathermap.org/data/2.5/weather?zip={},IT&units=metric&lang=it&appid={}",
-        "covid": "https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-json/dpc-covid19-ita-andamento-nazionale.json"
+    "bot": {
+        "name": "https://abreveilverdetto.herokuapp.com/",
+        "token": "1132815578:AAHx0IW2ZpPAChG9Yo-7mQVJL_8NqezQFY8",
+        "port": "8443",
+        "listen": "0.0.0.0"
+    },
+    "openweathermap": {
+        "url": "https://api.openweathermap.org/data/2.5/weather?zip={},IT&units=metric&lang=it&appid={}",
+        "token": "2b712f823ee54b5bad72047b1ea65ce3"
+    },
+    "comuni": {
+        "url": "https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json"
+    },
+    "codiv": {
+        "url": "https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-json/dpc-covid19-ita-andamento-nazionale.json"
     }
 }

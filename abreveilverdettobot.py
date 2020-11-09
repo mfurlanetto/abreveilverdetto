@@ -146,7 +146,7 @@ def giurato_command(update, context):
     update.message.reply_text('\"{}\"'.format(message))
 
 def covid_command(update, context):
-    reqCovid = Request(config['url']['covid'])
+    reqCovid = Request(config['covid']['url'])
     COVID = json.loads(urlopen(reqCovid).read().decode())
     lastIndex = len(COVID) - 1
     latestData = COVID[lastIndex]['data']
@@ -187,11 +187,11 @@ def covid_command(update, context):
 
 def comune_command(update, context):
     zone_dict = utils.emoji.zone_color
-    reqComuni = Request(config['url']['comuni'])
+    reqComuni = Request(config['comuni']['url'])
     comuni = json.loads(urlopen(reqComuni).read().decode())
     randIndex = randrange(len(comuni))
     comune = comuni[randIndex]
-    urlWeather = config['url']['meteo'].format(comune['cap'][0], config['openweathermap_token'])
+    urlWeather = config['openweathermap']['url'].format(comune['cap'][0], config['openweathermap']['token'])
     reqMeteo = Request(urlWeather)
     meteoStr = ''
 
@@ -367,10 +367,10 @@ def main():
     logger.info('BOT STARTED')
 
     """ Get configurations """
-    token = config['token']
-    appName = config['name']
-    port = config['port']
-    listen = config['listen']
+    token = config['bot']['token']
+    appName = config['bot']['name']
+    port = config['bot']['port']
+    listen = config['bot']['listen']
 
 
     """Start the bot."""
