@@ -82,6 +82,9 @@ START OF COMMANDS SECTION
 
 def new_start(update, context):
     """Send a message when the command /start2 is issued."""
+    user = update.message.from_user
+    logger.info("User %s started the conversation.", user.first_name)
+    
     keyboard = [
         [
             InlineKeyboardButton("SALUTI", callback_data=str(SALUTI)),
@@ -137,12 +140,12 @@ def saluti(update, context):
     numSalutiConte = len(content['greetings'])
     randomIndex = randrange(numSalutiConte)
     user = update.message.from_user
-    logger.info('User {} started the conversation.'.format(user.first_name))
+    logger.info('User {} chose saluti.'.format(user.first_name))
     query.edit_message_text(
         text=content['greetings'][randomIndex].format(greetings(user.first_name))
     )
-    update.message.reply_text(content['greetings'][randomIndex].format(greetings(user.first_name)))
-    return 1
+    #update.message.reply_text(content['greetings'][randomIndex].format(greetings(user.first_name)))
+    return ConversationHandler.END
 
 def end(update, context):
     """Returns `ConversationHandler.END`, which tells the
