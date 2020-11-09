@@ -24,7 +24,7 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 from random import randrange
-from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
 
 os.environ['TZ'] = 'Europe/Rome'
@@ -97,8 +97,9 @@ def new_start(update, context):
             InlineKeyboardButton("COMUNE", callback_data=str(10))
         ]
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Seleziona comando', reply_markup=reply_markup)
+    #reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('Seleziona comando', 
+        reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True))
     return 0
 
 
@@ -135,14 +136,15 @@ def saluti_command(update, context):
 
 def saluti(update, context):
     """Send a message when the command /saluti is issued."""
-    query = update.callback_query
-    query.answer()
+    #query = update.callback_query
+    #query.answer()
     numSalutiConte = len(content['greetings'])
     randomIndex = randrange(numSalutiConte)
     user = update.message.from_user
     logger.info('User {} chose saluti.'.format(user.first_name))
-    query.edit_message_text(
-        text=content['greetings'][randomIndex].format(greetings(user.first_name))
+    update.message.reply_text(
+        text=content['greetings'][randomIndex].format(greetings(user.first_name)),
+        reply_markup=ReplyKeyboardRemove()
     )
     #update.message.reply_text(content['greetings'][randomIndex].format(greetings(user.first_name)))
     return ConversationHandler.END
