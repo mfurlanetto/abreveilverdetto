@@ -95,7 +95,8 @@ def new_start(update, context):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
+    update.message.reply_text('Seleziona comando', reply_markup=reply_markup)
+    return 0
 
 
 def start_command(update, context):
