@@ -75,26 +75,6 @@
             "Queste polizie di Pasqua fatte a primavera poi reggano o non reggano?"
         ]
     },
-    "keywords": {
-        "verdetto": [
-            "furla",
-            "zoggia",
-            "daniele",
-            "verdetto",
-            "conte",
-            "governo",
-            "casalino",
-            "rocco"
-        ],
-        "autocert": [
-            "decreto",
-            "dpcm",
-            "autocertificazione",
-            "cazzo",
-            "tiro",
-            "coprifuoco"
-        ]
-    },
     "CTS": [
         "Cristiano Malgoglio",
         "Angela",
@@ -273,8 +253,8 @@
     ],
     "MESSAGES": {
         "WEATHER_URL_NOT_FOUND": "Nessuna info meteo disponibile\n"
-    }
-    , "ItalianRegions": [
+    }, 
+    "ItalianRegions": [
         {"name": "Lombardia", "covid_serverity_color": "red"}
         , {"name": "Lazio", "covid_serverity_color": "yellow"}
         , {"name": "Campania", "covid_serverity_color": "yellow"}

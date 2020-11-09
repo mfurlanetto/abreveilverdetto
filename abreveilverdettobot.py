@@ -57,46 +57,11 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 
-dictionary = utils.emoji.dict
-
-numFrasiConte = len(content['sentences']['conte'])
-numSalutiConte = len(content['greetings'])
-ctsMaxLen = 5
-ctsSize = len(content['CTS'])
-ctsList = content['CTS']
-dpcmSize = len(content['DPCM'])
-dpcmList = content['DPCM']
-giuratoList = content['sentences']['giurato']
-giuratoSize = len(giuratoList)
-
 
 HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
 THE_SENTENCE = 'a breve il verdetto'
 
-FIVE = 5
-TEN = 10
-
-
-# Openweathermap Weather codes and corressponding emojis
-thunderstorm = u'\U0001F4A8'    # Code: 200's, 900, 901, 902, 905
-drizzle = u'\U0001F4A7'         # Code: 300's
-rain = u'\U00002614'            # Code: 500's
-snowflake = u'\U00002744'       # Code: 600's snowflake
-snowman = u'\U000026C4'         # Code: 600's snowman, 903, 906
-atmosphere = u'\U0001F301'      # Code: 700's foogy
-clearSky = u'\U00002600'        # Code: 800 clear sky
-fewClouds = u'\U000026C5'       # Code: 801 sun behind clouds
-clouds = u'\U00002601'          # Code: 802-803-804 clouds general
-hot = u'\U0001F525'             # Code: 904
-defaultEmoji = u'\U0001F300'    # default emojis
-
-reqComuni = Request(config['url']['comuni'])
-COMUNI = json.loads(urlopen(reqComuni).read().decode())
-TOT_COMUNI = len(COMUNI)
-
-reqCovid = Request(config['url']['covid'])
-COVID = json.loads(urlopen(reqCovid).read().decode())
 
 medical = u'\U00002695'
 maskFace = u'\U0001F637'
@@ -124,6 +89,7 @@ START OF COMMANDS SECTION
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
     """Send a message when the command /start is issued."""
+    numSalutiConte = len(content['greetings'])
     randomIndex = randrange(numSalutiConte)
     user = update.message.from_user
     logger.info('User {} started the conversation.'.format(user.first_name))
@@ -136,13 +102,15 @@ def torta_command(update, context):
 
 def conte_command(update, context):
     randomIndexImage = randrange(12)
+    numFrasiConte = len(content['sentences']['conte'])
     randomIndexCaption = randrange(numFrasiConte)
     update.message.bot.send_photo(chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/conte/{}.jpg".format(randomIndexImage)), 'rb'),
         caption=content['sentences']['conte'][randomIndexCaption])
 
 def bimbe_command(update, context):
-    loveEmojis = list(dictionary.get("love").values())
+    love_dict = utils.emoji.love
+    loveEmojis = list(love_dict.values())
     sizeLove = len(loveEmojis)
     randomIndexImage = randrange(20)
     update.message.bot.send_photo(chat_id=update.effective_chat.id, 
@@ -154,8 +122,8 @@ def cts_command(update, context):
     """Send a message when the command /cts is issued."""
     keyboard = [
         [
-            InlineKeyboardButton("5", callback_data=str(FIVE)),
-            InlineKeyboardButton("10", callback_data=str(TEN)),
+            InlineKeyboardButton("5", callback_data=str(5)),
+            InlineKeyboardButton("10", callback_data=str(10)),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -163,18 +131,23 @@ def cts_command(update, context):
 
 def dpcm_command(update, context):
     """Send a message when the command /dpcm is issued."""
+    dpcmList = content['DPCM']
+    dpcmSize = len(dpcmList)
     randIndex = randrange(dpcmSize)
     message = dpcmList[randIndex]
     update.message.reply_text('\"{}\"'.format(message))
 
 def giurato_command(update, context):
-    """Send a message when the command /giurato is issued."""
-    logger.info(update)
+    """Send a message when the command /giurato is issued."""    
+    giuratoList = content['sentences']['giurato']
+    giuratoSize = len(giuratoList)
     randIndex = randrange(giuratoSize)
     message = giuratoList[randIndex]
     update.message.reply_text('\"{}\"'.format(message))
 
 def covid_command(update, context):
+    reqCovid = Request(config['url']['covid'])
+    COVID = json.loads(urlopen(reqCovid).read().decode())
     lastIndex = len(COVID) - 1
     latestData = COVID[lastIndex]['data']
     latestUpdate = latestData[0:10]
@@ -212,9 +185,12 @@ def covid_command(update, context):
     update.message.bot.send_message(chat_id=update.effective_chat.id, text=message, 
                 parse_mode=ParseMode.HTML)
 
-def comune_command(update, context):    
-    randIndex = randrange(TOT_COMUNI)
-    comune = COMUNI[randIndex]
+def comune_command(update, context):
+    zone_dict = utils.emoji.zone_color
+    reqComuni = Request(config['url']['comuni'])
+    comuni = json.loads(urlopen(reqComuni).read().decode())
+    randIndex = randrange(len(comuni))
+    comune = comuni[randIndex]
     urlWeather = config['url']['meteo'].format(comune['cap'][0], config['openweathermap_token'])
     reqMeteo = Request(urlWeather)
     meteoStr = ''
@@ -236,7 +212,7 @@ def comune_command(update, context):
     message = '<b>{}</b>\n'.format(comune['nome'])
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
     if covid_serverity_color is not None:
-        message += 'Zone: {}\n'.format(covid_serverity_color)
+        message += 'Zone: ' + zone_dict.get(covid_serverity_color) + '\n'
     message += '{} abitanti\n'.format(comune['popolazione'])
     message += meteoStr
     message += 'I bar chiudono alle ore 18:00'
@@ -287,7 +263,7 @@ def help_command(update, context):
 START OF UTILITY SECTION
 """
 
-def generateIndexList(qty):
+def generateIndexList(qty, ctsSize):
     i = 0
     list = []
     while i < int(qty):
@@ -298,8 +274,10 @@ def generateIndexList(qty):
     return list
 
 def buildCtsMessage(qty):
+    ctsList = content['CTS']
+    ctsSize = len(ctsList)
     message = '<b>Comitato Tecnico-Scientifico</b>\n'
-    indexlist = generateIndexList(qty)
+    indexlist = generateIndexList(qty, ctsSize)
     for index in indexlist:
         message += '∘ {}\n'.format(ctsList[index])
     return message
@@ -330,11 +308,7 @@ def greetings(name):
 def handle_message(update, context):
     message = update.message.text.replace('?', '')
     splitText = message.lower().split()
-    if any(x in content['keywords']['verdetto'] for x in splitText):
-        echo_sentence(update, context, THE_SENTENCE)
-    elif any(x in content['keywords']['autocert'] for x in splitText):
-        update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/others/doraemon.jpg"), 'rb'))
-    elif all(x in splitText for x in ['15', '18']):
+    if all(x in splitText for x in ['15', '18']):
         update.message.bot.send_photo(chat_id=update.effective_chat.id, 
             photo=open(buildPath("media/others/15e18.png"), 'rb'),
             caption=BRISCOLA)
@@ -353,30 +327,30 @@ def echo_sentence(update, context, sentence=THE_SENTENCE):
     Return related emojis according to weather
 """
 def getEmoji(weatherID):
+    weather_dict = utils.emoji.weather
     if weatherID:
         if str(weatherID)[0] == '2' or weatherID == 900 or weatherID==901 or weatherID==902 or weatherID==905:
-            return thunderstorm
+            return weather_dict.get("thunderstorm")
         elif str(weatherID)[0] == '3':
-            return drizzle
+            return  weather_dict.get("drizzle")
         elif str(weatherID)[0] == '5':
-            return rain
+            return  weather_dict.get("rain")
         elif str(weatherID)[0] == '6' or weatherID==903 or weatherID== 906:
-            return snowflake + ' ' + snowman
+            return weather_dict("snowflake") + ' ' + weather_dict("snowman")
         elif str(weatherID)[0] == '7':
-            return atmosphere
+            return  weather_dict.get("atmosphere")
         elif weatherID == 800:
-            return clearSky
+            return  weather_dict.get("clearSky")
         elif weatherID == 801:
-            return fewClouds
+            return  weather_dict.get("fewClouds")
         elif weatherID==802 or weatherID==803 or weatherID==803:
-            return clouds
+            return  weather_dict.get("clouds")
         elif weatherID == 904:
-            return hot
+            return  weather_dict.get("hot")
         else:
-            return defaultEmoji    # Default emoji
-
+            return weather_dict.get("defaultEmoji")    # Default emoji 
     else:
-        return defaultEmoji   # Default emoji
+        return weather_dict.get("defaultEmoji")   # Default emoji
 
 
 def error(update, context):
