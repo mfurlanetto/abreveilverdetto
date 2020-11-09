@@ -24,7 +24,7 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 from random import randrange
-from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
 
 os.environ['TZ'] = 'Europe/Rome'
@@ -97,9 +97,8 @@ def new_start(update, context):
             InlineKeyboardButton("COMUNE", callback_data=str(10))
         ]
     ]
-    #reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Seleziona comando', 
-        reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True))
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('Seleziona comando', reply_markup=reply_markup)
     return 0
 
 
@@ -136,18 +135,17 @@ def saluti_command(update, context):
 
 def saluti(update, context):
     """Send a message when the command /saluti is issued."""
-    #query = update.callback_query
-    #query.answer()
+    query = update.callback_query
+    query.answer()
     numSalutiConte = len(content['greetings'])
     randomIndex = randrange(numSalutiConte)
     user = update.message.from_user
     logger.info('User {} chose saluti.'.format(user.first_name))
-    update.message.reply_text(
-        text=content['greetings'][randomIndex].format(greetings(user.first_name)),
-        reply_markup=ReplyKeyboardRemove()
+    query.edit_message_text(
+        text=content['greetings'][randomIndex].format(greetings(user.first_name))
     )
     #update.message.reply_text(content['greetings'][randomIndex].format(greetings(user.first_name)))
-    return ConversationHandler.END
+    #return ConversationHandler.END
 
 def end(update, context):
     """Returns `ConversationHandler.END`, which tells the
@@ -446,7 +444,7 @@ def main():
     #SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO = range(11)
 
         
-    conv_handler = ConversationHandler(
+    '''conv_handler = ConversationHandler(
         entry_points=[CommandHandler('test', new_start)],
         states={
             0: [
@@ -457,14 +455,15 @@ def main():
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
-    )
+    )'''
 
-    dp.add_handler(conv_handler)
+    #dp.add_handler(conv_handler)
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler('start', start_command))
-    dp.add_handler(CommandHandler('test', start_command))
+    dp.add_handler(CommandHandler('test', new_start))
     dp.add_handler(CommandHandler('saluti', saluti_command))
+    dp.add_handler(CallbackQueryHandler(saluti, pattern='^' + str(SALUTI) + '$'))
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('bimbe', bimbe_command))
     dp.add_handler(CommandHandler('cts', cts_command))
