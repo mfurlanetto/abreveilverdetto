@@ -87,7 +87,33 @@ START OF COMMANDS SECTION
 
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
-def start(update, context):
+
+
+def start_command(update, context):
+    """Send a message when the command /start is issued."""
+    user = update.message.from_user
+    logger.info('User {} started the conversation.'.format(user.first_name))
+    message = '''
+        {}, di seguito la lista dei comandi:
+        \n
+        \\saluti - Saluti da Conte
+        \\cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
+        \\dpcm - Un DPCM a caso
+        \\conte - Foto di Conte con frase
+        \\bimbe - Foto per le Bimbe di Conte
+        \\comune - Un comune a caso
+        \\covid - Dati nazionali sul COVID-19
+        \\giurato - Una frase a caso di Luca Giurato
+        \\tortadimele - Foto torte di mele
+        \\help - Aiuto da Conte
+        \\fibonacci - un prefisso di lunghezza variabile della successione di fibonacci
+        \\centocentocento - numero pseudocasuale multiplo di 5 nell'intervallo [5;100]
+        \\update - Aggiornamenti da Conte
+    '''.format(greetings(user.first_name))
+    update.message.reply_text(message)
+
+
+def saluti_command(update, context):
     """Send a message when the command /start is issued."""
     numSalutiConte = len(content['greetings'])
     randomIndex = randrange(numSalutiConte)
@@ -383,7 +409,8 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler('saluti', start))
+    dp.add_handler(CommandHandler('start', start_command))
+    dp.add_handler(CommandHandler('saluti', saluti_command))
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('bimbe', bimbe_command))
     dp.add_handler(CommandHandler('cts', cts_command))

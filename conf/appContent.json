@@ -253,27 +253,87 @@
     ],
     "MESSAGES": {
         "WEATHER_URL_NOT_FOUND": "Nessuna info meteo disponibile\n"
-    }, 
+    },
     "ItalianRegions": [
-        {"name": "Lombardia", "covid_serverity_color": "red"}
-        , {"name": "Lazio", "covid_serverity_color": "yellow"}
-        , {"name": "Campania", "covid_serverity_color": "yellow"}
-        , {"name": "Sicilia", "covid_serverity_color": "orange"}
-        , {"name": "Veneto", "covid_serverity_color": "yellow"}
-        , {"name": "Emilia-Romagna", "covid_serverity_color": "yellow"}
-        , {"name": "Piemonte", "covid_serverity_color": "red"}
-        , {"name": "Puglia", "covid_serverity_color": "orange"}
-        , {"name": "Toscana", "covid_serverity_color": "yellow"}
-        , {"name": "Calabria", "covid_serverity_color": "red"}
-        , {"name": "Sardegna", "covid_serverity_color": "yellow"}
-        , {"name": "Liguria", "covid_serverity_color": "yellow"}
-        , {"name": "Marche", "covid_serverity_color": "yellow"}
-        , {"name": "Abruzzo", "covid_serverity_color": "yellow"}
-        , {"name": "Friuli-Venezia Giulia", "covid_serverity_color": "yellow"}
-        , {"name": "Trentino-Alto Adige/Südtirol", "covid_serverity_color": "yellow"}
-        , {"name": "Umbria", "covid_serverity_color": "yellow"}
-        , {"name": "Basilicata", "covid_serverity_color": "yellow"}
-        , {"name": "Molise", "covid_serverity_color": "yellow"}
-        , {"name": "Valle d'Aosta/Vallée d'Aoste", "covid_serverity_color": "red"}
+        {
+            "name": "Lombardia",
+            "covid_serverity_color": "red"
+        },
+        {
+            "name": "Lazio",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Campania",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Sicilia",
+            "covid_serverity_color": "orange"
+        },
+        {
+            "name": "Veneto",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Emilia-Romagna",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Piemonte",
+            "covid_serverity_color": "red"
+        },
+        {
+            "name": "Puglia",
+            "covid_serverity_color": "orange"
+        },
+        {
+            "name": "Toscana",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Calabria",
+            "covid_serverity_color": "red"
+        },
+        {
+            "name": "Sardegna",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Liguria",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Marche",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Abruzzo",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Friuli-Venezia Giulia",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Trentino-Alto Adige/Südtirol",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Umbria",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Basilicata",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Molise",
+            "covid_serverity_color": "yellow"
+        },
+        {
+            "name": "Valle d'Aosta/Vallée d'Aoste",
+            "covid_serverity_color": "red"
+        }
     ]
 }
