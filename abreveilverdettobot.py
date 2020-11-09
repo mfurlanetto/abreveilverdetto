@@ -30,7 +30,7 @@ centocentocento - numero pseudocasuale multiplo di 5 nell'intervallo [5;100]
 update - Aggiornamenti da Conte
 """
 
-import logging, json, yaml, os, time
+import logging, json, os, time
 
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
