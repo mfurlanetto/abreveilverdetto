@@ -96,19 +96,19 @@ def start_command(update, context):
     message = '''
         {}, di seguito la lista dei comandi:
         \n
-        \\saluti - Saluti da Conte
-        \\cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
-        \\dpcm - Un DPCM a caso
-        \\conte - Foto di Conte con frase
-        \\bimbe - Foto per le Bimbe di Conte
-        \\comune - Un comune a caso
-        \\covid - Dati nazionali sul COVID-19
-        \\giurato - Una frase a caso di Luca Giurato
-        \\tortadimele - Foto torte di mele
-        \\help - Aiuto da Conte
-        \\fibonacci - un prefisso di lunghezza variabile della successione di fibonacci
-        \\centocentocento - numero pseudocasuale multiplo di 5 nell'intervallo [5;100]
-        \\update - Aggiornamenti da Conte
+        /saluti - Saluti da Conte
+        /cts - Estrazione casuale di membri del Comitato Tecnico Scientifico
+        /dpcm - Un DPCM a caso
+        /conte - Foto di Conte con frase
+        /bimbe - Foto per le Bimbe di Conte
+        /comune - Un comune a caso
+        /covid - Dati nazionali sul COVID-19
+        /giurato - Una frase a caso di Luca Giurato
+        /tortadimele - Foto torte di mele
+        /help - Aiuto da Conte
+        /fibonacci - un prefisso di lunghezza variabile della successione di fibonacci
+        /centocentocento - numero pseudocasuale multiplo di 5 nell'intervallo [5;100]
+        /update - Aggiornamenti da Conte
     '''.format(greetings(user.first_name))
     update.message.reply_text(message)
 
@@ -323,9 +323,9 @@ def isAfternoon(hour):
 def greetings(name):
     greetings = ''
     actualHour = time.strftime('%H')
-    if isMorning(actualHour):
+    if isMorning(int(actualHour)):
         greetings = 'Buongiorno'
-    elif isAfternoon(actualHour):
+    elif isAfternoon(int(actualHour)):
         greetings = 'Buon pomeriggio'
     else:
         greetings = 'Buonasera'
