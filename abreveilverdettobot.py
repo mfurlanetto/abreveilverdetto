@@ -30,11 +30,7 @@ centocentocento - numero pseudocasuale multiplo di 5 nell'intervallo [5;100]
 update - Aggiornamenti da Conte
 """
 
-import logging
-import json
-import os
-import datetime
-import pytz
+import logging, json, yaml, os, time
 
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -42,6 +38,9 @@ from urllib.error import URLError, HTTPError
 from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
+
+os.environ['TZ'] = 'Europe/Rome'
+time.tzset()
 
 # Enable logging
 logging.basicConfig(
@@ -57,7 +56,6 @@ def buildPath(relativePath):
 
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
-timezone = pytz.timezone('Europe/Rome')
 
 
 numFrasiConte = len(content['sentences']['conte'])
@@ -352,7 +350,7 @@ def isAfternoon(hour):
 
 def greetings(name):
     greetings = ''
-    actualHour = datetime.datetime.now(timezone).hour
+    actualHour = time.strftime('%H')
     if isMorning(actualHour):
         greetings = 'Buongiorno'
     elif isAfternoon(actualHour):
