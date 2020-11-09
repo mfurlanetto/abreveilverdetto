@@ -99,6 +99,7 @@ def new_start(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('Seleziona comando', reply_markup=reply_markup)
+    return 0
 
 
 def start_command(update, context):
@@ -144,7 +145,7 @@ def saluti(update, context):
         text=content['greetings'][randomIndex].format(greetings(user.first_name))
     )
     #update.message.reply_text(content['greetings'][randomIndex].format(greetings(user.first_name)))
-    #return ConversationHandler.END
+    return ConversationHandler.END
 
 def end(update, context):
     """Returns `ConversationHandler.END`, which tells the
@@ -443,26 +444,23 @@ def main():
     #SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO = range(11)
 
         
-    '''conv_handler = ConversationHandler(
+    conv_handler = ConversationHandler(
         entry_points=[CommandHandler('test', new_start)],
         states={
             0: [
                 CallbackQueryHandler(saluti, pattern='^' + str(SALUTI) + '$')
-            ],
-            1: [
-                CallbackQueryHandler(end)
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
-    )'''
+    )
 
-    #dp.add_handler(conv_handler)
+    dp.add_handler(conv_handler)
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler('start', start_command))
     dp.add_handler(CommandHandler('test', new_start))
     dp.add_handler(CommandHandler('saluti', saluti_command))
-    dp.add_handler(CallbackQueryHandler(saluti, pattern='^' + str(SALUTI) + '$'))
+    #dp.add_handler(CallbackQueryHandler(saluti, pattern='^' + str(SALUTI) + '$'))
     dp.add_handler(CommandHandler('conte', conte_command))
     dp.add_handler(CommandHandler('bimbe', bimbe_command))
     dp.add_handler(CommandHandler('cts', cts_command))
