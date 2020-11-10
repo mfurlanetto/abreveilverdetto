@@ -18,7 +18,7 @@ Telegram commands:
 start - Lista dei comandi
 """
 
-import logging, json, os, time, utils.emoji, utils.commandutils, datetime
+import logging, json, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
 
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -105,7 +105,7 @@ def saluti(update, context):
     logger.info('User {} chose saluti.'.format(user.username))
     
     query.edit_message_text(
-        text=content['greetings'][randomIndex].format(utils.commandutils.greetings(time, user.first_name))
+        text=content['greetings'][randomIndex].format(utils.greetings(time, user.first_name))
     )
     return ConversationHandler.END
 
@@ -153,7 +153,7 @@ def conte_command(update, context):
 def bimbe_command(update, context):
     query = update.callback_query
     query.answer()
-    love_dict = utils.emoji.love
+    love_dict = emojis.love
     loveEmojis = list(love_dict.values())
     sizeLove = len(loveEmojis)
     randomIndexImage = randrange(20)
@@ -211,7 +211,7 @@ def giurato_command(update, context):
 def covid_command(update, context):
     query = update.callback_query
     query.answer()
-    covid_dict = utils.emoji.covid
+    covid_dict = emojis.covid
     reqCovid = Request(config['covid']['url'])
     COVID = json.loads(urlopen(reqCovid).read().decode())
     latestDate = datetime.datetime.strptime(COVID[-1]['data'], '%Y-%m-%dT%H:%M:%S')
@@ -225,12 +225,12 @@ def covid_command(update, context):
     percPosTamp = 100 * COVID[-1]['nuovi_positivi'] / varTamponi
     
     message = 'Ultimo aggiornamento: {} alle {}\n'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H:%M"))
-    message += '{}{} {}\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.commandutils.getVariation(nuoviPositivi))
-    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.commandutils.getVariation(varOspedalizzati))
-    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.commandutils.getVariation(varTerapieI))
-    message += '{}{} {} ({})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.commandutils.getVariation(varIsolamento))
-    message += '{}{} {} ({})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], utils.commandutils.getVariation(varDeceduti))
-    message += '{}{} {} ({})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], utils.commandutils.getVariation(varTamponi))
+    message += '{}{} {}\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.getVariation(nuoviPositivi))
+    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.getVariation(varOspedalizzati))
+    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.getVariation(varTerapieI))
+    message += '{}{} {} ({})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.getVariation(varIsolamento))
+    message += '{}{} {} ({})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], utils.getVariation(varDeceduti))
+    message += '{}{} {} ({})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], utils.getVariation(varTamponi))
     message += '{}\{} {:.3}%'.format(covid_dict['biohazard'], covid_dict['testTube'], percPosTamp)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
@@ -245,7 +245,7 @@ def covid_command(update, context):
 def comune_command(update, context):
     query = update.callback_query
     query.answer()
-    zone_dict = utils.emoji.zone_color
+    zone_dict = emojis.zone_color
     request_comuni = Request(config['comuni']['url'])
     comuni = json.loads(urlopen(request_comuni).read().decode())
     index_comune = randrange(len(comuni))
@@ -266,7 +266,7 @@ def comune_command(update, context):
         logger.error('Reason: ', e.reason)
         meteo_message = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
         
-    covid_severity_color = utils.commandutils.getSeverityColor(comune, content['ItalianRegions'])
+    covid_severity_color = utils.getSeverityColor(comune, content['ItalianRegions'])
 
     message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
@@ -383,7 +383,7 @@ def echo_sentence(update, context, sentence=THE_SENTENCE):
     Return related emojis according to weather
 """
 def getEmoji(weatherID):
-    weather_dict = utils.emoji.weather
+    weather_dict = emojis.weather
     if weatherID:
         if str(weatherID)[0] == '2' or weatherID == 900 or weatherID==901 or weatherID==902 or weatherID==905:
             return weather_dict.get("thunderstorm")

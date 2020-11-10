@@ -27,10 +27,7 @@ def getSeverityColor(comune, regioni):
     if regione_lista is not None:
         if regione_lista['name'] == 'Trentino-Alto Adige/Südtirol':
             provincia = next((prov for prov in regione_lista['name']['province'] if prov['name'] == comune['provincia']['nome']), None)
-            if provincia is not None:
-                return provincia['covid_severity_color']
-            else:
-                return None
+            return provincia['covid_severity_color'] if provincia is not None else None
         else:
             return regione_lista['covid_severity_color']
     else:
