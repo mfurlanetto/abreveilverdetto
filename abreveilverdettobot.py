@@ -89,11 +89,11 @@ def start_command(update, context):
         ],
         [
             InlineKeyboardButton(u'\U0001F522' + " fibonacci", callback_data=str(FIBONACCI)),
-            InlineKeyboardButton(u'\U0001F4AF' + " centocentocento", callback_data=str(CENTOCENTOCENTO))
+            InlineKeyboardButton('{0} {0} {0}'.format(u'\U0001F4AF'), callback_data=str(CENTOCENTOCENTO))
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('{} seleziona comando:'.format(utils.commandutils.greetings(time, user.first_name)), reply_markup=reply_markup)
+    update.message.bot.send_message('Seleziona comando:', reply_markup=reply_markup)
     return 0
 
 
