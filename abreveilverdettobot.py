@@ -268,10 +268,8 @@ def comune_command(update, context):
         
     covid_severity_color = utils.commandutils.getSeverityColor(comune, content['ItalianRegions'])
 
-    message = '<b>{}</b>\n'.format(comune['nome'])
+    message = '<b>{}</b> {}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
-    if covid_severity_color is not None:
-        message += 'Zone: {}\n'.format(zone_dict.get(covid_severity_color))
     message += '{} abitanti\n'.format(comune['popolazione'])
     message += meteo_message
     
