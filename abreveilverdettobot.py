@@ -270,7 +270,7 @@ def comune_command(update, context):
 
     message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
-    message += '<i>{:,.2f}</i> abitanti\n'.format(comune['popolazione'])
+    message += '<i>{:,.2f}</i> abitanti\n'.format(int(comune['popolazione']))
     message += meteo_message
     
     query.edit_message_text(
