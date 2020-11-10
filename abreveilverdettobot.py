@@ -18,7 +18,7 @@ Telegram commands:
 start - Lista dei comandi
 """
 
-import logging, json, os, time, utils.emoji, utils.commandutils
+import logging, json, os, time, utils.emoji, utils.commandutils, datetime
 
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -53,20 +53,6 @@ HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
 THE_SENTENCE = 'a breve il verdetto'
 
-
-medical = u'\U00002695'
-maskFace = u'\U0001F637'
-thermoFace = u'\U0001F912'
-headstone = u'\U0001FAA6'
-hospital = u'\U0001F3E5'
-latinCross = u'\U0000271D'
-biohazard = u'\U00002623'
-house = u'\U0001F3E0'
-bed = u'\U0001F6CF'
-pill = u'\U0001F48A'
-angel = u'\U0001F47C'
-testTube = u'\U0001F9EA'
-nose = u'\U0001F443'
 
 logger = logging.getLogger(__name__)
 
@@ -212,18 +198,17 @@ def giurato_command(update, context):
 def covid_command(update, context):
     query = update.callback_query
     query.answer()
+    covid_dict = utils.emoji.covid
     reqCovid = Request(config['covid']['url'])
     COVID = json.loads(urlopen(reqCovid).read().decode())
-    lastIndex = len(COVID) - 1
-    latestData = COVID[lastIndex]['data']
-    latestUpdate = latestData[0:10]
-    nuoviPositivi = COVID[lastIndex]['nuovi_positivi']
-    varOspedalizzati = COVID[lastIndex]['totale_ospedalizzati'] - COVID[lastIndex - 1]['totale_ospedalizzati']
-    varTerapieI = COVID[lastIndex]['terapia_intensiva'] - COVID[lastIndex - 1]['terapia_intensiva']
-    varIsolamento = COVID[lastIndex]['isolamento_domiciliare'] - COVID[lastIndex - 1]['isolamento_domiciliare']
-    varDeceduti = COVID[lastIndex]['deceduti'] - COVID[lastIndex - 1]['deceduti']
-    varTamponi = COVID[lastIndex]['tamponi'] - COVID[lastIndex - 1]['tamponi']
-    percPosTamp = 100*COVID[lastIndex]['nuovi_positivi']/varTamponi
+    latestDate = datetime.datetime.strptime(COVID[-1]['data'], '%Y-%m-%dT%H:%M:%S')
+    nuoviPositivi = COVID[-1]['nuovi_positivi']
+    varOspedalizzati = COVID[-1]['totale_ospedalizzati'] - COVID[-2]['totale_ospedalizzati']
+    varTerapieI = COVID[-1]['terapia_intensiva'] - COVID[-2]['terapia_intensiva']
+    varIsolamento = COVID[-1]['isolamento_domiciliare'] - COVID[-2]['isolamento_domiciliare']
+    varDeceduti = COVID[-1]['deceduti'] - COVID[-2]['deceduti']
+    varTamponi = COVID[-1]['tamponi'] - COVID[-2]['tamponi']
+    percPosTamp = 100*COVID[-1]['nuovi_positivi']/varTamponi
     signNuoviPositivi = ''
     if nuoviPositivi>0 : signNuoviPositivi = '+'
     signVarOspedalizzati = ''
@@ -236,14 +221,14 @@ def covid_command(update, context):
     if varDeceduti>0 : signVarDeceduti = '+'
     signVarTamponi = ''
     if varTamponi>0 : signVarTamponi = '+'
-    message = 'Ultimo aggiornamento: {}\n'.format(latestUpdate)
-    message += '{}{} {}{}\n'.format(biohazard,thermoFace,signNuoviPositivi,nuoviPositivi)
-    message += '{}{} {} ({}{})\n'.format(hospital,maskFace,COVID[lastIndex]['totale_ospedalizzati'],signVarOspedalizzati,varOspedalizzati)
-    message += '{}{} {} ({}{})\n'.format(hospital,bed,COVID[lastIndex]['terapia_intensiva'],signVarTerapieI,varTerapieI)
-    message += '{}{} {} ({}{})\n'.format(house,thermoFace,COVID[lastIndex]['isolamento_domiciliare'],signVarIsolamento,varIsolamento)
-    message += '{}{} {} ({}{})\n'.format(latinCross,angel,COVID[lastIndex]['deceduti'], signVarDeceduti,varDeceduti)
-    message += '{}{} {} ({}{})\n'.format(nose,testTube,COVID[lastIndex]['tamponi'], signVarTamponi,varTamponi)
-    message += '{}\{} {:.3}%'.format(biohazard,testTube,percPosTamp)
+    message = 'Ultimo aggiornamento: {} alle {}\n'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H/%M"))
+    message += '{}{} {}{}\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], signNuoviPositivi,nuoviPositivi)
+    message += '{}{} {} ({}{})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], signVarOspedalizzati, varOspedalizzati)
+    message += '{}{} {} ({}{})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], signVarTerapieI, varTerapieI)
+    message += '{}{} {} ({}{})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], signVarIsolamento, varIsolamento)
+    message += '{}{} {} ({}{})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], signVarDeceduti, varDeceduti)
+    message += '{}{} {} ({}{})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], signVarTamponi, varTamponi)
+    message += '{}\{} {:.3}%'.format(covid_dict['biohazard'], covid_dict['testTube'], percPosTamp)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
