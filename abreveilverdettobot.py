@@ -93,7 +93,7 @@ def start_command(update, context):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.bot.send_message('Seleziona comando:', reply_markup=reply_markup)
+    update.message.reply_text('Seleziona comando:', reply_markup=reply_markup)
     return 0
 
 
