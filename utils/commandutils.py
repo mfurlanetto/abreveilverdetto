@@ -14,3 +14,9 @@ def greetings(time, name):
     else:
         greetings = 'Buonasera'
     return '{} {}'.format(greetings, name)
+
+def getSign(value):
+    return '+' if value > 0 else ''
+
+def getVariation(variation):
+    return '{}{}'.format(getSign(variation), variation)

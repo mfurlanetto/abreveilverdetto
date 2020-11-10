@@ -37,10 +37,8 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-script_dir = os.path.dirname(__file__)
-
 def buildPath(relativePath):
-    return os.path.join(script_dir, relativePath)
+    return os.path.join(os.path.dirname(__file__), relativePath)
 
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
@@ -105,6 +103,7 @@ def saluti(update, context):
     randomIndex = randrange(numSalutiConte)
     user = update.effective_user
     logger.info('User {} chose saluti.'.format(user.username))
+    
     query.edit_message_text(
         text=content['greetings'][randomIndex].format(utils.commandutils.greetings(time, user.first_name))
     )
@@ -122,9 +121,15 @@ def torta_command(update, context):
     query = update.callback_query
     query.answer()
     randomIndex = randrange(5)
-    query.bot.delete_message(chat_id=update.effective_chat.id,
-               message_id=update.effective_message.message_id)
-    query.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb'))
+    
+    query.bot.delete_message(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id
+    )
+    query.bot.send_photo(
+        chat_id=update.effective_chat.id, 
+        photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb')
+    )
     return ConversationHandler.END
 
 def conte_command(update, context):
@@ -133,11 +138,16 @@ def conte_command(update, context):
     randomIndexImage = randrange(12)
     numFrasiConte = len(content['sentences']['conte'])
     randomIndexCaption = randrange(numFrasiConte)
-    query.bot.delete_message(chat_id=update.effective_chat.id,
-               message_id=update.effective_message.message_id)
-    query.bot.send_photo(chat_id=update.effective_chat.id, 
+    
+    query.bot.delete_message(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id
+    )
+    query.bot.send_photo(
+        chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/conte/{}.jpg".format(randomIndexImage)), 'rb'),
-        caption=content['sentences']['conte'][randomIndexCaption])
+        caption=content['sentences']['conte'][randomIndexCaption]
+    )
     return ConversationHandler.END
 
 def bimbe_command(update, context):
@@ -147,11 +157,16 @@ def bimbe_command(update, context):
     loveEmojis = list(love_dict.values())
     sizeLove = len(loveEmojis)
     randomIndexImage = randrange(20)
-    query.bot.delete_message(chat_id=update.effective_chat.id,
-               message_id=update.effective_message.message_id)
-    query.bot.send_photo(chat_id=update.effective_chat.id, 
+    
+    query.bot.delete_message(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id
+    )
+    query.bot.send_photo(
+        chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/bimbe/{}.jpg".format(randomIndexImage)), 'rb'),
-        caption=loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)])
+        caption=loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)]
+    )
     return ConversationHandler.END
 
 
@@ -174,11 +189,10 @@ def dpcm_command(update, context):
     query = update.callback_query
     query.answer()
     dpcmList = content['DPCM']
-    dpcmSize = len(dpcmList)
-    randIndex = randrange(dpcmSize)
-    message = dpcmList[randIndex]
+    randIndex = randrange(len(dpcmList))
+    
     query.edit_message_text(
-        text='\"{}\"'.format(message)
+        text='\"{}\"'.format(dpcmList[randIndex])
     )
     return ConversationHandler.END
 
@@ -187,11 +201,10 @@ def giurato_command(update, context):
     query = update.callback_query
     query.answer()
     giuratoList = content['sentences']['giurato']
-    giuratoSize = len(giuratoList)
-    randIndex = randrange(giuratoSize)
-    message = giuratoList[randIndex]
+    randIndex = randrange(len(giuratoList))
+    
     query.edit_message_text(
-        text='\"{}\"'.format(message)
+        text='\"{}\"'.format(giuratoList[randIndex])
     )
     return ConversationHandler.END
 
@@ -202,39 +215,30 @@ def covid_command(update, context):
     reqCovid = Request(config['covid']['url'])
     COVID = json.loads(urlopen(reqCovid).read().decode())
     latestDate = datetime.datetime.strptime(COVID[-1]['data'], '%Y-%m-%dT%H:%M:%S')
+    
     nuoviPositivi = COVID[-1]['nuovi_positivi']
     varOspedalizzati = COVID[-1]['totale_ospedalizzati'] - COVID[-2]['totale_ospedalizzati']
     varTerapieI = COVID[-1]['terapia_intensiva'] - COVID[-2]['terapia_intensiva']
     varIsolamento = COVID[-1]['isolamento_domiciliare'] - COVID[-2]['isolamento_domiciliare']
     varDeceduti = COVID[-1]['deceduti'] - COVID[-2]['deceduti']
     varTamponi = COVID[-1]['tamponi'] - COVID[-2]['tamponi']
-    percPosTamp = 100*COVID[-1]['nuovi_positivi']/varTamponi
-    signNuoviPositivi = ''
-    if nuoviPositivi>0 : signNuoviPositivi = '+'
-    signVarOspedalizzati = ''
-    if varOspedalizzati>0 : signVarOspedalizzati = '+'
-    signVarTerapieI = ''
-    if varTerapieI>0 : signVarTerapieI = '+'
-    signVarIsolamento = ''
-    if varIsolamento>0 : signVarIsolamento = '+'
-    signVarDeceduti = ''
-    if varDeceduti>0 : signVarDeceduti = '+'
-    signVarTamponi = ''
-    if varTamponi>0 : signVarTamponi = '+'
+    percPosTamp = 100 * COVID[-1]['nuovi_positivi'] / varTamponi
+    
     message = 'Ultimo aggiornamento: {} alle {}\n'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H:%M"))
-    message += '{}{} {}{}\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], signNuoviPositivi,nuoviPositivi)
-    message += '{}{} {} ({}{})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], signVarOspedalizzati, varOspedalizzati)
-    message += '{}{} {} ({}{})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], signVarTerapieI, varTerapieI)
-    message += '{}{} {} ({}{})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], signVarIsolamento, varIsolamento)
-    message += '{}{} {} ({}{})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], signVarDeceduti, varDeceduti)
-    message += '{}{} {} ({}{})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], signVarTamponi, varTamponi)
+    message += '{}{} {}\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.commandutils.getVariation(nuoviPositivi))
+    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.commandutils.getVariation(varOspedalizzati))
+    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.commandutils.getVariation(varTerapieI))
+    message += '{}{} {} ({})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.commandutils.getVariation(varIsolamento))
+    message += '{}{} {} ({})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], utils.commandutils.getVariation(varDeceduti))
+    message += '{}{} {} ({})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], utils.commandutils.getVariation(varTamponi))
     message += '{}\{} {:.3}%'.format(covid_dict['biohazard'], covid_dict['testTube'], percPosTamp)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
     """
-    query.edit_message_text(text=message, 
-                parse_mode=ParseMode.HTML
+    query.edit_message_text(
+        text=message, 
+        parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
 
@@ -270,8 +274,11 @@ def comune_command(update, context):
         message += 'Zone: ' + zone_dict.get(covid_serverity_color) + '\n'
     message += '{} abitanti\n'.format(comune['popolazione'])
     message += meteoStr
-    message += 'I bar chiudono alle ore 18:00'
-    query.edit_message_text(text=message, parse_mode=ParseMode.HTML)
+    
+    query.edit_message_text(
+        text=message, 
+        parse_mode=ParseMode.HTML
+    )
     return ConversationHandler.END
 
 def fibonacci_command(update, context):
@@ -302,7 +309,11 @@ def fibonacci_command(update, context):
         for _ in range(numberOfIterations):
             sequence.append(sequence[-1] + sequence[-2])
     response.append(', '.join(map(str, sequence)))
-    query.edit_message_text(text="\n".join(response), parse_mode=ParseMode.HTML)
+    
+    query.edit_message_text(
+        text="\n".join(response), 
+        parse_mode=ParseMode.HTML
+    )
     return ConversationHandler.END
 
 
