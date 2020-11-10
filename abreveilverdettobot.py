@@ -180,6 +180,7 @@ def bimbe_command(update, context):
     loveEmojis = list(love_dict.values())
     sizeLove = len(loveEmojis)
     randomIndexImage = randrange(20)
+    query.edit_message_text(text="")
     query.bot.send_photo(chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/bimbe/{}.jpg".format(randomIndexImage)), 'rb'),
         caption=loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)])
