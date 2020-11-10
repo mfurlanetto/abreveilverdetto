@@ -87,23 +87,23 @@ def new_start(update, context):
     
     keyboard = [
         [
-            InlineKeyboardButton(u'\U0001F44B' + " SALUTI", callback_data=str(SALUTI)),
-            InlineKeyboardButton(u'\U0001f469' + " CTS", callback_data=str(CTS)),
-            InlineKeyboardButton(u'\U0001F4DC' + " DPCM", callback_data=str(DPCM)),
+            InlineKeyboardButton(u'\U0001F44B' + " saluti", callback_data=str(SALUTI)),
+            InlineKeyboardButton(u'\U0001f52c' + " cts", callback_data=str(CTS)),
+            InlineKeyboardButton(u'\U0001F4DC' + " dpcm", callback_data=str(DPCM)),
         ],
         [
-            InlineKeyboardButton(u'\U0001F647' + " CONTE", callback_data=str(CONTE)),
-            InlineKeyboardButton(u'\U0001F638' + " BIMBE", callback_data=str(BIMBE)),
-            InlineKeyboardButton(u'\U0001F3D9' + " COMUNE", callback_data=str(COMUNE))
+            InlineKeyboardButton(u'\U0001F647' + " conte", callback_data=str(CONTE)),
+            InlineKeyboardButton(u'\U0001F63b' + " bimbe", callback_data=str(BIMBE)),
+            InlineKeyboardButton(u'\U0001F3D9' + " comune", callback_data=str(COMUNE))
         ],
         [
-            InlineKeyboardButton(u'\U0001F9EA' + " COVID", callback_data=str(COVID)),
-            InlineKeyboardButton(u'\U0001F926' + " GIURATO", callback_data=str(GIURATO)),
-            InlineKeyboardButton(u'\U0001F967' + " TORTADIMELE", callback_data=str(TORTADIMELE))
+            InlineKeyboardButton(u'\U0001F9EA' + " covid", callback_data=str(COVID)),
+            InlineKeyboardButton(u'\U0001F926' + " giurato", callback_data=str(GIURATO)),
+            InlineKeyboardButton(u'\U0001F967' + " torta", callback_data=str(TORTADIMELE))
         ],
         [
-            InlineKeyboardButton(u'\U0001F522' + " FIBONACCI", callback_data=str(FIBONACCI)),
-            InlineKeyboardButton(u'\U0001F4AF' + " CENTOCENTOCENTO", callback_data=str(CENTOCENTOCENTO))
+            InlineKeyboardButton(u'\U0001F522' + " fibonacci", callback_data=str(FIBONACCI)),
+            InlineKeyboardButton(u'\U0001F4AF' + " centocentocento", callback_data=str(CENTOCENTOCENTO))
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -180,7 +180,8 @@ def bimbe_command(update, context):
     loveEmojis = list(love_dict.values())
     sizeLove = len(loveEmojis)
     randomIndexImage = randrange(20)
-    query.edit_message_text(text="")
+    query.bot.delete_message(chat_id=update.effective_chat.id,
+               message_id=update.effective_message.message_id)
     query.bot.send_photo(chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/bimbe/{}.jpg".format(randomIndexImage)), 'rb'),
         caption=loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)])
