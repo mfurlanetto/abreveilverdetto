@@ -159,7 +159,7 @@ def torta_command(update, context):
     query = update.callback_query
     query.answer()
     randomIndex = randrange(5)
-    update.message.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb'))
+    query.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb'))
     return ConversationHandler.END
 
 def conte_command(update, context):
@@ -168,7 +168,7 @@ def conte_command(update, context):
     randomIndexImage = randrange(12)
     numFrasiConte = len(content['sentences']['conte'])
     randomIndexCaption = randrange(numFrasiConte)
-    update.message.bot.send_photo(chat_id=update.effective_chat.id, 
+    query.bot.send_photo(chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/conte/{}.jpg".format(randomIndexImage)), 'rb'),
         caption=content['sentences']['conte'][randomIndexCaption])
     return ConversationHandler.END
@@ -180,7 +180,7 @@ def bimbe_command(update, context):
     loveEmojis = list(love_dict.values())
     sizeLove = len(loveEmojis)
     randomIndexImage = randrange(20)
-    update.message.bot.send_photo(chat_id=update.effective_chat.id, 
+    query.bot.send_photo(chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/bimbe/{}.jpg".format(randomIndexImage)), 'rb'),
         caption=loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)] + loveEmojis[randrange(sizeLove)])
     return ConversationHandler.END
@@ -198,7 +198,6 @@ def cts_command(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text('Quanti membri desideri?', reply_markup=reply_markup)
-    #update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
     return 1
 
 def dpcm_command(update, context):
@@ -266,8 +265,7 @@ def covid_command(update, context):
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
     """
-    query.edit_message_text(
-        chat_id=update.effective_chat.id, text=message, 
+    query.edit_message_text(text=message, 
                 parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
@@ -305,10 +303,7 @@ def comune_command(update, context):
     message += '{} abitanti\n'.format(comune['popolazione'])
     message += meteoStr
     message += 'I bar chiudono alle ore 18:00'
-    query.edit_message_text(chat_id=update.effective_chat.id, 
-                text=message, 
-                parse_mode=ParseMode.HTML
-    )
+    query.edit_message_text(text=message, parse_mode=ParseMode.HTML)
     return ConversationHandler.END
 
 def fibonacci_command(update, context):
@@ -339,7 +334,7 @@ def fibonacci_command(update, context):
         for _ in range(numberOfIterations):
             sequence.append(sequence[-1] + sequence[-2])
     response.append(', '.join(map(str, sequence)))
-    query.edit_message_text(chat_id=update.effective_chat.id, text="\n".join(response), parse_mode=ParseMode.HTML)
+    query.edit_message_text(text="\n".join(response), parse_mode=ParseMode.HTML)
     return ConversationHandler.END
 
 
@@ -347,9 +342,7 @@ def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
     value = 5 + randrange(0, 100, 5)
-    query.edit_message_text(
-        text='\"{}\"'.format(chat_id=update.effective_chat.id, text="{}".format(value), parse_mode=ParseMode.HTML)
-    )
+    query.edit_message_text(text="{}".format(value), parse_mode=ParseMode.HTML)
     return ConversationHandler.END
 
 
