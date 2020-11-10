@@ -246,34 +246,34 @@ def comune_command(update, context):
     query = update.callback_query
     query.answer()
     zone_dict = utils.emoji.zone_color
-    reqComuni = Request(config['comuni']['url'])
-    comuni = json.loads(urlopen(reqComuni).read().decode())
-    randIndex = randrange(len(comuni))
-    comune = comuni[randIndex]
+    request_comuni = Request(config['comuni']['url'])
+    comuni = json.loads(urlopen(request_comuni).read().decode())
+    index_comune = randrange(len(comuni))
+    comune = comuni[index_comune]
     urlWeather = config['openweathermap']['url'].format(comune['cap'][0], config['openweathermap']['token'])
     reqMeteo = Request(urlWeather)
-    meteoStr = ''
+    meteo_message = ''
 
     try:
         weather = json.loads(urlopen(reqMeteo).read().decode())
-        meteoStr = '{} ({}) ᛫ {} °C\n'.format(getEmoji(weather['weather'][0]['id']), 
+        meteo_message = '{} ({}) ᛫ {} °C\n'.format(getEmoji(weather['weather'][0]['id']), 
             weather['weather'][0]['description'].capitalize(),
             '%.1f' % weather['main']['temp'])
     except HTTPError as e:
         logger.error('Error code: ', e.code)
-        meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
+        meteo_message = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
     except URLError as e:
         logger.error('Reason: ', e.reason)
-        meteoStr = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
-
-    covid_serverity_color = next((region["covid_serverity_color"] for region in content['ItalianRegions'] if region['name'] == comune['regione']['nome']), None)
+        meteo_message = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
+        
+    covid_severity_color = utils.commandutils.getSeverityColor(comune, content['ItalianRegions'])
 
     message = '<b>{}</b>\n'.format(comune['nome'])
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
-    if covid_serverity_color is not None:
-        message += 'Zone: ' + zone_dict.get(covid_serverity_color) + '\n'
+    if covid_severity_color is not None:
+        message += 'Zone: {}\n'.format(zone_dict.get(covid_severity_color))
     message += '{} abitanti\n'.format(comune['popolazione'])
-    message += meteoStr
+    message += meteo_message
     
     query.edit_message_text(
         text=message, 
