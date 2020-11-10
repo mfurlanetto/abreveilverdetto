@@ -256,7 +256,7 @@ def comune_command(update, context):
 
     try:
         weather = json.loads(urlopen(reqMeteo).read().decode())
-        meteo_message = '{} ({}) ᛫ {} °C\n'.format(getEmoji(weather['weather'][0]['id']), 
+        meteo_message = '{} ({}) ᛫ <b>{}</b> °C\n'.format(getEmoji(weather['weather'][0]['id']), 
             weather['weather'][0]['description'].capitalize(),
             '%.1f' % weather['main']['temp'])
     except HTTPError as e:
@@ -270,7 +270,7 @@ def comune_command(update, context):
 
     message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
     message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
-    message += '{} abitanti\n'.format(comune['popolazione'])
+    message += '<i>{:,.2f}</i> abitanti\n'.format(comune['popolazione'])
     message += meteo_message
     
     query.edit_message_text(
