@@ -188,6 +188,8 @@ def bimbe_command(update, context):
 
 def cts_command(update, context):
     """Send a message when the command /cts is issued."""
+    query = update.callback_query
+    query.answer()
     keyboard = [
         [
             InlineKeyboardButton("5", callback_data=str(5)),
@@ -195,7 +197,8 @@ def cts_command(update, context):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
+    query.edit_message_text('Quanti membri desideri?', reply_markup=reply_markup)
+    #update.message.reply_text('Quanti membri desideri?', reply_markup=reply_markup)
     return 1
 
 def dpcm_command(update, context):
