@@ -221,7 +221,7 @@ def covid_command(update, context):
     if varDeceduti>0 : signVarDeceduti = '+'
     signVarTamponi = ''
     if varTamponi>0 : signVarTamponi = '+'
-    message = 'Ultimo aggiornamento: {} alle {}\n'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H/%M"))
+    message = 'Ultimo aggiornamento: {} alle {}\n'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H:%M"))
     message += '{}{} {}{}\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], signNuoviPositivi,nuoviPositivi)
     message += '{}{} {} ({}{})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], signVarOspedalizzati, varOspedalizzati)
     message += '{}{} {} ({}{})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], signVarTerapieI, varTerapieI)
