@@ -192,7 +192,8 @@ def dpcm_command(update, context):
     randIndex = randrange(len(dpcmList))
     
     query.edit_message_text(
-        text='\"{}\"'.format(dpcmList[randIndex])
+        text='<i>\"{}\"</i>'.format(dpcmList[randIndex]), 
+        parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
 
@@ -204,7 +205,8 @@ def giurato_command(update, context):
     randIndex = randrange(len(giuratoList))
     
     query.edit_message_text(
-        text='\"{}\"'.format(giuratoList[randIndex])
+        text='<i>\"{}\"</i>'.format(giuratoList[randIndex]), 
+        parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
 
