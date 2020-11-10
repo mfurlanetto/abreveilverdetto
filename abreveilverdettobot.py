@@ -80,7 +80,7 @@ START OF COMMANDS SECTION
 # context. Error handlers also receive the raised TelegramError object in error.
 
 
-def new_start(update, context):
+def start_command(update, context):
     """Send a message when the command /start is issued."""
     user = update.message.from_user
     logger.info("User %s started the conversation.", user.first_name)
@@ -107,31 +107,8 @@ def new_start(update, context):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Seleziona comando:', reply_markup=reply_markup)
+    update.message.reply_text('{} seleziona comando:'.format(utils.commandutils.greetings(time, user.first_name)), reply_markup=reply_markup)
     return 0
-
-
-def start_command(update, context):
-    """Send a message when the command /start is issued."""
-    user = update.message.from_user
-    logger.info('User {} started the conversation.'.format(user.first_name))
-    message = '<b>{}</b>, di seguito la lista dei comandi:\n'.format(utils.commandutils.greetings(time, user.first_name))
-    message += '/saluti - <i>Saluti da Conte</i>\n'
-    message += '/cts - <i>Membri del Comitato Tecnico Scientifico a caso</i>\n'
-    message += '/dpcm - <i>Un DPCM a caso</i>\n'
-    message += '/conte - <i>Foto di Conte con frase</i>\n'
-    message += '/bimbe - <i>Foto per le Bimbe di Conte</i>\n'
-    message += '/comune - <i>Un comune a caso</i>\n'
-    message += '/covid - <i>Dati nazionali sul COVID-19</i>\n'
-    message += '/giurato - <i>Una frase a caso di Luca Giurato</i>\n'
-    message += '/tortadimele - <i>Foto torte di mele</i>\n'
-    message += '/help - <i>Aiuto da Conte</i>\n'
-    message += '/fibonacci - <i>un prefisso di lunghezza variabile della successione di fibonacci</i>\n'
-    message += '/centocentocento - <i>numero pseudocasuale multiplo di 5 nell\'intervallo [5;100]</i>\n'
-    message += '/update - <i>Aggiornamenti da Conte</i>'
-    update.message.bot.send_message(chat_id=update.effective_chat.id, 
-        text=message, 
-        parse_mode=ParseMode.HTML)
 
 
 def saluti(update, context):
@@ -159,6 +136,8 @@ def torta_command(update, context):
     query = update.callback_query
     query.answer()
     randomIndex = randrange(5)
+    query.bot.delete_message(chat_id=update.effective_chat.id,
+               message_id=update.effective_message.message_id)
     query.bot.send_photo(chat_id=update.effective_chat.id, photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb'))
     return ConversationHandler.END
 
@@ -168,6 +147,8 @@ def conte_command(update, context):
     randomIndexImage = randrange(12)
     numFrasiConte = len(content['sentences']['conte'])
     randomIndexCaption = randrange(numFrasiConte)
+    query.bot.delete_message(chat_id=update.effective_chat.id,
+               message_id=update.effective_message.message_id)
     query.bot.send_photo(chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/conte/{}.jpg".format(randomIndexImage)), 'rb'),
         caption=content['sentences']['conte'][randomIndexCaption])
@@ -465,7 +446,7 @@ def main():
 
         
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', new_start)],
+        entry_points=[CommandHandler('start', start_command)],
         states={
             0: [
                 CallbackQueryHandler(saluti, pattern='^' + str(SALUTI) + '$'),
@@ -488,24 +469,6 @@ def main():
     )
 
     dp.add_handler(conv_handler)
-
-    # on different commands - answer in Telegram
-    '''dp.add_handler(CommandHandler('start', start_command))
-    dp.add_handler(CommandHandler('test', new_start))
-    dp.add_handler(CommandHandler('saluti', saluti_command))
-    dp.add_handler(CommandHandler('conte', conte_command))
-    dp.add_handler(CommandHandler('bimbe', bimbe_command))
-    dp.add_handler(CommandHandler('cts', cts_command))
-    dp.add_handler(CommandHandler('dpcm', dpcm_command))
-    dp.add_handler(CommandHandler('giurato', giurato_command))
-    dp.add_handler(CallbackQueryHandler(ctsCommandHandler))
-    dp.add_handler(CommandHandler('tortadimele', torta_command))
-    dp.add_handler(CommandHandler('comune', comune_command))
-    dp.add_handler(CommandHandler('covid', covid_command))
-    dp.add_handler(CommandHandler('update', echo_sentence))
-    dp.add_handler(CommandHandler('fibonacci', fibonacci_command))
-    dp.add_handler(CommandHandler('centocentocento', centocentocento_command))
-    dp.add_handler(CommandHandler('help', help_command))'''
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
