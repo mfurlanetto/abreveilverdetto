@@ -254,31 +254,35 @@ def comune_command(update, context):
     comune = comuni[index_comune]
     urlWeather = config['openweathermap']['url'].format(comune['cap'][0], config['openweathermap']['token'])
     reqMeteo = Request(urlWeather)
-    meteo_message = ''
+    covid_severity_color = utils.getSeverityColor(comune, content['ItalianRegions'])
 
     try:
         weather = json.loads(urlopen(reqMeteo).read().decode())
-        meteo_message = '{} ({}) ᛫ <b>{}</b> °C\n'.format(getEmoji(weather['weather'][0]['id']), 
-            weather['weather'][0]['description'].capitalize(),
+        message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
+        message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
+        message += '<i>{:,.0f}</i> abitanti\n'.format(int(comune['popolazione']))
+        message += '<b>{1}</b> °C ᛫ {0}'.format(weather['weather'][0]['description'].capitalize(),
             '%.1f' % weather['main']['temp'])
-    except HTTPError as e:
-        logger.error('Error code: ', e.code)
-        meteo_message = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
-    except URLError as e:
-        logger.error('Reason: ', e.reason)
-        meteo_message = content['MESSAGES']['WEATHER_URL_NOT_FOUND']
         
-    covid_severity_color = utils.getSeverityColor(comune, content['ItalianRegions'])
-
-    message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
-    message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
-    message += '<i>{:,.0f}</i> abitanti\n'.format(int(comune['popolazione']))
-    message += meteo_message
+        query.bot.delete_message(
+            chat_id=update.effective_chat.id,
+            message_id=update.effective_message.message_id
+        )
+        query.bot.send_photo(
+            chat_id=update.effective_chat.id, 
+            photo=config['openweathermap']['icon'].format(weather['weather'][0]['icon']),
+            caption=message
+        )        
+    except:
+        message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
+        message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
+        message += '<i>{:,.0f}</i> abitanti\n'.format(int(comune['popolazione']))
     
-    query.edit_message_text(
-        text=message, 
-        parse_mode=ParseMode.HTML
-    )
+        query.edit_message_text(
+            text=message, 
+            parse_mode=ParseMode.HTML
+        )
+        
     return ConversationHandler.END
 
 def fibonacci_command(update, context):
