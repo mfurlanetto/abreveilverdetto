@@ -261,7 +261,7 @@ def comune_command(update, context):
         message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
         message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
         message += '<i>{:,.0f}</i> abitanti\n'.format(int(comune['popolazione']))
-        message += '<b>{1}</b> °C ̶  {0}'.format(weather['weather'][0]['description'].capitalize(),
+        message += '<b>{1}</b> °C - {0}'.format(weather['weather'][0]['description'].capitalize(),
             '%.1f' % weather['main']['temp'])
         
         query.bot.delete_message(
