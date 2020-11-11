@@ -271,7 +271,8 @@ def comune_command(update, context):
         query.bot.send_photo(
             chat_id=update.effective_chat.id, 
             photo=config['openweathermap']['icon'].format(weather['weather'][0]['icon']),
-            caption=message
+            caption=message, 
+            parse_mode=ParseMode.HTML
         )        
     except:
         message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
