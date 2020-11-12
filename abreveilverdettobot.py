@@ -43,9 +43,7 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 
-
 SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO = range(11)
-
 
 HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
@@ -99,6 +97,7 @@ def saluti(update, context):
     """Send a message when the command /saluti is issued."""
     query = update.callback_query
     query.answer()
+    
     numSalutiConte = len(content['greetings'])
     randomIndex = randrange(numSalutiConte)
     user = update.effective_user
@@ -109,18 +108,12 @@ def saluti(update, context):
     )
     return ConversationHandler.END
 
-def end(update, context):
-    """Returns `ConversationHandler.END`, which tells the
-    ConversationHandler that the conversation is over"""
-    query = update.callback_query
-    query.answer()
-    query.edit_message_text(text="See you next time!")
-    return ConversationHandler.END
 
 def torta_command(update, context):
     query = update.callback_query
     query.answer()
-    randomIndex = randrange(5)
+    
+    index = randrange(5)
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -128,14 +121,16 @@ def torta_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=open(buildPath("media/tortamele/{}.jpg".format(randomIndex)), 'rb')
+        photo=open(buildPath("media/tortamele/{}.jpg".format(index)), 'rb')
     )
     return ConversationHandler.END
+
 
 def conte_command(update, context):
     query = update.callback_query
     query.answer()
-    randomIndexImage = randrange(12)
+    
+    index = randrange(12)
     numFrasiConte = len(content['sentences']['conte'])
     randomIndexCaption = randrange(numFrasiConte)
     
@@ -145,14 +140,16 @@ def conte_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=open(buildPath("media/conte/{}.jpg".format(randomIndexImage)), 'rb'),
+        photo=open(buildPath("media/conte/{}.jpg".format(index)), 'rb'),
         caption=content['sentences']['conte'][randomIndexCaption]
     )
     return ConversationHandler.END
 
+
 def bimbe_command(update, context):
     query = update.callback_query
     query.answer()
+    
     love_dict = emojis.love
     loveEmojis = list(love_dict.values())
     sizeLove = len(loveEmojis)
@@ -174,6 +171,7 @@ def cts_command(update, context):
     """Send a message when the command /cts is issued."""
     query = update.callback_query
     query.answer()
+    
     keyboard = [
         [
             InlineKeyboardButton("5", callback_data=str(5)),
@@ -184,10 +182,12 @@ def cts_command(update, context):
     query.edit_message_text('Quanti membri desideri?', reply_markup=reply_markup)
     return 1
 
+
 def dpcm_command(update, context):
     """Send a message when the command /dpcm is issued."""
     query = update.callback_query
     query.answer()
+    
     dpcmList = content['DPCM']
     randIndex = randrange(len(dpcmList))
     
@@ -197,22 +197,26 @@ def dpcm_command(update, context):
     )
     return ConversationHandler.END
 
+
 def giurato_command(update, context):
     """Send a message when the command /giurato is issued."""
     query = update.callback_query
     query.answer()
-    giuratoList = content['sentences']['giurato']
-    randIndex = randrange(len(giuratoList))
+    
+    giurato_list = content['sentences']['giurato']
+    randIndex = randrange(len(giurato_list))
     
     query.edit_message_text(
-        text='<i>\"{}\"</i>'.format(giuratoList[randIndex]), 
+        text='<i>\"{}\"</i>'.format(giurato_list[randIndex]), 
         parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
 
+
 def covid_command(update, context):
     query = update.callback_query
     query.answer()
+    
     covid_dict = emojis.covid
     reqCovid = Request(config['covid']['url'])
     COVID = json.loads(urlopen(reqCovid).read().decode())
@@ -227,12 +231,12 @@ def covid_command(update, context):
     percPosTamp = 100 * COVID[-1]['nuovi_positivi'] / varTamponi
     
     message = 'Ultimo aggiornamento: {} alle {}\n'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H:%M"))
-    message += '{}{} {}\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.getVariation(nuoviPositivi))
-    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.getVariation(varOspedalizzati))
-    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.getVariation(varTerapieI))
-    message += '{}{} {} ({})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.getVariation(varIsolamento))
-    message += '{}{} {} ({})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], utils.getVariation(varDeceduti))
-    message += '{}{} {} ({})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], utils.getVariation(varTamponi))
+    message += '{}{} {}\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.get_variation(nuoviPositivi))
+    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.get_variation(varOspedalizzati))
+    message += '{}{} {} ({})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.get_variation(varTerapieI))
+    message += '{}{} {} ({})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.get_variation(varIsolamento))
+    message += '{}{} {} ({})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], utils.get_variation(varDeceduti))
+    message += '{}{} {} ({})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], utils.get_variation(varTamponi))
     message += '{}\{} {:.3}%'.format(covid_dict['biohazard'], covid_dict['testTube'], percPosTamp)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
@@ -244,9 +248,11 @@ def covid_command(update, context):
     )
     return ConversationHandler.END
 
+
 def comune_command(update, context):
     query = update.callback_query
     query.answer()
+    
     zone_dict = emojis.zone_color
     request_comuni = Request(config['comuni']['url'])
     comuni = json.loads(urlopen(request_comuni).read().decode())
@@ -254,7 +260,7 @@ def comune_command(update, context):
     comune = comuni[index_comune]
     urlWeather = config['openweathermap']['url'].format(comune['cap'][0], config['openweathermap']['token'])
     reqMeteo = Request(urlWeather)
-    covid_severity_color = utils.getSeverityColor(comune, content['ItalianRegions'])
+    covid_severity_color = utils.get_severity_color(comune, content['ItalianRegions'])
 
     try:
         weather = json.loads(urlopen(reqMeteo).read().decode())
@@ -286,9 +292,11 @@ def comune_command(update, context):
         
     return ConversationHandler.END
 
+
 def fibonacci_command(update, context):
     query = update.callback_query
     query.answer()
+    
     response = []
     error = False
     try:
@@ -325,8 +333,13 @@ def fibonacci_command(update, context):
 def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
+    
     value = 5 + randrange(0, 100, 5)
-    query.edit_message_text(text="{}".format(value), parse_mode=ParseMode.HTML)
+    
+    query.edit_message_text(
+        text="<b>{}</b>".format(value), 
+        parse_mode=ParseMode.HTML
+    )
     return ConversationHandler.END
 
 
@@ -334,6 +347,15 @@ def help_command(update, context):
     """Send a message when the command /help is issued."""
     user = update.message.from_user
     update.message.reply_text(HELP.format(user.first_name))
+    
+
+def end(update, context):
+    """Returns `ConversationHandler.END`, which tells the
+    ConversationHandler that the conversation is over"""
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(text="See you next time!")
+    return ConversationHandler.END
 
 
 #================================================================================
@@ -342,21 +364,11 @@ def help_command(update, context):
 START OF UTILITY SECTION
 """
 
-def generateIndexList(qty, ctsSize):
-    i = 0
-    list = []
-    while i < int(qty):
-        randIndex = randrange(ctsSize)
-        if randIndex not in list:
-            list.append(randIndex)
-            i += 1
-    return list
-
 def buildCtsMessage(qty):
     ctsList = content['CTS']
     ctsSize = len(ctsList)
     message = '<b>Comitato Tecnico-Scientifico</b>\n'
-    indexlist = generateIndexList(qty, ctsSize)
+    indexlist = utils.get_index_list(qty, ctsSize)
     for index in indexlist:
         message += '∘ {}\n'.format(ctsList[index])
     return message
@@ -385,35 +397,6 @@ def handle_sticker(update, context):
 def echo_sentence(update, context, sentence=THE_SENTENCE):
     """Echo the user message."""
     update.message.reply_text(sentence)
-
-"""
-    Return related emojis according to weather
-"""
-def getEmoji(weatherID):
-    weather_dict = emojis.weather
-    if weatherID:
-        if str(weatherID)[0] == '2' or weatherID == 900 or weatherID==901 or weatherID==902 or weatherID==905:
-            return weather_dict.get("thunderstorm")
-        elif str(weatherID)[0] == '3':
-            return  weather_dict.get("drizzle")
-        elif str(weatherID)[0] == '5':
-            return  weather_dict.get("rain")
-        elif str(weatherID)[0] == '6' or weatherID==903 or weatherID== 906:
-            return weather_dict("snowflake") + ' ' + weather_dict("snowman")
-        elif str(weatherID)[0] == '7':
-            return  weather_dict.get("atmosphere")
-        elif weatherID == 800:
-            return  weather_dict.get("clearSky")
-        elif weatherID == 801:
-            return  weather_dict.get("fewClouds")
-        elif weatherID==802 or weatherID==803 or weatherID==803:
-            return  weather_dict.get("clouds")
-        elif weatherID == 904:
-            return  weather_dict.get("hot")
-        else:
-            return weather_dict.get("defaultEmoji")    # Default emoji 
-    else:
-        return weather_dict.get("defaultEmoji")   # Default emoji
 
 
 def error(update, context):

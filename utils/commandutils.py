@@ -1,3 +1,5 @@
+from random import randrange
+
 def isMorning(hour):
     return hour >= 6 and hour < 13
 
@@ -6,22 +8,22 @@ def isAfternoon(hour):
 
 def greetings(time, name):
     greetings = ''
-    actualHour = time.strftime('%H')
-    if isMorning(int(actualHour)):
+    current_hour = time.strftime('%H')
+    if isMorning(int(current_hour)):
         greetings = 'Buongiorno'
-    elif isAfternoon(int(actualHour)):
+    elif isAfternoon(int(current_hour)):
         greetings = 'Buon pomeriggio'
     else:
         greetings = 'Buonasera'
     return '{} {}'.format(greetings, name)
 
-def getSign(value):
+def get_sign(value):
     return '+' if value > 0 else ''
 
-def getVariation(variation):
-    return '{}{}'.format(getSign(variation), variation)
+def get_variation(variation):
+    return '{}{}'.format(get_sign(variation), variation)
 
-def getSeverityColor(comune, regioni):
+def get_severity_color(comune, regioni):
     regione_comune = comune['regione']['nome']
     regione_lista = next((region for region in regioni if region['name'] == comune['regione']['nome']), None)
     if regione_lista is not None:
@@ -32,3 +34,13 @@ def getSeverityColor(comune, regioni):
             return regione_lista['covid_severity_color']
     else:
         return None
+    
+def get_index_list(how_many, size):
+    i = 0
+    list = []
+    while i < int(how_many):
+        index = randrange(size)
+        if index not in list:
+            list.append(index)
+            i += 1
+    return list
