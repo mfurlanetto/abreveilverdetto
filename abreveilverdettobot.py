@@ -334,10 +334,15 @@ def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
     
+    numbers_dict = emojis.numbers
     value = 5 + randrange(0, 100, 5)
+    new_value = []
+    
+    for n in str(value):
+        new_value.append(numbers_dict.get(n))
     
     query.edit_message_text(
-        text="<b>{}</b>".format(value), 
+        text=" ".join(new_value), 
         parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
