@@ -463,7 +463,7 @@ def main():
                 CallbackQueryHandler(giurato_command, pattern='^' + str(GIURATO) + '$'),
                 CallbackQueryHandler(torta_command, pattern='^' + str(TORTADIMELE) + '$'),
                 CallbackQueryHandler(fibonacci_command, pattern='^' + str(FIBONACCI) + '$'),
-                CallbackQueryHandler(centocentocento_command, pattern='^' + str(CENTOCENTOCENTO) + '$')
+                CallbackQueryHandler(centocentocento_command, pattern='^' + str(CENTOCENTOCENTO) + '$'),
                 CallbackQueryHandler(ghesboro_command, pattern='^' + str(GHESBORO) + '$')
             ],
             1: [
