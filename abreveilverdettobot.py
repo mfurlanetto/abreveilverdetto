@@ -43,7 +43,7 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 
-SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO = range(11)
+SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO = range(12)
 
 HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
@@ -85,7 +85,8 @@ def start_command(update, context):
         ],
         [
             InlineKeyboardButton(u'\U0001F522' + " fibonacci", callback_data=str(FIBONACCI)),
-            InlineKeyboardButton('{0} {0} {0}'.format(u'\U0001F4AF'), callback_data=str(CENTOCENTOCENTO))
+            InlineKeyboardButton('{0} {0} {0}'.format(u'\U0001F4AF'), callback_data=str(CENTOCENTOCENTO)),
+            InlineKeyboardButton(u'\U0001F981' + " ghesboro", callback_data=str(GHESBORO)),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -347,6 +348,20 @@ def centocentocento_command(update, context):
     )
     return ConversationHandler.END
 
+def ghesboro_command(update, context):
+    """Send a message when the command /ghesboro is issued."""
+    query = update.callback_query
+    query.answer()
+    
+    veneto_list = content['sentences']['veneto']
+    randIndex = randrange(len(veneto_list))
+    
+    query.edit_message_text(
+        text='<i>\"{}\"</i>'.format(veneto_list[randIndex]), 
+        parse_mode=ParseMode.HTML
+    )
+    return ConversationHandler.END
+
 
 def help_command(update, context):
     """Send a message when the command /help is issued."""
@@ -449,6 +464,7 @@ def main():
                 CallbackQueryHandler(torta_command, pattern='^' + str(TORTADIMELE) + '$'),
                 CallbackQueryHandler(fibonacci_command, pattern='^' + str(FIBONACCI) + '$'),
                 CallbackQueryHandler(centocentocento_command, pattern='^' + str(CENTOCENTOCENTO) + '$')
+                CallbackQueryHandler(ghesboro_command, pattern='^' + str(GHESBORO) + '$')
             ],
             1: [
                 CallbackQueryHandler(ctsCommandHandler, pattern='^(' + str(5) + '|' + str(10) + ')$')

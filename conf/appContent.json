@@ -73,6 +73,26 @@
             "Le polemiche sono molto dure tra la Democrazia Cristiana e il partito sociolista, i due partiti più forzi [...] lei che ne pensa di questa polsibilità?",
             "Mi faccia capire bene, lei lavorava come oste di terra.",
             "Queste polizie di Pasqua fatte a primavera poi reggano o non reggano?"
+        ],
+        "veneto" : [
+            "To mare omo!",
+            "Magnime el ton!",
+            "Ghe sboro!",
+            "Fa puito",
+            "Magna e tasi",
+            "Te manca un bojo",
+            "Son ciapà coe bombe",
+            "Un bianco par mi e na spuma pal bocia",
+            "Areo!",
+            "Tajate i cavei che i te sgama i spinei!",
+            "Anca massa",
+            "Voja de far, saltame dosso",
+            "Mejo bevarghene un posso che spanderghene un giosso",
+            "Come te go fato, te desfo!",
+            "Ea a ga visto pi osei del marcà dei poastri",
+            "I te ga batixà con l'aqua dei folpi?",
+            "Schei e paura, mai avui",
+            "Schei e osei, fin che ghe ne xè ciapei"
         ]
     },
     "CTS": [
@@ -344,25 +364,5 @@
             "name": "Valle d'Aosta/Vallée d'Aoste",
             "covid_severity_color": "red"
         }
-    ],
-    "venetoSentences" : [
-        "To mare omo!",
-        "Magnime el ton!",
-        "Ghe sboro!",
-        "Fa puito",
-        "Magna e tasi",
-        "Te manca un bojo",
-        "Son ciapà coe bombe",
-        "Un bianco par mi e na spuma pal bocia",
-        "Areo!",
-        "Tajate i cavei che i te sgama i spinei!",
-        "Anca massa",
-        "Voja de far, saltame dosso",
-        "Mejo bevarghene un posso che spanderghene un giosso",
-        "Come te go fato, te desfo!",
-        "Ea a ga visto pi osei del marcà dei poastri",
-        "I te ga batixà con l'aqua dei folpi?",
-        "Schei e paura, mai avui",
-        "Schei e osei, fin che ghe ne xè ciapei"
     ]
 }
