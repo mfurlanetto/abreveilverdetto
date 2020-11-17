@@ -249,7 +249,7 @@
         "Ai fini di cui al comma 1, possono essere utilizzate anche mascherine per il culo",
         "Sono sospese le attività musicali neomelodiche e bandite le canzoni di Gigi d'Alessio",
         "Allo scopo di contrastare e contenere il diffondersi del virus COVID-19 sull'intero territorio nazionale, sono sospesi i viaggi d'istruzione tranne quelli a Villach",
-        "Ai fini di cui al comma 2 bis, è consentito il cosnumo di alcolici da Ernesto e dalla Rosy"
+        "Ai fini di cui al comma 2 bis, è consentito il consumo di alcolici da Ernesto e dalla Rosy"
     ],
     "MESSAGES": {
         "WEATHER_URL_NOT_FOUND": "Nessuna info meteo disponibile\n"
@@ -344,5 +344,25 @@
             "name": "Valle d'Aosta/Vallée d'Aoste",
             "covid_severity_color": "red"
         }
+    ],
+    "venetoSentences" : [
+        "To mare omo!",
+        "Magnime el ton!",
+        "Ghe sboro!",
+        "Fa puito",
+        "Magna e tasi",
+        "Te manca un bojo",
+        "Son ciapà coe bombe",
+        "Un bianco par mi e na spuma pal bocia",
+        "Areo!",
+        "Tajate i cavei che i te sgama i spinei!",
+        "Anca massa",
+        "Voja de far, saltame dosso",
+        "Mejo bevarghene un posso che spanderghene un giosso",
+        "Come te go fato, te desfo!",
+        "Ea a ga visto pi osei del marcà dei poastri",
+        "I te ga batixà con l'aqua dei folpi?",
+        "Schei e paura, mai avui",
+        "Schei e osei, fin che ghe ne xè ciapei"
     ]
 }
