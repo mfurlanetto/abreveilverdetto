@@ -317,7 +317,7 @@
         },
         {
             "name": "Campania",
-            "covid_severity_color": "yellow"
+            "covid_severity_color": "red"
         },
         {
             "name": "Sicilia",
@@ -329,7 +329,7 @@
         },
         {
             "name": "Emilia-Romagna",
-            "covid_severity_color": "yellow"
+            "covid_severity_color": "orange"
         },
         {
             "name": "Piemonte",
@@ -341,7 +341,7 @@
         },
         {
             "name": "Toscana",
-            "covid_severity_color": "orange"
+            "covid_severity_color": "red"
         },
         {
             "name": "Calabria",
@@ -357,7 +357,7 @@
         },
         {
             "name": "Marche",
-            "covid_severity_color": "yellow"
+            "covid_severity_color": "orange"
         },
         {
             "name": "Abruzzo",
@@ -365,7 +365,7 @@
         },
         {
             "name": "Friuli-Venezia Giulia",
-            "covid_severity_color": "yellow"
+            "covid_severity_color": "orange"
         },
         {
             "name": "Trentino-Alto Adige/Südtirol",
