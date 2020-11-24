@@ -87,6 +87,9 @@ def start_command(update, context):
             InlineKeyboardButton(u'\U0001F522' + " fibonacci", callback_data=str(FIBONACCI)),
             InlineKeyboardButton('{0} {0} {0}'.format(u'\U0001F4AF'), callback_data=str(CENTOCENTOCENTO)),
             InlineKeyboardButton(u'\U0001F981' + " ghesboro", callback_data=str(GHESBORO)),
+        ],
+        [
+            InlineKeyboardButton(u'\U0001F995' + " pokemon", callback_data=str(POKEMON))
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -362,6 +365,28 @@ def ghesboro_command(update, context):
     )
     return ConversationHandler.END
 
+def pokemon_command(update, context):
+    """Send a message when the command /pokemon is issued."""
+    query = update.callback_query
+    query.answer()
+
+    index_pokemon = randrange(150)
+    reqPokemon = Request(config['pokemon']['url'])
+    Pokedex = json.loads(urlopen(reqPokemon).read().decode())
+    message = '#{} - {}\n'.format(index_pokemon, Pokedex['pokemon'][index_pokemon]['N'])
+
+    query.bot.delete_message(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id
+    )
+    query.bot.send_photo(
+        chat_id=update.effective_chat.id, 
+        photo=config['pokemon']['photo'].format(index_pokemon),
+        caption=message, 
+        parse_mode=ParseMode.HTML
+    )  
+    return ConversationHandler.END
+
 
 def help_command(update, context):
     """Send a message when the command /help is issued."""
@@ -464,7 +489,8 @@ def main():
                 CallbackQueryHandler(torta_command, pattern='^' + str(TORTADIMELE) + '$'),
                 CallbackQueryHandler(fibonacci_command, pattern='^' + str(FIBONACCI) + '$'),
                 CallbackQueryHandler(centocentocento_command, pattern='^' + str(CENTOCENTOCENTO) + '$'),
-                CallbackQueryHandler(ghesboro_command, pattern='^' + str(GHESBORO) + '$')
+                CallbackQueryHandler(ghesboro_command, pattern='^' + str(GHESBORO) + '$'),
+                CallbackQueryHandler(pokemon_command, pattern='^' + str(POKEMON) + '$')
             ],
             1: [
                 CallbackQueryHandler(ctsCommandHandler, pattern='^(' + str(5) + '|' + str(10) + ')$')
