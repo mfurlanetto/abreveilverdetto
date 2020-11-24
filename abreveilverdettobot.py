@@ -43,7 +43,7 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 
-SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO = range(12)
+SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON = range(13)
 
 HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
