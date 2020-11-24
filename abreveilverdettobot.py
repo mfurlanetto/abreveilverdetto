@@ -370,7 +370,12 @@ def pokemon_command(update, context):
     query = update.callback_query
     query.answer()
 
+    index_str = ''
     index_pokemon = randrange(150)
+    if (index_pokemon < 100):
+        index_str = '0{}'.format(index_pokemon)
+    else:
+        index_str = '{}'.format(index_pokemon)
     reqPokemon = Request(config['pokemon']['url'])
     Pokedex = json.loads(urlopen(reqPokemon).read().decode())
     message = '#{} - {}\n'.format(index_pokemon, Pokedex['pokemon'][index_pokemon]['N'])
@@ -381,12 +386,11 @@ def pokemon_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=config['pokemon']['photo'].format(index_pokemon),
-        caption=message, 
+        photo=Request(config['pokemon']['photo'].format(index_str)),
+        caption=message,
         parse_mode=ParseMode.HTML
     )  
     return ConversationHandler.END
-
 
 def help_command(update, context):
     """Send a message when the command /help is issued."""
