@@ -88,9 +88,11 @@ def start_command(update, context):
             InlineKeyboardButton('{0} {0} {0}'.format(u'\U0001F4AF'), callback_data=str(CENTOCENTOCENTO)),
             InlineKeyboardButton(u'\U0001F981' + " ghesboro", callback_data=str(GHESBORO)),
         ],
+        """
         [
             InlineKeyboardButton(u'\U0001F995' + " pokemon", callback_data=str(POKEMON))
         ]
+        """
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('Seleziona comando:', reply_markup=reply_markup)
