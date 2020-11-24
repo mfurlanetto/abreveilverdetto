@@ -369,7 +369,7 @@ def pokemon_command(update, context):
     """Send a message when the command /pokemon is issued."""
     query = update.callback_query
     query.answer()
-
+    
     index_str = ''
     index_pokemon = randrange(150)
     if (index_pokemon < 100):
@@ -381,7 +381,8 @@ def pokemon_command(update, context):
     message = '#{} - {}\n'.format(index_pokemon, Pokedex['pokemon'][index_pokemon]['N'])
 
     query.edit_message_text(
-        text='<i>{}</i>'.format(message), 
+        """ text='<i>{}</i>'.format(message), """
+        text='pokemon',
         parse_mode=ParseMode.HTML
     )
 
