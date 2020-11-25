@@ -429,10 +429,23 @@ def pokemon_command(update, context):
     message = '#{} - {}\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'].title())
     #message = '#{}\n'.format(index_pokemon)
 
+    query.bot.delete_message(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id
+    )
+    query.bot.send_photo(
+        chat_id=update.effective_chat.id, 
+        photo=config['pokemon']['photo'].format(index_str),
+        caption=message, 
+        parse_mode=ParseMode.HTML
+    ) 
+    
+    """
     query.edit_message_text(
         text='<i>{}</i>'.format(message),
         parse_mode=ParseMode.HTML
     )
+    """
     return ConversationHandler.END
 
 def help_command(update, context):
