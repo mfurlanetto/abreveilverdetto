@@ -21,7 +21,7 @@ start - Lista dei comandi
 import logging, json, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
 from cairosvg import svg2png
 
-from urllib.request import Request, urlopen
+from urllib.request import Request, urlopen, urlretrieve
 from urllib.error import URLError, HTTPError
 
 from random import randrange
@@ -315,7 +315,10 @@ def country_command(update, context):
     
     if find(flag_filename) == "NO_RESULT":
         png_file = open(flag_filename, "w+")
-        png_content = svg2png(url=country["flag"])
+        
+        img = urlretrieve(country["flag"], "{}.svg".format(country_code))
+        png_content = svg2png(url=img)
+        
         png_file.write(png_content)
         png_file.close()
     
