@@ -19,5 +19,8 @@
     "pokemon" : {
         "url": "https://raw.githubusercontent.com/HybridShivam/Pokemon/master/src/dataSet/pokemon.json",
         "photo": "https://github.com/HybridShivam/Pokemon/raw/master/assets/images/{}.png"
+    },
+    "countries": {
+        "url": "https://restcountries.eu/rest/v2/all"
     }
 }

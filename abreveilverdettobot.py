@@ -19,6 +19,7 @@ start - Lista dei comandi
 """
 
 import logging, json, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
+from cairosvg import svg2png
 
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -43,7 +44,7 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 
-SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON = range(13)
+SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY = range(14)
 
 HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
@@ -89,7 +90,8 @@ def start_command(update, context):
             InlineKeyboardButton(u'\U0001F981' + " ghesboro", callback_data=str(GHESBORO)),
         ],        
         [
-            InlineKeyboardButton(u'\U0001F995' + " pokemon", callback_data=str(POKEMON))
+            InlineKeyboardButton(u'\U0001F995' + " pokemon", callback_data=str(POKEMON)),            
+            InlineKeyboardButton(u'\U0001F30D' + " nazione", callback_data=str(COUNTRY))
         ]
        
     ]
@@ -298,6 +300,38 @@ def comune_command(update, context):
     return ConversationHandler.END
 
 
+def country_command(update, context):
+    query = update.callback_query
+    query.answer()
+    
+    request_countries = Request(config['countries']['url'])
+    countries = json.loads(urlopen(request_countries).read().decode())
+    index_country = randrange(len(countries))
+    
+    country = countries[index_country]
+    country_code = country["alpha3Code"].lower()    
+    flag_filename = "{}.png".format(country_code)
+    flag_path = buildPath("media/flags/{}".format(flag_filename))
+    
+    if find(flag_filename) == "NO_RESULT":    
+        svg2png(
+            url=country["flag"], 
+            write_to=flag_path)
+    
+    query.bot.delete_message(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id
+    )
+    query.bot.send_photo(
+        chat_id=update.effective_chat.id, 
+        photo=open(flag_path, 'rb'),
+        caption=build_country_message(country, countries), 
+        parse_mode=ParseMode.HTML
+    ) 
+    
+    return ConversationHandler.END
+
+
 def fibonacci_command(update, context):
     query = update.callback_query
     query.answer()
@@ -408,6 +442,41 @@ def end(update, context):
 START OF UTILITY SECTION
 """
 
+def find(name):
+    result = "NO_RESULT"
+    for root, dirs, files in os.walk(buildPath("media/flags")):
+        if name in files:
+            result = os.path.join(root, name)
+    return result
+
+def find_borders(countries, codes):
+    name_list = []
+    for code in codes:
+        result = next((country for country in countries if country['alpha3Code'] == code), None)
+        if result is not None:
+            name_list.append(build_country_name(result))
+    return ', '.join(name_list)
+
+def build_country_name(country):
+    country_name = ""
+    try:
+        country_name = country["translations"]["it"]
+    except:
+        country_name = country["name"]
+        
+    return country_name
+
+def build_country_message(country, countries):
+    message = "<b>{}</b>\n".format(build_country_name(country))
+    message += "Capitale: {}\n".format(country["capital"])
+    message += "Continente: {}\n".format(country["region"])
+    message += "Popolazione: {}\n".format(country["population"])
+    message += "Moneta: {}\n".format(country["currencies"][0]["symbol"])
+    message += "Lingua: {}\n".format(country["languages"][0]["name"])
+    message += "Confina con: {}".format(find_borders(countries, country["borders"]))
+    
+    return message
+
 def buildCtsMessage(qty):
     ctsList = content['CTS']
     ctsSize = len(ctsList)
@@ -489,7 +558,8 @@ def main():
                 CallbackQueryHandler(fibonacci_command, pattern='^' + str(FIBONACCI) + '$'),
                 CallbackQueryHandler(centocentocento_command, pattern='^' + str(CENTOCENTOCENTO) + '$'),
                 CallbackQueryHandler(ghesboro_command, pattern='^' + str(GHESBORO) + '$'),
-                CallbackQueryHandler(pokemon_command, pattern='^' + str(POKEMON) + '$')
+                CallbackQueryHandler(pokemon_command, pattern='^' + str(POKEMON) + '$'),
+                CallbackQueryHandler(country_command, pattern='^' + str(COUNTRY) + '$')
             ],
             1: [
                 CallbackQueryHandler(ctsCommandHandler, pattern='^(' + str(5) + '|' + str(10) + ')$')
