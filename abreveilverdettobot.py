@@ -19,7 +19,7 @@ start - Lista dei comandi
 """
 
 import logging, json, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
-#from cairosvg import svg2png
+from cairosvg import svg2png
 
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
