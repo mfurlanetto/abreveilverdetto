@@ -320,7 +320,7 @@ def country_command(update, context):
         logger.info('[png_file] : {}'.format(png_file))
         logger.info('[svg_url] : {}'.format(country["flag"]))
         
-        img = urlretrieve(country["flag"], "{}.svg".format(country_code))
+        img = urlretrieve(country["flag"])
         
         logger.info('[urlretrieve] : {}'.format(img))
         
