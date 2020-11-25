@@ -311,12 +311,17 @@ def country_command(update, context):
     country = countries[index_country]
     country_code = country["alpha3Code"].lower()    
     flag_filename = "{}.png".format(country_code)
+    logger.info('[flag_filename] : {}'.format(flag_filename))
     flag_path = buildPath("media/flags/{}".format(flag_filename))
+    logger.info('[flag_path] : {}'.format(flag_path))
     
     if find(flag_filename) == "NO_RESULT":
         png_file = open(flag_filename, "w+")
         
         img = urlretrieve(country["flag"], "{}.svg".format(country_code))
+        
+        logger.info('[urlretrieve] : {}'.format(img))
+        
         png_content = svg2png(url=img)
         
         png_file.write(png_content)
