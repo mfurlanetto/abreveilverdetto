@@ -311,15 +311,24 @@ def country_command(update, context):
     country = countries[index_country]
     country_code = country["alpha3Code"].lower()    
     flag_filename = "{}.png".format(country_code)
+    logger.info('[flag_filename] : {}'.format(flag_filename))
     flag_path = buildPath("media/flags/{}".format(flag_filename))
+    logger.info('[flag_path] : {}'.format(flag_path))
     
     if find(flag_filename) == "NO_RESULT":
         png_file = open(flag_filename, "w+")
+        logger.info('[png_file] : {}'.format(png_file))
+        logger.info('[svg_url] : {}'.format(country["flag"]))
         
-        img = urlretrieve(country["flag"], "{}.svg".format(country_code))
+        img = urlretrieve(country["flag"])
+        
+        logger.info('[urlretrieve] : {}'.format(img))
+        
         png_content = svg2png(url=img)
+        logger.info('[png_content] : {}'.format(png_content))
         
         png_file.write(png_content)
+        logger.info('[png_content_write] : {}'.format(png_content))
         png_file.close()
     
     query.bot.delete_message(
