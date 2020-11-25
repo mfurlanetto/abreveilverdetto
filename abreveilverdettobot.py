@@ -426,7 +426,7 @@ def pokemon_command(update, context):
         index_str = '{}'.format(index_pokemon)
     reqPokemon = Request(config['pokemon']['url'])
     Pokedex = json.loads(urlopen(reqPokemon).read().decode())
-    message = '#{} - {}\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'])
+    message = '#{} - {}\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'].title())
     #message = '#{}\n'.format(index_pokemon)
 
     query.edit_message_text(
