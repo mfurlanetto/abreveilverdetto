@@ -313,10 +313,9 @@ def country_command(update, context):
     flag_filename = "{}.png".format(country_code)
     flag_path = buildPath("media/flags/{}".format(flag_filename))
     
-    if find(flag_filename) == "NO_RESULT":    
-        svg2png(
-            url=country["flag"], 
-            write_to=flag_path)
+    if find(flag_filename) == "NO_RESULT":
+        png_content = svg2png(url=country["flag"])
+        flag_path.write(png_content)
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
