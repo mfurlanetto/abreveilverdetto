@@ -87,12 +87,11 @@ def start_command(update, context):
             InlineKeyboardButton(u'\U0001F522' + " fibonacci", callback_data=str(FIBONACCI)),
             InlineKeyboardButton('{0} {0} {0}'.format(u'\U0001F4AF'), callback_data=str(CENTOCENTOCENTO)),
             InlineKeyboardButton(u'\U0001F981' + " ghesboro", callback_data=str(GHESBORO)),
-        ],
-        """
+        ],        
         [
             InlineKeyboardButton(u'\U0001F995' + " pokemon", callback_data=str(POKEMON))
         ]
-        """
+       
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('Seleziona comando:', reply_markup=reply_markup)
@@ -380,7 +379,7 @@ def pokemon_command(update, context):
         index_str = '{}'.format(index_pokemon)
     reqPokemon = Request(config['pokemon']['url'])
     Pokedex = json.loads(urlopen(reqPokemon).read().decode())
-    message = '#{} - {}\n'.format(index_pokemon, Pokedex['pokemon'][index_pokemon]['N'])
+    message = '#{} - {}\n'.format(str(index_pokemon), Pokedex['pokemon'][index_pokemon]['N'])
 
     query.edit_message_text(
         text='<i>{}</i>'.format(message),
