@@ -317,6 +317,7 @@ def country_command(update, context):
     
     if find(flag_filename) == "NO_RESULT":
         png_file = open(flag_filename, "w+")
+        logger.info('[svg_url] : {}'.format(country["flag"]))
         
         img = urlretrieve(country["flag"], "{}.svg".format(country_code))
         
