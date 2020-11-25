@@ -300,7 +300,7 @@ def comune_command(update, context):
     return ConversationHandler.END
 
 
-""" def country_command(update, context):
+def country_command(update, context):
     query = update.callback_query
     query.answer()
     
@@ -329,7 +329,7 @@ def comune_command(update, context):
         parse_mode=ParseMode.HTML
     ) 
     
-    return ConversationHandler.END """
+    return ConversationHandler.END
 
 
 def fibonacci_command(update, context):
@@ -558,7 +558,8 @@ def main():
                 CallbackQueryHandler(fibonacci_command, pattern='^' + str(FIBONACCI) + '$'),
                 CallbackQueryHandler(centocentocento_command, pattern='^' + str(CENTOCENTOCENTO) + '$'),
                 CallbackQueryHandler(ghesboro_command, pattern='^' + str(GHESBORO) + '$'),
-                CallbackQueryHandler(pokemon_command, pattern='^' + str(POKEMON) + '$')
+                CallbackQueryHandler(pokemon_command, pattern='^' + str(POKEMON) + '$'),
+                CallbackQueryHandler(country_command, pattern='^' + str(COUNTRY) + '$')
             ],
             1: [
                 CallbackQueryHandler(ctsCommandHandler, pattern='^(' + str(5) + '|' + str(10) + ')$')
