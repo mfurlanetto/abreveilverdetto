@@ -45,6 +45,27 @@ covid = {
     "nose": u'\U0001F443'
 }
 
+pkmn_type = {
+    "bug":      u'\U0001F41E',
+    "dark":     u'\U0001F311',
+    "dragon":   u'\U0001F409',
+    "electro":  u'\U000026A1',
+    "fairy":    u'\U0001F984',
+    "fight":    u'\U0001F4AA',
+    "fire":     u'\U0001F525',
+    "flying":   u'\U0001F54A',
+    "ghost":    u'\U0001F47B',
+    "grass":    u'\U0001F33F',
+    "ground":   u'\U0001F4A9',
+    "ice":      u'\U00002744',
+    "normal":   u'\U0001F9F8',
+    "poison":   u'\U00002620',
+    "psychic":  u'\U0001F9FF',
+    "rock":     u'\U0001F5FF',
+    "steel":    u'\U00002699',
+    "water":    u'\U0001F4A7'
+}
+
 zone_color = {
     "red": u'\U0001f534',
     "orange": u'\U0001f7e0',
