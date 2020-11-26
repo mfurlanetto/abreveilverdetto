@@ -427,7 +427,7 @@ def pokemon_command(update, context):
         index_str = '{}'.format(index_pokemon)
     reqPokemon = Request(config['pokemon']['url'])
     Pokedex = json.loads(urlopen(reqPokemon).read().decode())
-    message = '#{} - <b>{}<b>\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'].upper())
+    message = '#{} - <b>{}</b>\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'].upper())
     numOfType = len(Pokedex['pokemon'][str(index_pokemon)]['T'])
     if(numOfType == 2):
         type1 = pokemonType.get(Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n'])
