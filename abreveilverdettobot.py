@@ -418,6 +418,7 @@ def pokemon_command(update, context):
     query = update.callback_query
     query.answer()
     
+    pokemonType = emojis.pkmn_type
     index_str = ''
     index_pokemon = randrange(150)
     if (index_pokemon < 100):
@@ -429,11 +430,11 @@ def pokemon_command(update, context):
     message = '#{} - {}\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'].upper())
     numOfType = len(Pokedex['pokemon'][str(index_pokemon)]['T'])
     if(numOfType == 2):
-        type1 = Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n']
-        type2 = Pokedex['pokemon'][str(index_pokemon)]['T'][1]['n']
+        type1 = pokemonType.get(Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n'])
+        type2 = pokemonType.get(Pokedex['pokemon'][str(index_pokemon)]['T'][1]['n'])
         message += 'Type(s): {}{}'.format(type1,type2)
     else:
-        type1 = Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n']
+        type1 = pokemonType.get(Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n'])
         message += 'Type(s): {}'.format(type1)
 
     #message = '#{}\n'.format(index_pokemon)
