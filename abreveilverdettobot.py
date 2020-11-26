@@ -427,7 +427,7 @@ def pokemon_command(update, context):
         index_str = '{}'.format(index_pokemon)
     reqPokemon = Request(config['pokemon']['url'])
     Pokedex = json.loads(urlopen(reqPokemon).read().decode())
-    message = '#{} - {}\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'].upper())
+    message = '#{} - <b>{}<b>\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'].upper())
     numOfType = len(Pokedex['pokemon'][str(index_pokemon)]['T'])
     if(numOfType == 2):
         type1 = pokemonType.get(Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n'])
@@ -436,8 +436,6 @@ def pokemon_command(update, context):
     else:
         type1 = pokemonType.get(Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n'])
         message += 'Type(s): {}'.format(type1)
-
-    #message = '#{}\n'.format(index_pokemon)
 
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -450,12 +448,6 @@ def pokemon_command(update, context):
         parse_mode=ParseMode.HTML
     ) 
     
-    """
-    query.edit_message_text(
-        text='<i>{}</i>'.format(message),
-        parse_mode=ParseMode.HTML
-    )
-    """
     return ConversationHandler.END
 
 def help_command(update, context):
