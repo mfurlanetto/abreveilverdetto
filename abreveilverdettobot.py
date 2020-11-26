@@ -432,7 +432,7 @@ def pokemon_command(update, context):
         type1 = Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n']
         type2 = Pokedex['pokemon'][str(index_pokemon)]['T'][1]['n']
         message += 'Type(s): {}{}'.format(type1,type2)
-    else
+    else:
         type1 = Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n']
         message += 'Type(s): {}'.format(type1)
 
