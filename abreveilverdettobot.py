@@ -20,6 +20,7 @@ start - Lista dei comandi
 
 import logging, json, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
 from cairosvg import svg2png
+from PIL import Image, BytesIO
 
 from urllib.request import Request, urlopen, urlretrieve
 from urllib.error import URLError, HTTPError
@@ -315,21 +316,9 @@ def country_command(update, context):
     flag_path = buildPath("media/flags/{}".format(flag_filename))
     logger.info('[flag_path] : {}'.format(flag_path))
     
-    if find(flag_filename) == "NO_RESULT":
-        png_file = open(flag_filename, "w+")
-        logger.info('[png_file] : {}'.format(png_file))
-        logger.info('[svg_url] : {}'.format(country["flag"]))
-        
-        img = urlretrieve(country["flag"], "{}.svg".format(country_code))
-        
-        logger.info('[urlretrieve] : {}'.format(img))
-        
-        png_content = svg2png(url=img)
-        logger.info('[png_content] : {}'.format(png_content))
-        
-        png_file.write(png_content)
-        logger.info('[png_content_write] : {}'.format(png_content))
-        png_file.close()
+    response = urlopen(Request(country["flag"])).read().decode()
+    new_bites = svg2png(bytestring=response,
+                        write_to=None)
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -337,7 +326,7 @@ def country_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=open(flag_path, 'rb'),
+        photo=Image.open(BytesIO(new_bites)),
         caption=build_country_message(country, countries), 
         parse_mode=ParseMode.HTML
     ) 
