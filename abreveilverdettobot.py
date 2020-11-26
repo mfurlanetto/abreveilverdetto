@@ -20,7 +20,8 @@ start - Lista dei comandi
 
 import logging, json, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
 from cairosvg import svg2png
-from PIL import Image, BytesIO
+from PIL import Image
+from io import BytesIO
 
 from urllib.request import Request, urlopen, urlretrieve
 from urllib.error import URLError, HTTPError
