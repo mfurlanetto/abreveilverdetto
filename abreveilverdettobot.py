@@ -424,7 +424,7 @@ def pokemon_command(update, context):
         image = config['pokemon']['photo'].format("{:03d}".format(index_pokemon))
     else:
         message = '#0 - <b>CESARA BUONAMICI</b>\n'
-        image = open(buildPath("media/others/cesara.jpg", 'rb'),
+        image = open(buildPath("media/others/cesara.jpg", 'rb')
 
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
