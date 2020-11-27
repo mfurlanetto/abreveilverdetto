@@ -408,7 +408,7 @@ def pokemon_command(update, context):
     query = update.callback_query
     query.answer()
     
-    heart = emojis.love.redHeart
+    heart = emojis.love.get('redHeart')
     pokemonType = emojis.pkmn_type
     reqPokemon = Request(config['pokemon']['url'])
     pokedex = json.loads(urlopen(reqPokemon).read().decode())
