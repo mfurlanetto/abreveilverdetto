@@ -409,23 +409,15 @@ def pokemon_command(update, context):
     query.answer()
     
     pokemonType = emojis.pkmn_type
-    index_str = ''
     index_pokemon = randrange(150)
-    if (index_pokemon < 100):
-        index_str = '0{}'.format(index_pokemon)
-    else:
-        index_str = '{}'.format(index_pokemon)
     reqPokemon = Request(config['pokemon']['url'])
     Pokedex = json.loads(urlopen(reqPokemon).read().decode())
     message = '#{} - <b>{}</b>\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'].upper())
     numOfType = len(Pokedex['pokemon'][str(index_pokemon)]['T'])
-    if(numOfType == 2):
-        type1 = pokemonType.get(Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n'])
-        type2 = pokemonType.get(Pokedex['pokemon'][str(index_pokemon)]['T'][1]['n'])
-        message += 'Type(s): {}{}'.format(type1,type2)
-    else:
-        type1 = pokemonType.get(Pokedex['pokemon'][str(index_pokemon)]['T'][0]['n'])
-        message += 'Type(s): {}'.format(type1)
+    if(numOfType != 2):
+        numOfType = 1
+    types = [pokemonType.get(current_type['n']) for current_type in Pokedex['pokemon'][str(index_pokemon)]['T'][:numOfType]]
+    message += "Type(s): {}".format("".join(types))
 
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -433,7 +425,7 @@ def pokemon_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=config['pokemon']['photo'].format(index_str),
+        photo=config['pokemon']['photo'].format("{:03d}".format(index_pokemon)),
         caption=message, 
         parse_mode=ParseMode.HTML
     ) 
