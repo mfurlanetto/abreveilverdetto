@@ -409,14 +409,15 @@ def pokemon_command(update, context):
     query.answer()
     
     pokemonType = emojis.pkmn_type
-    index_pokemon = randrange(150)
     reqPokemon = Request(config['pokemon']['url'])
-    Pokedex = json.loads(urlopen(reqPokemon).read().decode())
-    message = '#{} - <b>{}</b>\n'.format(index_pokemon, Pokedex['pokemon'][str(index_pokemon)]['N'].upper())
-    numOfType = len(Pokedex['pokemon'][str(index_pokemon)]['T'])
-    if(numOfType != 2):
-        numOfType = 1
-    types = [pokemonType.get(current_type['n']) for current_type in Pokedex['pokemon'][str(index_pokemon)]['T'][:numOfType]]
+    pokedex = json.loads(urlopen(reqPokemon).read().decode())
+
+    index_pokemon = randrange(150)
+    pokemon = pokedex['pokemon'][str(index_pokemon)]
+
+    message = '#{} - <b>{}</b>\n'.format(index_pokemon, pokemon['N'].upper())
+    
+    types = [pokemonType.get(current_type['n']) for current_type in pokemon['T'][:2]]
     message += "Type(s): {}".format("".join(types))
 
     query.bot.delete_message(
