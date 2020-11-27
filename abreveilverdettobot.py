@@ -414,9 +414,7 @@ def pokemon_command(update, context):
     pokedex = json.loads(urlopen(reqPokemon).read().decode())
 
     index_pokemon = randrange(152)
-
-    index_pokemon = 0
-
+    
     if(index_pokemon):
         pokemon = pokedex['pokemon'][str(index_pokemon)]
         message = '#{} - <b>{}</b>\n'.format(index_pokemon, pokemon['N'].upper())
