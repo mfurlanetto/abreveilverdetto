@@ -412,13 +412,19 @@ def pokemon_command(update, context):
     reqPokemon = Request(config['pokemon']['url'])
     pokedex = json.loads(urlopen(reqPokemon).read().decode())
 
-    index_pokemon = randrange(150)
-    pokemon = pokedex['pokemon'][str(index_pokemon)]
+    index_pokemon = randrange(152)
 
-    message = '#{} - <b>{}</b>\n'.format(index_pokemon, pokemon['N'].upper())
-    
-    types = [pokemonType.get(current_type['n']) for current_type in pokemon['T'][:2]]
-    message += "Type(s): {}".format("".join(types))
+    index_pokemon = 0
+
+    if(index_pokemon):
+        pokemon = pokedex['pokemon'][str(index_pokemon)]
+        message = '#{} - <b>{}</b>\n'.format(index_pokemon, pokemon['N'].upper())
+        types = [pokemonType.get(current_type['n']) for current_type in pokemon['T'][:2]]
+        message += "Type(s): {}".format("".join(types))
+        image = config['pokemon']['photo'].format("{:03d}".format(index_pokemon))
+    else:
+        message = '#0 - <b>CESARA BUONAMICI</b>\n'
+        image = open(buildPath("media/others/cesara.jpg", 'rb'),
 
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -426,7 +432,8 @@ def pokemon_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=config['pokemon']['photo'].format("{:03d}".format(index_pokemon)),
+        #photo=config['pokemon']['photo'].format("{:03d}".format(index_pokemon)),
+        photo=image,
         caption=message, 
         parse_mode=ParseMode.HTML
     ) 
