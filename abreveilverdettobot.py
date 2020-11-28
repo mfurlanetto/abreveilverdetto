@@ -331,7 +331,7 @@ def country_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=base64.decodebytes(new_bites),
+        photo=base64.decodebytes(Image.open(new_bites)),
         caption=build_country_message(country, countries), 
         parse_mode=ParseMode.HTML
     )
