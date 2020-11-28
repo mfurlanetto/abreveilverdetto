@@ -317,7 +317,7 @@ def country_command(update, context):
     flag_path = buildPath("media/flags/{}".format(flag_filename))
     logger.info('[flag_path] : {}'.format(flag_path))
     
-    response = urlopen(Request(country["flag"])).read().decode()
+    response = urlopen(Request(country["flag"])).read()
     new_bites = svg2png(bytestring=response,
                         write_to=None)
     
