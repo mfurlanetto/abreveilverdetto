@@ -487,7 +487,7 @@ def build_country_message(country, countries):
     message = "<b>{}</b>\n".format(build_country_name(country))
     message += "Capitale: {}\n".format(country["capital"])
     message += "Continente: {}\n".format(country["region"])
-    message += "Popolazione: {}\n".format(country["population"])
+    message += "Popolazione: {:,.0f}\n".format(country["population"])
     message += "Moneta: {} ({})\n".format(country["currencies"][0]["name"], country["currencies"][0]["code"])
     message += "Lingua: {}\n".format(country["languages"][0]["name"])
     if (len(country["borders"]) > 0): 
