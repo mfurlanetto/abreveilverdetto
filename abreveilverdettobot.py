@@ -325,7 +325,7 @@ def country_command(update, context):
     message += "Popolazione: {:,.0f}\n".format(country["population"])
     message += "Moneta: {} ({})\n".format(country["currencies"][0]["name"], country["currencies"][0]["code"])
     message += "Lingua: {}\n".format(country["languages"][0]["name"])
-    message += "Fuso orario: {}".format(country["timezones"][0])
+    message += "Fuso orario: {}\n".format(country["timezones"][0])
     if (len(country["borders"]) > 0): 
         message += "Confini: {}".format(find_borders(countries, country["borders"]))
     
