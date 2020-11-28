@@ -315,7 +315,7 @@ def country_command(update, context):
     country_code = country["alpha3Code"].lower()  
       
     flag_filename = "{}.png".format(country_code)
-    logger.info('[flag_filename] : {}'.format(flag_filename))
+    logger.info('[url] : {}'.format(country["flag"]))
     
     flag_path = buildPath("media/flags/{}".format(flag_filename))
     logger.info('[flag_path] : {}'.format(flag_path))
@@ -334,8 +334,6 @@ def country_command(update, context):
         caption=build_country_message(country, countries), 
         parse_mode=ParseMode.HTML
     )
-    
-    #photo=base64.decodebytes(Image.open(new_bites)),
     
     return ConversationHandler.END
 
