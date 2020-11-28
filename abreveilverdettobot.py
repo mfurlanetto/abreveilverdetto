@@ -312,18 +312,17 @@ def country_command(update, context):
     index_country = randrange(len(countries))
     
     country = countries[index_country]
-    country_code = country["alpha3Code"].lower()    
+    country_code = country["alpha3Code"].lower()  
+      
     flag_filename = "{}.png".format(country_code)
     logger.info('[flag_filename] : {}'.format(flag_filename))
+    
     flag_path = buildPath("media/flags/{}".format(flag_filename))
     logger.info('[flag_path] : {}'.format(flag_path))
     
-    response = urlopen(Request(country["flag"])).read()
-    logger.info('[response] : {}'.format(response))
+    svg2png(url=country["flag"], write_to=flag_path)    
     
-    new_bites = svg2png(bytestring=response,
-                        write_to=None)
-    logger.info('[new_bites] : {}'.format(new_bites))
+    logger.info('[svg2png] : DONE')
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -331,7 +330,7 @@ def country_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=new_bites,
+        photo=open(flag_path, 'rb'),
         caption=build_country_message(country, countries), 
         parse_mode=ParseMode.HTML
     )
