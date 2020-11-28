@@ -485,13 +485,12 @@ def find_borders(countries, codes):
     return ', '.join(name_list)
 
 def build_country_name(country):
-    country_name = ""
-    try:
-        country_name = country["translations"]["it"]
-    except:
-        country_name = country["name"]
-        
-    return country_name
+    country_name = country["translations"]["it"]
+    
+    if not country_name:
+        return country_name
+    else:
+        return country["name"]
 
 def buildCtsMessage(qty):
     ctsList = content['CTS']
