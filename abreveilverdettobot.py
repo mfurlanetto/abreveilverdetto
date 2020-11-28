@@ -318,8 +318,11 @@ def country_command(update, context):
     logger.info('[flag_path] : {}'.format(flag_path))
     
     response = urlopen(Request(country["flag"])).read()
+    logger.info('[response] : {}'.format(response))
+    
     new_bites = svg2png(bytestring=response,
                         write_to=None)
+    logger.info('[new_bites] : {}'.format(new_bites))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
