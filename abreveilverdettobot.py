@@ -456,10 +456,9 @@ def cocktail_command(update, context):
 
     reqRecipes = Request(config['cocktail']['url'])
     recipes = json.loads(urlopen(reqRecipes).read().decode())
-    index = 0
-    message = '{}\n'.format(len(recipes))
-    message += '<b>\"{}\"</b>\n'.format(recipes[index]['name'].upper())
-    message += '<i>{}</i>\n'.format(recipes[index]['category'])
+    index_drink = randrange(len(recipes))
+    message = '<b>\"{}\"</b>\n'.format(recipes[index_drink]['name'].upper())
+    message += '<i>{}</i>\n'.format(recipes[index_drink]['category'])
 
     query.edit_message_text(
         text=message, 
