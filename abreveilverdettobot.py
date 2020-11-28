@@ -19,6 +19,7 @@ start - Lista dei comandi
 """
 
 import logging, json, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
+import base64
 from cairosvg import svg2png
 from PIL import Image
 from io import BytesIO
@@ -330,7 +331,7 @@ def country_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=Image.open(BytesIO(new_bites)),
+        photo=base64.decodebytes(Image.open(BytesIO(new_bites))),
         caption=build_country_message(country, countries), 
         parse_mode=ParseMode.HTML
     ) 
