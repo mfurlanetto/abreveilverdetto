@@ -459,7 +459,7 @@ def cocktail_command(update, context):
     index = 0
     message = '{}\n'.format(len(recipes))
     message += '<b>\"{}\"</b>\n'.format(recipes[index]['name'].upper())
-    message += '<i>{}</i>\n'.format(recipes[index)['category'])
+    message += '<i>{}</i>\n'.format(recipes[index]['category'])
 
     query.edit_message_text(
         text=message, 
