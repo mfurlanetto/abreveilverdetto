@@ -319,6 +319,16 @@ def country_command(update, context):
     
     svg2png(url=country["flag"], write_to=flag_path)
     
+    message = "<b>{}</b>\n".format(build_country_name(country))
+    message += "Capitale: {}\n".format(country["capital"])
+    message += "Paese in: {}\n".format(country["region"])
+    message += "Popolazione: {:,.0f}\n".format(country["population"])
+    message += "Moneta: {} ({})\n".format(country["currencies"][0]["name"], country["currencies"][0]["code"])
+    message += "Lingua: {}\n".format(country["languages"][0]["name"])
+    message += "Fuso orario: {}".format(country["timezones"][0])
+    if (len(country["borders"]) > 0): 
+        message += "Confini: {}".format(find_borders(countries, country["borders"]))
+    
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
         message_id=update.effective_message.message_id
@@ -326,7 +336,7 @@ def country_command(update, context):
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
         photo=open(flag_path, 'rb'),
-        caption=build_country_message(country, countries), 
+        caption=message, 
         parse_mode=ParseMode.HTML
     )
     
@@ -482,18 +492,6 @@ def build_country_name(country):
         country_name = country["name"]
         
     return country_name
-
-def build_country_message(country, countries):
-    message = "<b>{}</b>\n".format(build_country_name(country))
-    message += "Capitale: {}\n".format(country["capital"])
-    message += "Continente: {}\n".format(country["region"])
-    message += "Popolazione: {:,.0f}\n".format(country["population"])
-    message += "Moneta: {} ({})\n".format(country["currencies"][0]["name"], country["currencies"][0]["code"])
-    message += "Lingua: {}\n".format(country["languages"][0]["name"])
-    if (len(country["borders"]) > 0): 
-        message += "Confina con: {}".format(find_borders(countries, country["borders"]))
-    
-    return message
 
 def buildCtsMessage(qty):
     ctsList = content['CTS']
