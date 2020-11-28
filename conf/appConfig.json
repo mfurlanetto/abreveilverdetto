@@ -22,5 +22,8 @@
     },
     "countries": {
         "url": "https://restcountries.eu/rest/v2/all"
+    },
+    "cocktail": {
+        "url": "https://raw.githubusercontent.com/teijo/iba-cocktails/master/recipes.json"
     }
 }

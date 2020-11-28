@@ -47,7 +47,7 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 
-SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY = range(14)
+SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL = range(15)
 
 HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
@@ -94,7 +94,8 @@ def start_command(update, context):
         ],        
         [
             InlineKeyboardButton(u'\U0001F995' + " pokemon", callback_data=str(POKEMON)),            
-            InlineKeyboardButton(u'\U0001F30D' + " nazione", callback_data=str(COUNTRY))
+            InlineKeyboardButton(u'\U0001F30D' + " nazione", callback_data=str(COUNTRY)),
+            InlineKeyboardButton(u'\U0001F378' + " nazione", callback_data=str(COCKTAIL)),
         ]
        
     ]
@@ -448,6 +449,25 @@ def pokemon_command(update, context):
     
     return ConversationHandler.END
 
+def cocktail_command(update, context):
+    """Send a message when the command /cocktail is issued."""
+    query = update.callback_query
+    query.answer()
+
+    reqRecipes = Request(config['cocktail']['url'])
+    recipes = json.loads(urlopen(reqRecipes).read().decode())
+    index = 0
+    message = '{}\n'.format(len(recipes))
+    message += '<b>\"{}\"</b>\n'.format(recipes[str(index)]['name'].upper())
+    message += '<i>{}</i>\n'.format(recipes[str(index)]['category'])
+
+    query.edit_message_text(
+        text=message, 
+        parse_mode=ParseMode.HTML
+    )
+
+    return ConversationHandler.END
+
 def help_command(update, context):
     """Send a message when the command /help is issued."""
     user = update.message.from_user
@@ -574,7 +594,8 @@ def main():
                 CallbackQueryHandler(centocentocento_command, pattern='^' + str(CENTOCENTOCENTO) + '$'),
                 CallbackQueryHandler(ghesboro_command, pattern='^' + str(GHESBORO) + '$'),
                 CallbackQueryHandler(pokemon_command, pattern='^' + str(POKEMON) + '$'),
-                CallbackQueryHandler(country_command, pattern='^' + str(COUNTRY) + '$')
+                CallbackQueryHandler(country_command, pattern='^' + str(COUNTRY) + '$'),
+                CallbackQueryHandler(cocktail_command, pattern='^' + str(COCKTAIL) + '$')
             ],
             1: [
                 CallbackQueryHandler(ctsCommandHandler, pattern='^(' + str(5) + '|' + str(10) + ')$')
