@@ -95,7 +95,7 @@ def start_command(update, context):
         [
             InlineKeyboardButton(u'\U0001F995' + " pokemon", callback_data=str(POKEMON)),            
             InlineKeyboardButton(u'\U0001F30D' + " nazione", callback_data=str(COUNTRY)),
-            InlineKeyboardButton(u'\U0001F378' + " nazione", callback_data=str(COCKTAIL)),
+            InlineKeyboardButton(u'\U0001F378' + " cocktail", callback_data=str(COCKTAIL)),
         ]
        
     ]
@@ -458,8 +458,8 @@ def cocktail_command(update, context):
     recipes = json.loads(urlopen(reqRecipes).read().decode())
     index = 0
     message = '{}\n'.format(len(recipes))
-    message += '<b>\"{}\"</b>\n'.format(recipes[str(index)]['name'].upper())
-    message += '<i>{}</i>\n'.format(recipes[str(index)]['category'])
+    message += '<b>\"{}\"</b>\n'.format(recipes[index]['name'].upper())
+    message += '<i>{}</i>\n'.format(recipes[index)['category'])
 
     query.edit_message_text(
         text=message, 
