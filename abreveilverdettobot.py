@@ -314,15 +314,10 @@ def country_command(update, context):
     country = countries[index_country]
     country_code = country["alpha3Code"].lower()  
       
-    flag_filename = "{}.png".format(country_code)
-    logger.info('[url] : {}'.format(country["flag"]))
-    
+    flag_filename = "{}.png".format(country_code)    
     flag_path = buildPath("media/flags/{}".format(flag_filename))
-    logger.info('[flag_path] : {}'.format(flag_path))
     
-    svg2png(url=country["flag"], write_to=flag_path)    
-    
-    logger.info('[svg2png] : DONE')
+    svg2png(url=country["flag"], write_to=flag_path)
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -493,9 +488,10 @@ def build_country_message(country, countries):
     message += "Capitale: {}\n".format(country["capital"])
     message += "Continente: {}\n".format(country["region"])
     message += "Popolazione: {}\n".format(country["population"])
-    message += "Moneta: {}\n".format(country["currencies"][0]["symbol"])
+    message += "Moneta: {} ({})\n".format(country["currencies"][0]["name"], country["currencies"][0]["code"])
     message += "Lingua: {}\n".format(country["languages"][0]["name"])
-    message += "Confina con: {}".format(find_borders(countries, country["borders"]))
+    if (len(country["borders"]) > 0): 
+        message += "Confina con: {}".format(find_borders(countries, country["borders"]))
     
     return message
 
