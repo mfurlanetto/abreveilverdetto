@@ -385,15 +385,20 @@ def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
     
+    key = "value"
+    old_value = 0
+    if context.user_data is None:
+        context.user_data = {}
+    elif key in context.user_data:
+        old_value = context.user_data[key]
+    new_value = 5 + randrange(0, 100, 5)
+    context.user_data[key] = new_value
+
     numbers_dict = emojis.numbers
-    value = 5 + randrange(0, 100, 5)
-    new_value = []
-    
-    for n in str(value):
-        new_value.append(numbers_dict.get(n))
+    new_value_formatted = [numbers_dict.get(n) for n in str(new_value)]
     
     query.edit_message_text(
-        text=" ".join(new_value), 
+        text="{}\nPrevious value was {}".format(" ".join(new_value_formatted), old_value), 
         parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
@@ -441,7 +446,6 @@ def pokemon_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        #photo=config['pokemon']['photo'].format("{:03d}".format(index_pokemon)),
         photo=image,
         caption=message, 
         parse_mode=ParseMode.HTML
@@ -606,6 +610,7 @@ def main():
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
+        persistent=True
     )
 
     dp.add_handler(conv_handler)
