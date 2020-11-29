@@ -387,17 +387,19 @@ def centocentocento_command(update, context):
     query.answer()
     
     new_value = 5 + randrange(0, 100, 5)
-    last = new_value
     key = "previous_value"
     if key in context.user_data:
         new_value += context.user_data[key]
         del context.user_data[key]
+    else:
+        context.user_data[key] = new_value
 
-    numbers_dict = emojis.numbers
-    new_value_formatted = [numbers_dict.get(n) for n in str(new_value)]
+    message = " ".join([emojis.numbers.get(n) for n in str(new_value)])
+    if (new_value > 100):
+        message += "\nLoser"
     
     query.edit_message_text(
-        text="{}\nLast {}".format(" ".join(new_value_formatted), last), 
+        text=message, 
         parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
