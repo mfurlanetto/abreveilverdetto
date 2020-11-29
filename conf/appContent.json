@@ -315,7 +315,7 @@
   "ItalianRegions": [
     {
       "name": "Lombardia",
-      "covid_severity_color": "red"
+      "covid_severity_color": "orange"
     },
     {
       "name": "Lazio",
@@ -327,7 +327,7 @@
     },
     {
       "name": "Sicilia",
-      "covid_severity_color": "orange"
+      "covid_severity_color": "yellow"
     },
     {
       "name": "Veneto",
@@ -339,7 +339,7 @@
     },
     {
       "name": "Piemonte",
-      "covid_severity_color": "red"
+      "covid_severity_color": "orange"
     },
     {
       "name": "Puglia",
@@ -351,7 +351,7 @@
     },
     {
       "name": "Calabria",
-      "covid_severity_color": "red"
+      "covid_severity_color": "orange"
     },
     {
       "name": "Sardegna",
@@ -359,7 +359,7 @@
     },
     {
       "name": "Liguria",
-      "covid_severity_color": "orange"
+      "covid_severity_color": "yellow"
     },
     {
       "name": "Marche",
@@ -367,7 +367,7 @@
     },
     {
       "name": "Abruzzo",
-      "covid_severity_color": "orange"
+      "covid_severity_color": "red"
     },
     {
       "name": "Friuli-Venezia Giulia",
