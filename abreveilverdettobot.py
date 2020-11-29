@@ -52,6 +52,7 @@ SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI,
 HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
 THE_SENTENCE = 'a breve il verdetto'
+HANDLER_NAME = "abreveilverdetto"
 
 
 logger = logging.getLogger(__name__)
@@ -611,6 +612,7 @@ def main():
         },
         fallbacks=[CallbackQueryHandler(end)],
         persistent=True
+        , name=HANDLER_NAME
     )
 
     dp.add_handler(conv_handler)
