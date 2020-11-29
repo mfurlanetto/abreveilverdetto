@@ -322,8 +322,8 @@ def country_command(update, context):
     
     message = "<b>{}</b>\n".format(build_country_name(country))
     message += "Capitale: {}\n".format(country["capital"])
-    message += "Paese in: {}\n".format(country["region"])
-    message += "Popolazione: {:,.0f}\n".format(country["population"])
+    message += "Paese in {}\n".format(country["region"])
+    message += "Popolazione: <i>{:,.0f}</i>\n".format(country["population"])
     message += "Moneta: {} ({})\n".format(country["currencies"][0]["name"], country["currencies"][0]["code"])
     message += "Lingua: {}\n".format(country["languages"][0]["name"])
     message += "Fuso orario: {}\n".format(country["timezones"][0])
@@ -432,7 +432,7 @@ def pokemon_command(update, context):
         image = config['pokemon']['photo'].format("{:03d}".format(index_pokemon))
     else:
         message = '#0 - <b>CESARA BUONAMICI</b>\n'
-        message += "Type(s): {}{}".format(heart,heart)
+        message += "Type(s): {0}{0}".format(heart)
         image = open(buildPath("media/others/cesara.jpg"), 'rb')
 
     query.bot.delete_message(
