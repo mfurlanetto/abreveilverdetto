@@ -389,6 +389,7 @@ def centocentocento_command(update, context):
     new_value = 5 + randrange(0, 100, 5)
     key = "previous_value"
     if key in context.user_data:
+        message += "Previous {} \n".format(context.user_data[key])
         new_value += context.user_data[key]
         del context.user_data[key]
     else:
