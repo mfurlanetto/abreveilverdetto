@@ -396,7 +396,7 @@ def centocentocento_command(update, context):
     else:
         context.user_data[key] = new_value
 
-    message = " ".join([emojis.numbers.get(n) for n in str(new_value)])
+    message += " ".join([emojis.numbers.get(n) for n in str(new_value)])
     if (new_value > 100):
         message += "\nLoser"
     
