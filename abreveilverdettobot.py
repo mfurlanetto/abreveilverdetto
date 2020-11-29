@@ -29,7 +29,7 @@ from urllib.error import URLError, HTTPError
 
 from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler, PicklePersistence
 
 os.environ['TZ'] = 'Europe/Rome'
 time.tzset()
@@ -575,12 +575,14 @@ def main():
     port = config['bot']['port']
     listen = config['bot']['listen']
 
+    # Create the Updater and pass it your bot's token.
+    persistence = PicklePersistence(filename='conversationbot')
 
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater(token, use_context=True)
+    updater = Updater(token, use_context=True, persistence = persistence)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
