@@ -386,20 +386,18 @@ def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
     
-    key = "value"
-    old_value = 0
-    if context.user_data is None:
-        context.user_data = {}
-    elif key in context.user_data:
-        old_value = context.user_data[key]
     new_value = 5 + randrange(0, 100, 5)
-    context.user_data[key] = new_value
+    last = new_value
+    key = "previous_value"
+    if key in context.user_data:
+        new_value += context.user_data[key]
+        del context.user_data[key]
 
     numbers_dict = emojis.numbers
     new_value_formatted = [numbers_dict.get(n) for n in str(new_value)]
     
     query.edit_message_text(
-        text="{}\nPrevious value was {}".format(" ".join(new_value_formatted), old_value), 
+        text="{}\nLast {}".format(" ".join(new_value_formatted), last), 
         parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
