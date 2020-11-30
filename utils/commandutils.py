@@ -21,7 +21,7 @@ def get_sign(value):
     return '+' if value > 0 else ''
 
 def get_variation(variation):
-    return '{}{}'.format(get_sign(variation), variation)
+    return '{}{:,.0f}'.format(get_sign(variation), variation)
 
 def get_severity_color(comune, regioni):
     regione_comune = comune['regione']['nome']
