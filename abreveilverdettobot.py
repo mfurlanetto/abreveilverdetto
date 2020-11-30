@@ -392,18 +392,32 @@ def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
     
-    new_value = 5 + randrange(0, 100, 5)
-    previous_value_key = "previous_value"
-    if previous_value_key in context.user_data:
-        new_value += context.user_data.pop(previous_value_key)
-    elif new_value < 100:
-        context.user_data[previous_value_key] = new_value
+    PREVIOUS_VALUE_KEY = "previous_value"
+    MAX_VALUE_KEY = "max_value"
 
-    message_lines = [" ".join([emojis.numbers.get(n) for n in str(new_value)])]
-    message_lines.append(centocentocento_result_emoji(new_value))
-    
+    new_value = 5 + randrange(0, 100, 5)
+    if PREVIOUS_VALUE_KEY in context.user_data:
+        new_value += context.user_data.pop(PREVIOUS_VALUE_KEY)
+    elif new_value < 100:
+        context.user_data[PREVIOUS_VALUE_KEY] = new_value
+    message_lines = ["".join([emojis.numbers.get(n) for n in str(new_value)])]
+
+    message_lines += centocentocento_result_emoji(new_value)
+
+    if new_value < 100:
+        DATE_KEY = "date"
+        VALUE_KEY = "value"
+        is_best = True #optimistic approach
+        today = datetime.date.today()
+        if MAX_VALUE_KEY in context.user_data:
+            current_max_detail = context.user_data[MAX_VALUE_KEY]
+            is_best = current_max_detail[DATE_KEY] < today or current_max_detail[VALUE_KEY] < new_value
+        if is_best == True:
+            context.user_data[MAX_VALUE_KEY] = {DATE_KEY: today, VALUE_KEY: new_value}
+            message_lines += "Best result today!"
+
     query.edit_message_text(
-        text="\n".join(message_lines), 
+        text=" ".join(message_lines), 
         parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
