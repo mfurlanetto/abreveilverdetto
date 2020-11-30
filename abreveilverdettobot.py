@@ -381,25 +381,29 @@ def fibonacci_command(update, context):
     )
     return ConversationHandler.END
 
+def centocentocento_result_emoji(value):
+    if value < 100:
+        return emojis.centocentocentoresult["below"]
+    elif value == 100:
+        return emojis.centocentocentoresult["win"]
+    return emojis.centocentocentoresult["above"]
 
 def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
     
     new_value = 5 + randrange(0, 100, 5)
-    key = "previous_value"
-    if key in context.user_data:
-        new_value += context.user_data[key]
-        del context.user_data[key]
+    previous_value_key = "previous_value"
+    if previous_value_key in context.user_data:
+        new_value += context.user_data.pop(previous_value_key)
     elif new_value < 100:
-        context.user_data[key] = new_value
+        context.user_data[previous_value_key] = new_value
 
-    message = " ".join([emojis.numbers.get(n) for n in str(new_value)])
-    if (new_value > 100):
-        message += "\nLoser"
+    message_lines = [" ".join([emojis.numbers.get(n) for n in str(new_value)])]
+    message_lines.append(centocentocento_result_emoji(new_value))
     
     query.edit_message_text(
-        text=message, 
+        text="\n".join(message_lines), 
         parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END

@@ -84,3 +84,9 @@ numbers = {
     "8": u'\U00000038'u'\U0000fe0f'u'\U000020e3',
     "9": u'\U00000039'u'\U0000fe0f'u'\U000020e3'
 }
+
+centocentocentoresult = {
+    "below": u'\U0001F44E'
+    , "win": u'\U0001F4AF'
+    , "above": u'\U0001F595'
+}
