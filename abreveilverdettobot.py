@@ -243,7 +243,7 @@ def covid_command(update, context):
     percPosTamp = 100 * COVID[-1]['nuovi_positivi'] / varTamponi
     
     message = 'Ultimo aggiornamento: {} alle {}\n'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H:%M"))
-    message += '{} {} <i>{:,.0f}</i>\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.get_variation(nuoviPositivi))
+    message += '{} {} <i>{}</i>\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.get_variation(nuoviPositivi))
     message += '{} {} <i>{:,.0f}</i> ({})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.get_variation(varOspedalizzati))
     message += '{} {} <i>{:,.0f}</i> ({})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.get_variation(varTerapieI))
     message += '{} {} <i>{:,.0f}</i> ({})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.get_variation(varIsolamento))
