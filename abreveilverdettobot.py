@@ -404,7 +404,7 @@ def centocentocento_command(update, context):
 
     message_lines += centocentocento_result_emoji(new_value)
 
-    if new_value < 100:
+    if new_value <= 100:
         DATE_KEY = "date"
         VALUE_KEY = "value"
         is_best = True #optimistic approach
