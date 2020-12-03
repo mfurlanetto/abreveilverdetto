@@ -323,12 +323,11 @@ def country_command(update, context):
     
     message = "<b>{}</b>\n".format(build_country_name(country))
     message += "Capitale: {}\n".format(country["capital"])
-    message += "Paese in {}\n".format(country["region"])
+    message += "Paese in {}\n".format(get_country_region(country))
     message += "Popolazione: <i>{:,.0f}</i>\n".format(country["population"])
-    message += "Moneta: {} ({})\n".format(country["currencies"][0]["name"], country["currencies"][0]["code"])
-    message += "Lingua: {}\n".format(country["languages"][0]["name"])
-    message += "Fuso orario: {}\n".format(country["timezones"][0])
-    print(" - ".join(map(lambda x: x["name"], country["languages"])))
+    message += "Moneta: {}\n".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"])))
+    message += "Lingua: {}\n".format(", ".join(map(lambda x : x["name"], country["languages"])))
+    message += "Fuso orario: <i>{}</i>\n".format(", ".join(country["timezones"]))
     if (len(country["borders"]) > 0): 
         message += "Confini: {}".format(find_borders(countries, country["borders"]))
     
@@ -532,10 +531,17 @@ def find_borders(countries, codes):
             name_list.append(build_country_name(result))
     return ', '.join(name_list)
 
+def get_country_region(country):
+    region = country["region"]
+    subregion = country["subregion"]
+    if (subregion != ""):
+        region += ", {}".format(subregion)
+    return region
+
 def build_country_name(country):
     country_name = country["translations"]["it"]
     
-    if not country_name:
+    if not country_name or country_name == "":
         return country_name
     else:
         return country["name"]
