@@ -243,12 +243,12 @@ def covid_command(update, context):
     percPosTamp = 100 * COVID[-1]['nuovi_positivi'] / varTamponi
     
     message = 'Ultimo aggiornamento: {} alle {}\n'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H:%M"))
-    message += '{} {} <i>{}</i>\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.get_variation(nuoviPositivi))
-    message += '{} {} <i>{:,.0f}</i> ({})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.get_variation(varOspedalizzati))
-    message += '{} {} <i>{:,.0f}</i> ({})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.get_variation(varTerapieI))
-    message += '{} {} <i>{:,.0f}</i> ({})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.get_variation(varIsolamento))
-    message += '{} {} <i>{:,.0f}</i> ({})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], utils.get_variation(varDeceduti))
-    message += '{} {} <i>{:,.0f}</i> ({})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], utils.get_variation(varTamponi))
+    message += '{} {}  <i>{}</i>\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.get_variation(nuoviPositivi))
+    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.get_variation(varOspedalizzati))
+    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.get_variation(varTerapieI))
+    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.get_variation(varIsolamento))
+    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], utils.get_variation(varDeceduti))
+    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], utils.get_variation(varTamponi))
     message += '{} / {} {:.3}%'.format(covid_dict['biohazard'], covid_dict['testTube'], percPosTamp)
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
@@ -328,6 +328,7 @@ def country_command(update, context):
     message += "Moneta: {} ({})\n".format(country["currencies"][0]["name"], country["currencies"][0]["code"])
     message += "Lingua: {}\n".format(country["languages"][0]["name"])
     message += "Fuso orario: {}\n".format(country["timezones"][0])
+    print(map(lambda x: x["name"], country["languages"]))
     if (len(country["borders"]) > 0): 
         message += "Confini: {}".format(find_borders(countries, country["borders"]))
     
