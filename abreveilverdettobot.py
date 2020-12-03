@@ -328,7 +328,7 @@ def country_command(update, context):
     message += "Moneta: {} ({})\n".format(country["currencies"][0]["name"], country["currencies"][0]["code"])
     message += "Lingua: {}\n".format(country["languages"][0]["name"])
     message += "Fuso orario: {}\n".format(country["timezones"][0])
-    print(map(lambda x: x["name"], country["languages"]))
+    print(" - ".join(map(lambda x: x["name"], country["languages"])))
     if (len(country["borders"]) > 0): 
         message += "Confini: {}".format(find_borders(countries, country["borders"]))
     
