@@ -323,18 +323,18 @@ def country_command(update, context):
     
     message = []
     
-    message.push("<b>{}</b>".format(build_country_name(country)))
-    message.push("Capitale: {}".format(country["capital"]))
-    message.push("Paese in {}".format(get_country_region(country)))
-    message.push("Popolazione: <i>{:,.0f}</i>".format(country["population"]))
-    message.push("Area: {:,.0f} km²".format(country["area"]))
+    message.append("<b>{}</b>".format(build_country_name(country)))
+    message.append("Capitale: {}".format(country["capital"]))
+    message.append("Paese in {}".format(get_country_region(country)))
+    message.append("Popolazione: <i>{:,.0f}</i>".format(country["population"]))
+    message.append("Area: {:,.0f} km²".format(country["area"]))
     if country["gini"] is not None:
-        message.push("Coefficiente Gini: <b>{}</b>".format(country["gini"]))
-    message.push("Moneta: {}".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"]))))
-    message.push("Lingua: {}".format(", ".join(map(lambda x : x["name"], country["languages"]))))
-    message.push("Fuso orario: <i>{}</i>".format(", ".join(country["timezones"])))
+        message.append("Coefficiente Gini: <b>{}</b>".format(country["gini"]))
+    message.append("Moneta: {}".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"]))))
+    message.append("Lingua: {}".format(", ".join(map(lambda x : x["name"], country["languages"]))))
+    message.append("Fuso orario: <i>{}</i>".format(", ".join(country["timezones"])))
     if (len(country["borders"]) > 0): 
-        message.push("Confini: {}".format(find_borders(countries, country["borders"])))
+        message.append("Confini: {}".format(find_borders(countries, country["borders"])))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
