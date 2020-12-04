@@ -321,18 +321,20 @@ def country_command(update, context):
     
     svg2png(url=country["flag"], write_to=flag_path)
     
-    message = "<b>{}</b>\n".format(build_country_name(country))
-    message += "Capitale: {}\n".format(country["capital"])
-    message += "Paese in {}\n".format(get_country_region(country))
-    message += "Popolazione: <i>{:,.0f}</i>\n".format(country["population"])
-    message += "Area: {:,.0f} km²".format(country["area"])
+    message = []
+    
+    message.push("<b>{}</b>".format(build_country_name(country)))
+    message.push("Capitale: {}".format(country["capital"]))
+    message.push("Paese in {}".format(get_country_region(country)))
+    message.push("Popolazione: <i>{:,.0f}</i>".format(country["population"]))
+    message.push("Area: {:,.0f} km²".format(country["area"]))
     if country["gini"] is not None:
-        message += "Coefficiente Gini: <b>{}</b>".format(country["gini"])
-    message += "Moneta: {}\n".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"])))
-    message += "Lingua: {}\n".format(", ".join(map(lambda x : x["name"], country["languages"])))
-    message += "Fuso orario: <i>{}</i>\n".format(", ".join(country["timezones"]))
+        message.push("Coefficiente Gini: <b>{}</b>".format(country["gini"]))
+    message.push("Moneta: {}".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"]))))
+    message.push("Lingua: {}".format(", ".join(map(lambda x : x["name"], country["languages"]))))
+    message.push("Fuso orario: <i>{}</i>".format(", ".join(country["timezones"])))
     if (len(country["borders"]) > 0): 
-        message += "Confini: {}".format(find_borders(countries, country["borders"]))
+        message.push("Confini: {}".format(find_borders(countries, country["borders"])))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -341,7 +343,7 @@ def country_command(update, context):
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
         photo=open(flag_path, 'rb'),
-        caption=message, 
+        caption="\n".join(message), 
         parse_mode=ParseMode.HTML
     )
     
