@@ -325,6 +325,9 @@ def country_command(update, context):
     message += "Capitale: {}\n".format(country["capital"])
     message += "Paese in {}\n".format(get_country_region(country))
     message += "Popolazione: <i>{:,.0f}</i>\n".format(country["population"])
+    message += "Area: {:,.0f} km²".format(country["area"])
+    if country["gini"] is not None:
+        message += "Coefficiente Gini: <b>{}</b>".format(country["gini"])
     message += "Moneta: {}\n".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"])))
     message += "Lingua: {}\n".format(", ".join(map(lambda x : x["name"], country["languages"])))
     message += "Fuso orario: <i>{}</i>\n".format(", ".join(country["timezones"]))
