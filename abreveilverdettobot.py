@@ -546,7 +546,7 @@ def get_country_region(country):
 def build_country_name(country):
     country_name = country["translations"]["it"]
     
-    if not country_name or country_name == "":
+    if country_name is not None:
         return country_name
     else:
         return country["name"]
