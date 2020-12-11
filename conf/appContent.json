@@ -450,6 +450,21 @@
       "photo": "stazione_santa_maria_novella"
     },
     {
+      "name": "San Quirino",
+      "func": "Protettore dei templari",
+      "photo": "san_quirino"
+    },
+    {
+      "name": "San Quirico d'Orcia",
+      "func": "Protettore dei cipressi",
+      "photo": "san_quirico_dorcia"
+    },
+    {
+      "name": "San Remo",
+      "func": "Protettore dei festival musicali",
+      "photo": "sanremo"
+    },
+    {
       "name": "Sans Souci",
       "func": "Protettore delle birre",
       "photo": "sans_souci"
@@ -578,6 +593,11 @@
       "name": "San Miguel",
       "func": "Protettore della birra spagnola",
       "photo": "san_miguel"
+    },
+    {
+      "name": "Sam Pdoria",
+      "func": "Protettore dei besughi",
+      "photo": "sampdoria"
     }
   ]
 }
