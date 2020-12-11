@@ -420,6 +420,21 @@
       "photo": "san_dona_di_piave"
     },
     {
+      "name": "Santa Lucia di Piave",
+      "func": "Protettrice dell'antica Fiera",
+      "photo": "fiera_santa_lucia_di_piave"
+    },
+    {
+      "name": "San Giorgio di Nogaro",
+      "func": "Protettore della Bassa Friulana",
+      "photo": "san_giorgio_di_nogaro"
+    },
+    {
+      "name": "San Gimignano",
+      "func": "Protettore della torri",
+      "photo": "san_gimignano"
+    },
+    {
       "name": "Sans Souci",
       "func": "Protettore delle birre",
       "photo": "sans_souci"
@@ -441,7 +456,7 @@
     },
     {
       "name": "Sam Sonite",
-      "func": "Protettore delle patatine",
+      "func": "Protettore delle valigie",
       "photo": "samsonite"
     },
     {
@@ -483,6 +498,41 @@
       "name": "Sam Buca",
       "func": "Protettore dei liquori",
       "photo": "sambuca"
+    },
+    {
+      "name": "Santa Monica",
+      "func": "Protettrice dei bagnini",
+      "photo": "santa_monica_usa"
+    },
+    {
+      "name": "San Francisco",
+      "func": "Protettore delle carceri di massima sicurezza",
+      "photo": "san_francisco"
+    },
+    {
+      "name": "San Dokan",
+      "func": "Santo patrono di Mompracem e di tutta la Malesia",
+      "photo": "sandokan"
+    },
+    {
+      "name": "Sun Microsystem",
+      "func": "Protettore della programmazione a classi",
+      "photo": "sun_microsystem"
+    },
+    {
+      "name": "Saint Honoré",
+      "func": "Santo patrono dei pasticcieri francesi (Onorato di Amiens)",
+      "photo": "saint_honore"
+    },
+    {
+      "name": "San Tana",
+      "func": "Protettore dei chitarristi",
+      "photo": "santana"
+    },
+    {
+      "name": "San Tander",
+      "func": "Protettore dei banchieri",
+      "photo": "banca_santander"
     }
   ]
 }
