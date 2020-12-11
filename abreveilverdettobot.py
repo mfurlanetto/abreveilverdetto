@@ -47,7 +47,7 @@ def buildPath(relativePath):
 config = json.load(open(buildPath('conf/appConfig.json')))
 content = json.load(open(buildPath('conf/appContent.json')))
 
-SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL = range(15)
+SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI = range(16)
 
 HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
@@ -498,6 +498,24 @@ def cocktail_command(update, context):
         parse_mode=ParseMode.HTML
     )
 
+    return ConversationHandler.END
+
+def santi_command(update, context):
+    """Send a message when the command /santi is issued."""
+    query = update.callback_query
+    query.answer()
+
+    query.bot.delete_message(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id
+    )
+    query.bot.send_photo(
+        chat_id=update.effective_chat.id, 
+        photo=image,
+        caption=message, 
+        parse_mode=ParseMode.HTML
+    ) 
+    
     return ConversationHandler.END
 
 def help_command(update, context):
