@@ -425,6 +425,11 @@
       "photo": "fiera_santa_lucia_di_piave"
     },
     {
+      "name": "San Stino di Livenza",
+      "func": "Protettore dei fabbricatori di santini",
+      "photo": "san_stino_di_livenza"
+    },
+    {
       "name": "San Giorgio di Nogaro",
       "func": "Protettore della Bassa Friulana",
       "photo": "san_giorgio_di_nogaro"
@@ -433,6 +438,16 @@
       "name": "San Gimignano",
       "func": "Protettore della torri",
       "photo": "san_gimignano"
+    },
+    {
+      "name": "Santa Maria di Leuca",
+      "func": "Protettrice del tacco dello italico stivale",
+      "photo": "santa_maria_di_leuca"
+    },
+    {
+      "name": "Santa Maria Novella",
+      "func": "Protettrice della stazione fiorentina",
+      "photo": "stazione_santa_maria_novella"
     },
     {
       "name": "Sans Souci",
@@ -533,6 +548,36 @@
       "name": "San Tander",
       "func": "Protettore dei banchieri",
       "photo": "banca_santander"
+    },
+    {
+      "name": "Saint Bernardus",
+      "func": "Protettore dei frati birrari",
+      "photo": "st_bernardus"
+    },
+    {
+      "name": "Sam Pietrini",
+      "func": "Protettore delle sospensioni",
+      "photo": "sampietrini"
+    },
+    {
+      "name": "San Ificatore",
+      "func": "Protettore dell'igiene che elimina fino al 99,9% di germi e batteri",
+      "photo": "sanificatore"
+    },
+    {
+      "name": "San Gria",
+      "func": "Protettore della frutta alcolizzata",
+      "photo": "sangria"
+    },
+    {
+      "name": "San Gabriel",
+      "func": "Protettore della birra nostrana",
+      "photo": "san_gabriel"
+    },
+    {
+      "name": "San Miguel",
+      "func": "Protettore della birra spagnola",
+      "photo": "san_miguel"
     }
   ]
 }
