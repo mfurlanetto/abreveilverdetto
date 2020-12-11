@@ -473,6 +473,16 @@
       "name": "San Disk",
       "func": "Protettore delle memorie Flash",
       "photo": "sandisk"
+    },
+    {
+      "name": "San Bitter",
+      "func": "Protettore degli aperitivi analcolici",
+      "photo": "sanbitter"
+    },
+    {
+      "name": "Sam Buca",
+      "func": "Protettore dei liquori",
+      "photo": "sambuca"
     }
   ]
 }
