@@ -402,5 +402,77 @@
       "name": "Valle d'Aosta/Vallée d'Aoste",
       "covid_severity_color": "red"
     }
+  ],
+  "santi": [
+    {
+      "name": "San Daniele del Friuli",
+      "func": "Protettore dei prosciutti",
+      "photo": "prosciutto_crudo"
+    },
+    {
+      "name": "San Michele al Tagliamento",
+      "func": "Protettore delle spiagge",
+      "photo": "faro_bibione"
+    },
+    {
+      "name": "San Donà di Piave",
+      "func": "Protettore di gente illustre",
+      "photo": "san_dona_di_piave"
+    },
+    {
+      "name": "Sans Souci",
+      "func": "Protettore delle birre",
+      "photo": "sans_souci"
+    },
+    {
+      "name": "San Pellegrino",
+      "func": "Protettore dell'acqua e delle bibite gassate",
+      "photo": "san_pellegrino"
+    },
+    {
+      "name": "San Giovese",
+      "func": "Protettore del vino",
+      "photo": "sangiovese"
+    },
+    {
+      "name": "San Carlo",
+      "func": "Protettore delle patatine",
+      "photo": "san_carlo_patatine"
+    },
+    {
+      "name": "Sam Sonite",
+      "func": "Protettore delle patatine",
+      "photo": "samsonite"
+    },
+    {
+      "name": "Sam Montana",
+      "func": "Protettore del gelati",
+      "photo": "sammontana"
+    },
+    {
+      "name": "Sam Marzano",
+      "func": "Protettore dei pomodori",
+      "photo": "sammarzano"
+    },
+    {
+      "name": "San Dalo",
+      "func": "Protettore dei tedeschi con i calzini",
+      "photo": "sandali"
+    },
+    {
+      "name": "Sam Pei",
+      "func": "Protettore dei pescatori con grandi orecchie a sventola",
+      "photo": "sampei"
+    },
+    {
+      "name": "San Siro",
+      "func": "Protettore di Serpenti Nerazzurri e Diavoli Rossoneri",
+      "photo": "stadio_san_siro"
+    },
+    {
+      "name": "San Disk",
+      "func": "Protettore delle memorie Flash",
+      "photo": "sandisk"
+    }
   ]
 }
