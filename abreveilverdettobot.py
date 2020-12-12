@@ -102,7 +102,10 @@ def start_command(update, context):
         [
             InlineKeyboardButton(u'\U0001F995' + " pokemon", callback_data=str(POKEMON)),            
             InlineKeyboardButton(u'\U0001F30D' + " nazione", callback_data=str(COUNTRY)),
+        ],        
+        [
             InlineKeyboardButton(u'\U0001F378' + " cocktail", callback_data=str(COCKTAIL)),
+            InlineKeyboardButton(u'\U0001F47C' + " santi", callback_data=str(SANTI)),
         ]
        
     ]
@@ -538,13 +541,18 @@ def santi_command(update, context):
     query = update.callback_query
     query.answer()
 
+    index_santi = randrange(len(content['santi']))
+    santo = content['santi'][index_santi]
+    message = '<b>{}</b>\n'.format(santo['name'].upper())
+    message += '<i>{}</i>\n'.format(santo['func'])
+
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
         message_id=update.effective_message.message_id
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=image,
+        photo=open(buildPath("media/santi/{}.jpg".format(santo['photo'])), 'rb'),
         caption=message, 
         parse_mode=ParseMode.HTML
     ) 
@@ -687,7 +695,8 @@ def main():
                 CallbackQueryHandler(ghesboro_command, pattern='^' + str(GHESBORO) + '$'),
                 CallbackQueryHandler(pokemon_command, pattern='^' + str(POKEMON) + '$'),
                 CallbackQueryHandler(country_command, pattern='^' + str(COUNTRY) + '$'),
-                CallbackQueryHandler(cocktail_command, pattern='^' + str(COCKTAIL) + '$')
+                CallbackQueryHandler(cocktail_command, pattern='^' + str(COCKTAIL) + '$'),
+                CallbackQueryHandler(santi_command, pattern='^' + str(SANTI) + '$')
             ],
             1: [
                 CallbackQueryHandler(ctsCommandHandler, pattern='^(' + str(5) + '|' + str(10) + ')$')
