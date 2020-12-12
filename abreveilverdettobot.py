@@ -39,6 +39,9 @@ logger = logging.getLogger(__name__)
 def buildPath(relative_path):
     return os.path.join(os.path.dirname(__file__), relative_path)
 
+def directorySize(dir):
+    return len([name for name in os.listdir(dir) if os.path.isfile(os.path.join(dir, name))])
+
 def loadJSON(relative_path):
     return json.load(open(buildPath('{}.json'.format(relative_path))))
 
@@ -135,7 +138,7 @@ def torta_command(update, context):
     query = update.callback_query
     query.answer()
     
-    index = randrange(7)
+    index = randrange(directorySize("media/tortamele"))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
