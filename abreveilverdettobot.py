@@ -419,7 +419,7 @@ def centocentocento_command(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     message_lines = ["".join([emojis.numbers.get(n) for n in str(new_value)])]
-    message_lines += "Another run?"
+    message_lines += ["Another run?"]
     query.edit_message_text("\n".join(message_lines), reply_markup=reply_markup)
     return 2
 
