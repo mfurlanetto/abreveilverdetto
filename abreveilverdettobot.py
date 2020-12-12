@@ -464,8 +464,10 @@ def centocentocento_printresult(context, query, value, run_number):
     current_max_detail = chat_data[MAX_VALUE_KEY] if MAX_VALUE_KEY in chat_data else None
     today = datetime.date.today()
     if is_best(value, run_number, current_max_detail, today):
-        chat_data[MAX_VALUE_KEY] = {DATE_KEY: today, USER_KEY: context.user, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
-        message_lines += "This is the best result for today!"
+        chat_data[MAX_VALUE_KEY] = {DATE_KEY: today, USER_KEY: context.username, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
+        message_lines += "This is the best score for today!"
+    else:
+        message_lines += "Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[run_number])
 
     query.edit_message_text(
         text=" ".join(message_lines), 
