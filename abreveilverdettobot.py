@@ -705,7 +705,7 @@ def main():
         },
         fallbacks=[CallbackQueryHandler(end)],
         persistent=True, 
-        name=config['handlerName']
+        name=config['bot']['handlerName']
     )
 
     dp.add_handler(conv_handler)
