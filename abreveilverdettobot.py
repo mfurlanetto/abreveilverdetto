@@ -401,6 +401,15 @@ def centocentocento_generate_new_value():
 def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
+
+    dispatcher = context.dispatcher
+    i = 1
+    if "counter" in dispatcher.chat_data:
+        i = dispatcher.chat_data["counter"] + 1
+    dispatcher.chat_data["counter"] = i
+    logger.info(dispatcher.chat_data["counter"])
+    if i >= 5:
+        del dispatcher.chat_data["counter"]
     
     new_value = centocentocento_generate_new_value()
     run_number = 1
