@@ -54,6 +54,12 @@ BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te cop
 THE_SENTENCE = 'a breve il verdetto'
 HANDLER_NAME = "abreveilverdetto"
 
+NEW_VALUE_KEY = "new_value"
+MAX_VALUE_KEY = "max_value"
+DATE_KEY = "date"
+VALUE_KEY = "value"
+RUN_NUMBER_KEY = "run_number"
+NUMBER_OF_RUNS_KEY = "number_of_runs"
 
 logger = logging.getLogger(__name__)
 
@@ -386,46 +392,73 @@ def fibonacci_command(update, context):
     )
     return ConversationHandler.END
 
-def centocentocento_result_emoji(value):
-    if value < 100:
-        return emojis.centocentocentoresult["below"]
-    elif value == 100:
-        return emojis.centocentocentoresult["win"]
-    return emojis.centocentocentoresult["above"]
+def centocentocento_generate_new_value():
+    return 5 + randrange(0, 100, 5)
 
 def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
     
-    PREVIOUS_VALUE_KEY = "previous_value"
-    MAX_VALUE_KEY = "max_value"
+    new_value = centocentocento_generate_new_value()
+    run_number = 1
 
-    new_value = 5 + randrange(0, 100, 5)
-    if PREVIOUS_VALUE_KEY in context.user_data:
-        new_value += context.user_data.pop(PREVIOUS_VALUE_KEY)
-    elif new_value < 100:
-        context.user_data[PREVIOUS_VALUE_KEY] = new_value
-    message_lines = ["".join([emojis.numbers.get(n) for n in str(new_value)])]
+    if new_value == 100:
+        return centocentocento_printresult(context, query, new_value, True, run_number) #by definition, there is nothing better than 100
 
-    message_lines += centocentocento_result_emoji(new_value)
+    #otherwise, ask for another run or not
+    context.user_data[NEW_VALUE_KEY] = new_value
+    context.user_data[RUN_NUMBER_KEY] = run_number
+    keyboard = [
+        [
+            InlineKeyboardButton("No", callback_data="No"),
+            InlineKeyboardButton("Yes", callback_data="Yes"),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text("Another run?", reply_markup=reply_markup)
+    return 2
 
-    if new_value <= 100:
-        DATE_KEY = "date"
-        VALUE_KEY = "value"
-        is_best = True #optimistic approach
-        today = datetime.date.today()
-        if MAX_VALUE_KEY in context.user_data:
-            current_max_detail = context.user_data[MAX_VALUE_KEY]
-            is_best = current_max_detail[DATE_KEY] < today or current_max_detail[VALUE_KEY] < new_value
-        if is_best == True:
-            context.user_data[MAX_VALUE_KEY] = {DATE_KEY: today, VALUE_KEY: new_value}
-            message_lines += "Best result today!"
+def centocentocento_anotherrun(update, context):
+    query = update.callback_query
+    query.answer()
+
+    new_value = context.user_data.pop(NEW_VALUE_KEY) + centocentocento_generate_new_value()
+    run_number = context.user_data.pop(RUN_NUMBER_KEY) + 1
+
+    is_best = True #optimistic approach
+    if new_value > 100:
+        is_best = False
+    elif MAX_VALUE_KEY in context.user_data:
+        current_max_detail = context.user_data[MAX_VALUE_KEY]
+        if current_max_detail[DATE_KEY] > datetime.date.today():
+            is_best = False
+        elif current_max_detail[DATE_KEY] == datetime.date.today():
+            if current_max_detail[VALUE_KEY] > new_value:
+                is_best = False
+            elif current_max_detail[VALUE_KEY] == new_value and current_max_detail[NUMBER_OF_RUNS_KEY] < run_number:
+                is_best = False
+    
+    return centocentocento_printresult(context, query, new_value, is_best, run_number)
+
+def centocentocento_printresult(context, query, value, is_best, run_number):
+    message_lines = ["".join([emojis.numbers.get(n) for n in str(value)])]
+    message_lines += centocentocento_result_emoji(value)
+    if is_best == True:
+        context.user_data[MAX_VALUE_KEY] = {DATE_KEY: datetime.date.today(), VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
+        message_lines += "Best result today!"
 
     query.edit_message_text(
         text=" ".join(message_lines), 
         parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
+
+def centocentocento_result_emoji(value):
+    if value < 100:
+        return emojis.centocentocentoresult["below"]
+    elif value == 100:
+        return emojis.centocentocentoresult["win"]
+    return emojis.centocentocentoresult["above"]
 
 def ghesboro_command(update, context):
     """Send a message when the command /ghesboro is issued."""
@@ -658,6 +691,9 @@ def main():
             ],
             1: [
                 CallbackQueryHandler(ctsCommandHandler, pattern='^(' + str(5) + '|' + str(10) + ')$')
+            ]
+            , 2: [
+                CallbackQueryHandler(centocentocento_anotherrun, pattern='^(No|Yes)$')
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
