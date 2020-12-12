@@ -59,6 +59,7 @@ BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te cop
 
 NEW_VALUE_KEY = "new_value"
 MAX_VALUE_KEY = "max_value"
+USER_KEY = "user"
 DATE_KEY = "date"
 VALUE_KEY = "value"
 RUN_NUMBER_KEY = "run_number"
@@ -407,21 +408,12 @@ def centocentocento_generate_new_value():
 def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
-
-    dispatcher = context.dispatcher
-    i = 1
-    if "counter" in dispatcher.chat_data:
-        i = dispatcher.chat_data["counter"] + 1
-    dispatcher.chat_data["counter"] = i
-    logger.info(dispatcher.chat_data["counter"])
-    if i >= 5:
-        del dispatcher.chat_data["counter"]
     
     new_value = centocentocento_generate_new_value()
     run_number = 1
 
     if new_value == 100:
-        return centocentocento_printresult(context, query, new_value, True, run_number) #by definition, there is nothing better than 100
+        return centocentocento_printresult(context, query, new_value, run_number) #by definition, there is nothing better than 100, so stop with this run
 
     #otherwise, ask for another run or not
     context.user_data[NEW_VALUE_KEY] = new_value
@@ -447,28 +439,33 @@ def centocentocento_anotherrun(update, context):
     if query.data == "Yes":
         new_value += centocentocento_generate_new_value()
         run_number += 1
-
-    is_best = True #optimistic approach
-    if new_value > 100:
-        is_best = False
-    elif MAX_VALUE_KEY in context.user_data:
-        current_max_detail = context.user_data[MAX_VALUE_KEY]
-        if current_max_detail[DATE_KEY] > datetime.date.today():
-            is_best = False
-        elif current_max_detail[DATE_KEY] == datetime.date.today():
-            if current_max_detail[VALUE_KEY] > new_value:
-                is_best = False
-            elif current_max_detail[VALUE_KEY] == new_value and current_max_detail[NUMBER_OF_RUNS_KEY] < run_number:
-                is_best = False
     
-    return centocentocento_printresult(context, query, new_value, is_best, run_number)
+    return centocentocento_printresult(context, query, new_value, run_number)
 
-def centocentocento_printresult(context, query, value, is_best, run_number):
+def is_best(value, run_number, current_max_detail, reference_date):
+    if value > 100:
+        return False
+    if current_max_detail is None:
+        return True
+    if current_max_detail[DATE_KEY] > reference_date:
+        return False
+    if current_max_detail[DATE_KEY] == reference_date:
+        if current_max_detail[VALUE_KEY] > value:
+            return False
+        elif current_max_detail[VALUE_KEY] == value and current_max_detail[NUMBER_OF_RUNS_KEY] < run_number:
+            return False
+    return True
+
+def centocentocento_printresult(context, query, value, run_number):
     message_lines = ["".join([emojis.numbers.get(n) for n in str(value)])]
     message_lines += centocentocento_result_emoji(value)
-    if is_best == True:
-        context.user_data[MAX_VALUE_KEY] = {DATE_KEY: datetime.date.today(), VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
-        message_lines += "Best result today!"
+
+    chat_data = context.dispatcher.chat_data
+    current_max_detail = chat_data[MAX_VALUE_KEY] if MAX_VALUE_KEY in chat_data else None
+    today = datetime.date.today()
+    if is_best(value, run_number, current_max_detail, today):
+        chat_data[MAX_VALUE_KEY] = {DATE_KEY: today, USER_KEY: context.user, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
+        message_lines += "This is the best result for today!"
 
     query.edit_message_text(
         text=" ".join(message_lines), 
