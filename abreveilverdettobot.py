@@ -350,7 +350,8 @@ def country_command(update, context):
     if (len(country["borders"]) > 0): 
         message.append("Confini: {}".format(find_borders(countries, country["borders"])))
         
-    logger.info('context : {}'.format(context))
+    for key in context:
+        logger.info('{}: {}\n'.format(key, str(context[key])))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
