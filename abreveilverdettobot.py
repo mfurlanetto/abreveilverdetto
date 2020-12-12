@@ -44,6 +44,9 @@ logger = logging.getLogger(__name__)
 def buildPath(relativePath):
     return os.path.join(os.path.dirname(__file__), relativePath)
 
+def loadJSON(relative_path):
+    return json.load(open(buildPath('{}.json'.format(relative_path))))
+
 config = loadJSON('conf/appConfig')
 
 SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI = range(16)
@@ -587,9 +590,6 @@ def end(update, context):
 """
 START OF UTILITY SECTION
 """
-
-def loadJSON(relative_path):
-    return json.load(open(buildPath('{}.json'.format(relative_path))))
 
 def find(name):
     result = "NO_RESULT"
