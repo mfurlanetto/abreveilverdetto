@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 def buildPath(relativePath):
     return os.path.join(os.path.dirname(__file__), relativePath)
 
-config = loadJSON('conf/appConfig.json')
+config = loadJSON('conf/appConfig')
 
 SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI = range(16)
 
