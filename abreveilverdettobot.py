@@ -156,7 +156,7 @@ def conte_command(update, context):
     query.answer()
     
     frasi_conte = loadJSON('data/conte')
-    index = randrange(12)
+    index = randrange(directorySize("media/conte"))
     numFrasiConte = len(frasi_conte)
     randomIndexCaption = randrange(numFrasiConte)
     
@@ -179,7 +179,7 @@ def bimbe_command(update, context):
     love_dict = emojis.love
     loveEmojis = list(love_dict.values())
     sizeLove = len(loveEmojis)
-    randomIndexImage = randrange(20)
+    randomIndexImage = randrange(directorySize("media/bimbe"))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
