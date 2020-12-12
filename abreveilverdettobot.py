@@ -41,8 +41,8 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def buildPath(relativePath):
-    return os.path.join(os.path.dirname(__file__), relativePath)
+def buildPath(relative_path):
+    return os.path.join(os.path.dirname(__file__), relative_path)
 
 def loadJSON(relative_path):
     return json.load(open(buildPath('{}.json'.format(relative_path))))
@@ -285,7 +285,7 @@ def comune_command(update, context):
     comune = comuni[index_comune]
     urlWeather = config['openweathermap']['url'].format(comune['cap'][0], config['openweathermap']['token'])
     reqMeteo = Request(urlWeather)
-    regions_ita = loadJSON('regions_ita')
+    regions_ita = loadJSON('data/regions_ita')
     covid_severity_color = utils.get_severity_color(comune, regions_ita)
 
     try:
@@ -349,6 +349,8 @@ def country_command(update, context):
     message.append("Fuso orario: <i>{}</i>".format(", ".join(country["timezones"])))
     if (len(country["borders"]) > 0): 
         message.append("Confini: {}".format(find_borders(countries, country["borders"])))
+        
+    logger.info('context : {}'.format(context))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
