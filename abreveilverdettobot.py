@@ -47,7 +47,7 @@ def loadYAML(relative_path):
 
 config = loadYAML('conf/config')
 
-os.environ['TZ'] = config['localTimezone']
+os.environ['TZ'] = config['bot']['localTimezone']
 time.tzset()
 
 SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI = range(16)
