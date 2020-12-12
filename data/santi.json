@@ -193,5 +193,35 @@
     "name": "Sam Pdoria",
     "func": "Protettore dei besughi",
     "photo": "sampdoria"
+  },
+  {
+    "name": "Sun Silk",
+    "func": "Protettore dello shampoo",
+    "photo": "sunsilk"
+  },
+  {
+    "name": "Santa Lucia",
+    "func": "Protettrice delle mozzarelle",
+    "photo": "sunsilk"
+  },
+  {
+    "name": "Santa Rosa",
+    "func": "Protettrice delle marmellate",
+    "photo": "marmellata"
+  },
+  {
+    "name": "San Crispino",
+    "func": "Protettore del vino da tavola",
+    "photo": "sancrispino"
+  },
+  {
+    "name": "Saint Moritz",
+    "func": "Protettore degli sciatori",
+    "photo": "saint_moritz"
+  },
+  {
+    "name": "Saint Vincent",
+    "func": "Protettore dei casinò",
+    "photo": "casino_saint_vincent"
   }
 ]
