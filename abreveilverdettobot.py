@@ -349,9 +349,6 @@ def country_command(update, context):
     message.append("Fuso orario: <i>{}</i>".format(", ".join(country["timezones"])))
     if (len(country["borders"]) > 0): 
         message.append("Confini: {}".format(find_borders(countries, country["borders"])))
-        
-    for key in context:
-        logger.info('{}: {}\n'.format(key, str(context[key])))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
