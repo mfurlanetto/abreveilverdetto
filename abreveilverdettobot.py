@@ -224,8 +224,7 @@ def giurato_command(update, context):
     query = update.callback_query
     query.answer()
     
-    giurato_data = loadJSON('data/giurato')
-    giurato_list = giurato_data['sentences']['giurato']
+    giurato_list = loadJSON('data/giurato')
     randIndex = randrange(len(giurato_list))
     
     query.edit_message_text(
