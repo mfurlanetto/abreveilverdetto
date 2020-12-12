@@ -44,8 +44,7 @@ logger = logging.getLogger(__name__)
 def buildPath(relativePath):
     return os.path.join(os.path.dirname(__file__), relativePath)
 
-config = json.load(open(buildPath('conf/appConfig.json')))
-content = json.load(open(buildPath('conf/appContent.json')))
+config = loadJSON('conf/appConfig.json')
 
 SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI = range(16)
 
@@ -119,13 +118,14 @@ def saluti(update, context):
     query = update.callback_query
     query.answer()
     
-    numSalutiConte = len(content['greetings'])
+    saluti = loadJSON('data/saluti')
+    numSalutiConte = len(saluti)
     randomIndex = randrange(numSalutiConte)
     user = update.effective_user
     logger.info('User {} chose saluti.'.format(user.username))
     
     query.edit_message_text(
-        text=content['greetings'][randomIndex].format(utils.greetings(time, user.first_name))
+        text=saluti[randomIndex].format(utils.greetings(time, user.first_name))
     )
     return ConversationHandler.END
 
@@ -151,8 +151,9 @@ def conte_command(update, context):
     query = update.callback_query
     query.answer()
     
+    frasi_conte = loadJSON('data/conte')
     index = randrange(12)
-    numFrasiConte = len(content['sentences']['conte'])
+    numFrasiConte = len(frasi_conte)
     randomIndexCaption = randrange(numFrasiConte)
     
     query.bot.delete_message(
@@ -162,7 +163,7 @@ def conte_command(update, context):
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/conte/{}.jpg".format(index)), 'rb'),
-        caption=content['sentences']['conte'][randomIndexCaption]
+        caption=frasi_conte[randomIndexCaption]
     )
     return ConversationHandler.END
 
@@ -209,7 +210,7 @@ def dpcm_command(update, context):
     query = update.callback_query
     query.answer()
     
-    dpcmList = content['DPCM']
+    dpcmList = loadJSON('data/dpcm')
     randIndex = randrange(len(dpcmList))
     
     query.edit_message_text(
@@ -281,7 +282,8 @@ def comune_command(update, context):
     comune = comuni[index_comune]
     urlWeather = config['openweathermap']['url'].format(comune['cap'][0], config['openweathermap']['token'])
     reqMeteo = Request(urlWeather)
-    covid_severity_color = utils.get_severity_color(comune, content['ItalianRegions'])
+    regions_ita = loadJSON('regions_ita')
+    covid_severity_color = utils.get_severity_color(comune, regions_ita)
 
     try:
         weather = json.loads(urlopen(reqMeteo).read().decode())
@@ -546,8 +548,9 @@ def santi_command(update, context):
     query = update.callback_query
     query.answer()
 
-    index_santi = randrange(len(content['santi']))
-    santo = content['santi'][index_santi]
+    santi_list = loadJSON('data/santi')
+    index_santi = randrange(len(santi_list))
+    santo = santi_list[index_santi]
     message = '<b>{}</b>\n'.format(santo['name'].upper())
     message += '<i>{}</i>\n'.format(santo['func'])
 
