@@ -413,7 +413,7 @@ def centocentocento_command(update, context):
     run_number = 1
 
     if new_value == 100:
-        return centocentocento_printresult(context, query, new_value, run_number) #by definition, there is nothing better than 100, so stop with this run
+        return centocentocento_printresult(context, update.effective_user, query, new_value, run_number) #by definition, there is nothing better than 100, so stop with this run
 
     #otherwise, ask for another run or not
     context.user_data[NEW_VALUE_KEY] = new_value
@@ -440,7 +440,7 @@ def centocentocento_anotherrun(update, context):
         new_value += centocentocento_generate_new_value()
         run_number += 1
     
-    return centocentocento_printresult(context, query, new_value, run_number)
+    return centocentocento_printresult(context, update.effective_user, query, new_value, run_number)
 
 def is_best(value, run_number, current_max_detail, reference_date):
     if value > 100:
@@ -456,7 +456,7 @@ def is_best(value, run_number, current_max_detail, reference_date):
             return False
     return True
 
-def centocentocento_printresult(context, query, value, run_number):
+def centocentocento_printresult(context, user, query, value, run_number):
     message_lines = ["".join([emojis.numbers.get(n) for n in str(value)])]
     message_lines += centocentocento_result_emoji(value)
 
@@ -464,7 +464,7 @@ def centocentocento_printresult(context, query, value, run_number):
     current_max_detail = chat_data[MAX_VALUE_KEY] if MAX_VALUE_KEY in chat_data else None
     today = datetime.date.today()
     if is_best(value, run_number, current_max_detail, today):
-        chat_data[MAX_VALUE_KEY] = {DATE_KEY: today, USER_KEY: context.username, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
+        chat_data[MAX_VALUE_KEY] = {DATE_KEY: today, USER_KEY: user.username, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
         message_lines += "This is the best score for today!"
     else:
         message_lines += "Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[run_number])
