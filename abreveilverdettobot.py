@@ -418,15 +418,20 @@ def centocentocento_command(update, context):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text("Another run?", reply_markup=reply_markup)
+    message_lines = ["".join([emojis.numbers.get(n) for n in str(new_value)])]
+    message_lines += "Another run?"
+    query.edit_message_text("\n".join(message_lines), reply_markup=reply_markup)
     return 2
 
 def centocentocento_anotherrun(update, context):
     query = update.callback_query
     query.answer()
 
-    new_value = context.user_data.pop(NEW_VALUE_KEY) + centocentocento_generate_new_value()
-    run_number = context.user_data.pop(RUN_NUMBER_KEY) + 1
+    new_value = context.user_data.pop(NEW_VALUE_KEY)
+    run_number = context.user_data.pop(RUN_NUMBER_KEY)
+    if query.data == "Yes":
+        new_value += centocentocento_generate_new_value()
+        run_number += 1
 
     is_best = True #optimistic approach
     if new_value > 100:
