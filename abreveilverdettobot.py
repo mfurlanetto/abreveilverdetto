@@ -18,11 +18,9 @@ Telegram commands:
 start - Lista dei comandi
 """
 
-import logging, json, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
+import logging, json, yaml, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
 import base64
 from cairosvg import svg2png
-from PIL import Image
-from io import BytesIO
 
 from urllib.request import Request, urlopen, urlretrieve
 from urllib.error import URLError, HTTPError
@@ -30,9 +28,6 @@ from urllib.error import URLError, HTTPError
 from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler, PicklePersistence
-
-os.environ['TZ'] = 'Europe/Rome'
-time.tzset()
 
 # Enable logging
 logging.basicConfig(
@@ -47,14 +42,17 @@ def buildPath(relative_path):
 def loadJSON(relative_path):
     return json.load(open(buildPath('{}.json'.format(relative_path))))
 
-config = loadJSON('conf/appConfig')
+def loadYAML(relative_path):
+    return yaml.load(open(buildPath('{}.yaml'.format(relative_path))), Loader=yaml.Loader)
+
+config = loadJSON('conf/config')
+
+os.environ['TZ'] = config['localTimezone']
+time.tzset()
 
 SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI = range(16)
 
-HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
-THE_SENTENCE = 'a breve il verdetto'
-HANDLER_NAME = "abreveilverdetto"
 
 NEW_VALUE_KEY = "new_value"
 MAX_VALUE_KEY = "max_value"
@@ -568,13 +566,7 @@ def santi_command(update, context):
         parse_mode=ParseMode.HTML
     ) 
     
-    return ConversationHandler.END
-
-def help_command(update, context):
-    """Send a message when the command /help is issued."""
-    user = update.message.from_user
-    update.message.reply_text(HELP.format(user.first_name))
-    
+    return ConversationHandler.END    
 
 def end(update, context):
     """Returns `ConversationHandler.END`, which tells the
@@ -651,11 +643,6 @@ def handle_sticker(update, context):
     logger.info('[STICKER] - UPDATE OBJ : {}'.format(update))
 
 
-def echo_sentence(update, context, sentence=THE_SENTENCE):
-    """Echo the user message."""
-    update.message.reply_text(sentence)
-
-
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
@@ -717,8 +704,8 @@ def main():
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
-        persistent=True
-        , name=HANDLER_NAME
+        persistent=True, 
+        name=config['handlerName']
     )
 
     dp.add_handler(conv_handler)
