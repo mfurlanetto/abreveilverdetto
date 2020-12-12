@@ -45,7 +45,7 @@ def loadJSON(relative_path):
 def loadYAML(relative_path):
     return yaml.load(open(buildPath('{}.yaml'.format(relative_path))), Loader=yaml.Loader)
 
-config = loadJSON('conf/config')
+config = loadYAML('conf/config')
 
 os.environ['TZ'] = config['localTimezone']
 time.tzset()
