@@ -135,7 +135,7 @@ def torta_command(update, context):
     query = update.callback_query
     query.answer()
     
-    index = randrange(6)
+    index = randrange(7)
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,

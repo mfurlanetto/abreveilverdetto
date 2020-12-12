@@ -202,7 +202,7 @@
   {
     "name": "Santa Lucia",
     "func": "Protettrice delle mozzarelle",
-    "photo": "sunsilk"
+    "photo": "mozzarella"
   },
   {
     "name": "Santa Rosa",
@@ -223,5 +223,10 @@
     "name": "Saint Vincent",
     "func": "Protettore dei casinò",
     "photo": "casino_saint_vincent"
+  },
+  {
+    "name": "San Scrito",
+    "func": "Protettore della calligrafia dei dottori",
+    "photo": "sanscrito"
   }
 ]
