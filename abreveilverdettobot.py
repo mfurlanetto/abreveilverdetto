@@ -18,11 +18,9 @@ Telegram commands:
 start - Lista dei comandi
 """
 
-import logging, json, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
+import logging, json, yaml, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
 import base64
 from cairosvg import svg2png
-from PIL import Image
-from io import BytesIO
 
 from urllib.request import Request, urlopen, urlretrieve
 from urllib.error import URLError, HTTPError
@@ -31,9 +29,6 @@ from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler, PicklePersistence
 
-os.environ['TZ'] = 'Europe/Rome'
-time.tzset()
-
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -41,18 +36,26 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def buildPath(relativePath):
-    return os.path.join(os.path.dirname(__file__), relativePath)
+def buildPath(relative_path):
+    return os.path.join(os.path.dirname(__file__), relative_path)
 
-config = json.load(open(buildPath('conf/appConfig.json')))
-content = json.load(open(buildPath('conf/appContent.json')))
+def directorySize(dir):
+    return len([name for name in os.listdir(dir) if os.path.isfile(os.path.join(dir, name))])
+
+def loadJSON(relative_path):
+    return json.load(open(buildPath('{}.json'.format(relative_path))))
+
+def loadYAML(relative_path):
+    return yaml.load(open(buildPath('{}.yaml'.format(relative_path))), Loader=yaml.Loader)
+
+config = loadYAML('conf/config')
+
+os.environ['TZ'] = config['bot']['localTimezone']
+time.tzset()
 
 SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI = range(16)
 
-HELP = '{} non verrai abbandonato a te stesso'
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
-THE_SENTENCE = 'a breve il verdetto'
-HANDLER_NAME = "abreveilverdetto"
 
 NEW_VALUE_KEY = "new_value"
 MAX_VALUE_KEY = "max_value"
@@ -119,13 +122,14 @@ def saluti(update, context):
     query = update.callback_query
     query.answer()
     
-    numSalutiConte = len(content['greetings'])
+    saluti = loadJSON('data/saluti')
+    numSalutiConte = len(saluti)
     randomIndex = randrange(numSalutiConte)
     user = update.effective_user
     logger.info('User {} chose saluti.'.format(user.username))
     
     query.edit_message_text(
-        text=content['greetings'][randomIndex].format(utils.greetings(time, user.first_name))
+        text=saluti[randomIndex].format(utils.greetings(time, user.first_name))
     )
     return ConversationHandler.END
 
@@ -134,7 +138,7 @@ def torta_command(update, context):
     query = update.callback_query
     query.answer()
     
-    index = randrange(6)
+    index = randrange(directorySize("media/tortamele"))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -151,8 +155,9 @@ def conte_command(update, context):
     query = update.callback_query
     query.answer()
     
-    index = randrange(12)
-    numFrasiConte = len(content['sentences']['conte'])
+    frasi_conte = loadJSON('data/conte')
+    index = randrange(directorySize("media/conte"))
+    numFrasiConte = len(frasi_conte)
     randomIndexCaption = randrange(numFrasiConte)
     
     query.bot.delete_message(
@@ -162,7 +167,7 @@ def conte_command(update, context):
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
         photo=open(buildPath("media/conte/{}.jpg".format(index)), 'rb'),
-        caption=content['sentences']['conte'][randomIndexCaption]
+        caption=frasi_conte[randomIndexCaption]
     )
     return ConversationHandler.END
 
@@ -174,7 +179,7 @@ def bimbe_command(update, context):
     love_dict = emojis.love
     loveEmojis = list(love_dict.values())
     sizeLove = len(loveEmojis)
-    randomIndexImage = randrange(20)
+    randomIndexImage = randrange(directorySize("media/bimbe"))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -209,7 +214,7 @@ def dpcm_command(update, context):
     query = update.callback_query
     query.answer()
     
-    dpcmList = content['DPCM']
+    dpcmList = loadJSON('data/dpcm')
     randIndex = randrange(len(dpcmList))
     
     query.edit_message_text(
@@ -224,7 +229,7 @@ def giurato_command(update, context):
     query = update.callback_query
     query.answer()
     
-    giurato_list = content['sentences']['giurato']
+    giurato_list = loadJSON('data/giurato')
     randIndex = randrange(len(giurato_list))
     
     query.edit_message_text(
@@ -281,7 +286,8 @@ def comune_command(update, context):
     comune = comuni[index_comune]
     urlWeather = config['openweathermap']['url'].format(comune['cap'][0], config['openweathermap']['token'])
     reqMeteo = Request(urlWeather)
-    covid_severity_color = utils.get_severity_color(comune, content['ItalianRegions'])
+    regions_ita = loadJSON('data/regions_ita')
+    covid_severity_color = utils.get_severity_color(comune, regions_ita)
 
     try:
         weather = json.loads(urlopen(reqMeteo).read().decode())
@@ -482,7 +488,7 @@ def ghesboro_command(update, context):
     query = update.callback_query
     query.answer()
     
-    veneto_list = content['sentences']['veneto']
+    veneto_list = loadJSON('data/ghesboro')
     randIndex = randrange(len(veneto_list))
     
     query.edit_message_text(
@@ -555,8 +561,9 @@ def santi_command(update, context):
     query = update.callback_query
     query.answer()
 
-    index_santi = randrange(len(content['santi']))
-    santo = content['santi'][index_santi]
+    santi_list = loadJSON('data/santi')
+    index_santi = randrange(len(santi_list))
+    santo = santi_list[index_santi]
     message = '<b>{}</b>\n'.format(santo['name'].upper())
     message += '<i>{}</i>\n'.format(santo['func'])
 
@@ -571,13 +578,7 @@ def santi_command(update, context):
         parse_mode=ParseMode.HTML
     ) 
     
-    return ConversationHandler.END
-
-def help_command(update, context):
-    """Send a message when the command /help is issued."""
-    user = update.message.from_user
-    update.message.reply_text(HELP.format(user.first_name))
-    
+    return ConversationHandler.END    
 
 def end(update, context):
     """Returns `ConversationHandler.END`, which tells the
@@ -625,7 +626,7 @@ def build_country_name(country):
         return country["name"]
 
 def buildCtsMessage(qty):
-    ctsList = content['CTS']
+    ctsList = loadJSON('data/cts_list')
     ctsSize = len(ctsList)
     message = '<b>Comitato Tecnico-Scientifico</b>\n'
     indexlist = utils.get_index_list(qty, ctsSize)
@@ -652,11 +653,6 @@ def handle_message(update, context):
 
 def handle_sticker(update, context):
     logger.info('[STICKER] - UPDATE OBJ : {}'.format(update))
-
-
-def echo_sentence(update, context, sentence=THE_SENTENCE):
-    """Echo the user message."""
-    update.message.reply_text(sentence)
 
 
 def error(update, context):
@@ -720,8 +716,8 @@ def main():
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
-        persistent=True
-        , name=HANDLER_NAME
+        persistent=True, 
+        name=config['bot']['handlerName']
     )
 
     dp.add_handler(conv_handler)

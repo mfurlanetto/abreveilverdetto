@@ -1,0 +1,91 @@
+[
+  {
+    "name": "Lombardia",
+    "covid_severity_color": "orange"
+  },
+  {
+    "name": "Lazio",
+    "covid_severity_color": "yellow"
+  },
+  {
+    "name": "Campania",
+    "covid_severity_color": "red"
+  },
+  {
+    "name": "Sicilia",
+    "covid_severity_color": "yellow"
+  },
+  {
+    "name": "Veneto",
+    "covid_severity_color": "yellow"
+  },
+  {
+    "name": "Emilia-Romagna",
+    "covid_severity_color": "orange"
+  },
+  {
+    "name": "Piemonte",
+    "covid_severity_color": "orange"
+  },
+  {
+    "name": "Puglia",
+    "covid_severity_color": "orange"
+  },
+  {
+    "name": "Toscana",
+    "covid_severity_color": "red"
+  },
+  {
+    "name": "Calabria",
+    "covid_severity_color": "orange"
+  },
+  {
+    "name": "Sardegna",
+    "covid_severity_color": "yellow"
+  },
+  {
+    "name": "Liguria",
+    "covid_severity_color": "yellow"
+  },
+  {
+    "name": "Marche",
+    "covid_severity_color": "orange"
+  },
+  {
+    "name": "Abruzzo",
+    "covid_severity_color": "red"
+  },
+  {
+    "name": "Friuli-Venezia Giulia",
+    "covid_severity_color": "orange"
+  },
+  {
+    "name": "Trentino-Alto Adige/Südtirol",
+    "province": [
+      {
+        "name": "Bolzano/Bozen",
+        "covid_severity_color": "red"
+      },
+      {
+        "name": "Trento",
+        "covid_severity_color": "yellow"
+      }
+    ]
+  },
+  {
+    "name": "Umbria",
+    "covid_severity_color": "orange"
+  },
+  {
+    "name": "Basilicata",
+    "covid_severity_color": "orange"
+  },
+  {
+    "name": "Molise",
+    "covid_severity_color": "yellow"
+  },
+  {
+    "name": "Valle d'Aosta/Vallée d'Aoste",
+    "covid_severity_color": "red"
+  }
+]
