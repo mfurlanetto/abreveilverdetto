@@ -224,7 +224,8 @@ def giurato_command(update, context):
     query = update.callback_query
     query.answer()
     
-    giurato_list = content['sentences']['giurato']
+    giurato_data = loadJSON('data/giurato')
+    giurato_list = giurato_data['sentences']['giurato']
     randIndex = randrange(len(giurato_list))
     
     query.edit_message_text(
@@ -473,7 +474,7 @@ def ghesboro_command(update, context):
     query = update.callback_query
     query.answer()
     
-    veneto_list = content['sentences']['veneto']
+    veneto_list = loadJSON('data/ghesboro')
     randIndex = randrange(len(veneto_list))
     
     query.edit_message_text(
@@ -585,6 +586,9 @@ def end(update, context):
 START OF UTILITY SECTION
 """
 
+def loadJSON(relative_path):
+    return json.load(open(buildPath('{}.json'.format(relative_path))))
+
 def find(name):
     result = "NO_RESULT"
     for root, dirs, files in os.walk(buildPath("media/flags")):
@@ -616,7 +620,7 @@ def build_country_name(country):
         return country["name"]
 
 def buildCtsMessage(qty):
-    ctsList = content['CTS']
+    ctsList = loadJSON('data/cts_list')
     ctsSize = len(ctsList)
     message = '<b>Comitato Tecnico-Scientifico</b>\n'
     indexlist = utils.get_index_list(qty, ctsSize)
