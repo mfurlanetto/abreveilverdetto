@@ -508,9 +508,11 @@ def pokemon_command(update, context):
     pokedex = json.loads(urlopen(reqPokemon).read().decode())
 
     index_pokemon = randrange(152)
+    logger.info('[POKEMON] - index_pokemon : {}'.format(index_pokemon))
     
     if(index_pokemon):
         pokemon = pokedex['pokemon'][str(index_pokemon)]
+        logger.info('[POKEMON] - pokemon : {}'.format(pokemon))
         message = '#{} - <b>{}</b>\n'.format(index_pokemon, pokemon['N'].upper())
         types = [pokemonType.get(current_type['n']) for current_type in pokemon['T'][:2]]
         message += "Type(s): {}".format("".join(types))
