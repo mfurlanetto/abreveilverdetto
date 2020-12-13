@@ -503,6 +503,7 @@ def pokemon_command(update, context):
     
     heart = emojis.love.get('redHeart')
     pokemonType = emojis.pkmn_type
+    logger.info('[POKEMON] - REQUEST URL : {}'.format(config['pokemon']['url']))
     reqPokemon = Request(config['pokemon']['url'])
     pokedex = json.loads(urlopen(reqPokemon).read().decode())
 
