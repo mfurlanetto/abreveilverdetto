@@ -1,7 +1,7 @@
 [
   {
     "name": "Lombardia",
-    "covid_severity_color": "orange"
+    "covid_severity_color": "yellow"
   },
   {
     "name": "Lazio",
@@ -9,7 +9,7 @@
   },
   {
     "name": "Campania",
-    "covid_severity_color": "red"
+    "covid_severity_color": "orange"
   },
   {
     "name": "Sicilia",
@@ -33,11 +33,11 @@
   },
   {
     "name": "Toscana",
-    "covid_severity_color": "red"
+    "covid_severity_color": "orange"
   },
   {
     "name": "Calabria",
-    "covid_severity_color": "orange"
+    "covid_severity_color": "yellow"
   },
   {
     "name": "Sardegna",
@@ -49,22 +49,22 @@
   },
   {
     "name": "Marche",
-    "covid_severity_color": "orange"
+    "covid_severity_color": "yellow"
   },
   {
     "name": "Abruzzo",
-    "covid_severity_color": "red"
+    "covid_severity_color": "orange"
   },
   {
     "name": "Friuli-Venezia Giulia",
-    "covid_severity_color": "orange"
+    "covid_severity_color": "yellow"
   },
   {
     "name": "Trentino-Alto Adige/Südtirol",
     "province": [
       {
         "name": "Bolzano/Bozen",
-        "covid_severity_color": "red"
+        "covid_severity_color": "orange"
       },
       {
         "name": "Trento",
@@ -74,11 +74,11 @@
   },
   {
     "name": "Umbria",
-    "covid_severity_color": "orange"
+    "covid_severity_color": "yellow"
   },
   {
     "name": "Basilicata",
-    "covid_severity_color": "orange"
+    "covid_severity_color": "yellow"
   },
   {
     "name": "Molise",
@@ -86,6 +86,6 @@
   },
   {
     "name": "Valle d'Aosta/Vallée d'Aoste",
-    "covid_severity_color": "red"
+    "covid_severity_color": "orange"
   }
 ]
