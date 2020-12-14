@@ -228,5 +228,50 @@
     "name": "San Scrito",
     "func": "Protettore della calligrafia dei dottori",
     "photo": "sanscrito"
+  },
+  {
+    "name": "San Torini",
+    "func": "Protettore delle isole greche",
+    "photo": "santorini"
+  },
+  {
+    "name": "San Dero",
+    "func": "Protettore della Dacia",
+    "photo": "dacia_sandero"
+  },
+  {
+    "name": "San Zione",
+    "func": "Protettore dei vigili urbani",
+    "photo": "sanzione"
+  },
+  {
+    "name": "San Vendemiano",
+    "func": "Protettore di Alessandro Del Piero",
+    "photo": "san_vendemiano"
+  },
+  {
+    "name": "San Giusto",
+    "func": "Protettore di Trieste e de tuti i muli e le mule",
+    "photo": "san_giusto_trieste"
+  },
+  {
+    "name": "Santa Nchè",
+    "func": "Protettrice dei parlamentari italiani",
+    "photo": "santanche"
+  },
+  {
+    "name": "San Guisuga",
+    "func": "Protettore degli esami del sangue",
+    "photo": "sanguisuga"
+  },
+  {
+    "name": "San Marino",
+    "func": "Protettore degli staterelli dimenticati da Dio",
+    "photo": "san_marino"
+  },
+  {
+    "name": "Sam Buco",
+    "func": "Protettore dell'aperitivo Hugo",
+    "photo": "sambuco"
   }
 ]
