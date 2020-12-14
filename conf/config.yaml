@@ -7,7 +7,7 @@ bot:
     localTimezone: Europe/Rome
 
 openweathermap:
-    url: https://api.openweathermap.org/data/2.5/weather?zip=IT&units=metric&lang=it&appid={}
+    url: https://api.openweathermap.org/data/2.5/weather?zip={},IT&units=metric&lang=it&appid={}
     token: 2b712f823ee54b5bad72047b1ea65ce3
     icon: https://openweathermap.org/img/wn/{}@4x.png
 
