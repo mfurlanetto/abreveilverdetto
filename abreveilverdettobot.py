@@ -564,10 +564,13 @@ def santi_command(update, context):
     query.answer()
 
     santi_list = loadJSON('data/santi')
+    frasi_list = loadJSON('data/santi_frasi')
     index_santi = randrange(len(santi_list))
+    index_frasi = randrange(len(frasi_list[indec_frasi]))
     santo = santi_list[index_santi]
     message = '<b>{}</b>\n'.format(santo['name'].upper())
     message += '<i>{}</i>\n'.format(santo['func'])
+    message += '{}\n'.format(frasi_list['func'])
 
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
