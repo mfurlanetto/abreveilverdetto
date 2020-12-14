@@ -273,5 +273,40 @@
     "name": "Sam Buco",
     "func": "Protettore dell'aperitivo Hugo",
     "photo": "sambuco"
+  },
+  {
+    "name": "San Tal",
+    "func": "Protettore dei succhi di frutta",
+    "photo": "santal"
+  },
+  {
+    "name": "San Bernardo",
+    "func": "Protettore dei cani",
+    "photo": "san_bernardo"
+  },
+  {
+    "name": "Sam Arcanda",
+    "func": "Protettore dei cavalli oh-oh",
+    "photo": "samarcanda"
+  },
+  {
+    "name": "San Candido Lienz",
+    "func": "Protettore delle gite in bici",
+    "photo": "san_candido_lienz"
+  },
+  {
+    "name": "San Ton",
+    "func": "Protettore dei calciatori",
+    "photo": "santon"
+  },
+  {
+    "name": "San Tino",
+    "func": "Protettore del gioco di carte collezionabili dei santi",
+    "photo": "santino"
+  },
+  {
+    "name": "San Culotto",
+    "func": "Protettore dei rivoluzionari francesi",
+    "photo": "sanculotto"
   }
 ]
