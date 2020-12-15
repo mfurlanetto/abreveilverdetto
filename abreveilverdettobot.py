@@ -257,20 +257,20 @@ def covid_command(update, context):
     varTamponi = COVID[-1]['tamponi'] - COVID[-2]['tamponi']
     percPosTamp = 100 * COVID[-1]['nuovi_positivi'] / varTamponi
     
-    message = 'Ultimo aggiornamento: {} alle {}\n'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H:%M"))
-    message += '{} {}  <i>{}</i>\n'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.get_variation(nuoviPositivi))
-    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.get_variation(varOspedalizzati))
-    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.get_variation(varTerapieI))
-    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.get_variation(varIsolamento))
-    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], utils.get_variation(varDeceduti))
-    message += '{} {}  <i>{:,.0f}</i> ({})\n'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], utils.get_variation(varTamponi))
-    message += '{} / {} {:.3}%'.format(covid_dict['biohazard'], covid_dict['testTube'], percPosTamp)
+    message = ['Ultimo aggiornamento: {} alle {}'.format(latestDate.strftime("%d/%m/%Y"), latestDate.strftime("%H:%M"))]
+    message.append('{} {}  <i>{}</i>'.format(covid_dict['biohazard'], covid_dict['thermoFace'], utils.get_variation(nuoviPositivi)))
+    message.append('{} {}  <i>{:,.0f}</i> ({})'.format(covid_dict['hospital'], covid_dict['maskFace'], COVID[-1]['totale_ospedalizzati'], utils.get_variation(varOspedalizzati)))
+    message.append('{} {}  <i>{:,.0f}</i> ({})'.format(covid_dict['hospital'], covid_dict['bed'], COVID[-1]['terapia_intensiva'], utils.get_variation(varTerapieI)))
+    message.append('{} {}  <i>{:,.0f}</i> ({})'.format(covid_dict['house'], covid_dict['thermoFace'], COVID[-1]['isolamento_domiciliare'], utils.get_variation(varIsolamento)))
+    message.append('{} {}  <i>{:,.0f}</i> ({})'.format(covid_dict['latinCross'], covid_dict['angel'], COVID[-1]['deceduti'], utils.get_variation(varDeceduti)))
+    message.append('{} {}  <i>{:,.0f}</i> ({})'.format(covid_dict['nose'], covid_dict['testTube'], COVID[-1]['tamponi'], utils.get_variation(varTamponi)))
+    message.append('{} / {} {:.3}%'.format(covid_dict['biohazard'], covid_dict['testTube'], percPosTamp))
     """
     message += hospital + maskFace + ' ' + varTerapieI + '\n'
     message += house + ' ' + varIsolamento + '\n'
     """
     query.edit_message_text(
-        text=message, 
+        text="\n".join(message), 
         parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
@@ -281,22 +281,21 @@ def comune_command(update, context):
     query.answer()
     
     zone_dict = emojis.zone_color
-    request_comuni = Request(config['comuni']['url'])
-    comuni = json.loads(urlopen(request_comuni).read().decode())
-    index_comune = randrange(len(comuni))
-    comune = comuni[index_comune]
+    comuni = json.loads(urlopen(Request(config['comuni']['url'])).read().decode())
+    comune = comuni[randrange(len(comuni))]
     urlWeather = config['openweathermap']['url'].format(comune['cap'][0], config['openweathermap']['token'])
-    reqMeteo = Request(urlWeather)
     regions_ita = loadJSON('data/regions_ita')
     covid_severity_color = utils.get_severity_color(comune, regions_ita)
+    
+    message = ['{1} <b>{0}</b> {1}'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')]
+    message.append('{} {} ({})'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla']))
+    message.append('<i>{:,.0f}</i> abitanti'.format(int(comune['popolazione'])))
 
     try:
-        weather = json.loads(urlopen(reqMeteo).read().decode())
-        message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
-        message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
-        message += '<i>{:,.0f}</i> abitanti\n'.format(int(comune['popolazione']))
-        message += '<b>{1}</b> °C - {0}'.format(weather['weather'][0]['description'].capitalize(),
-            '%.1f' % weather['main']['temp'])
+        weather = json.loads(urlopen(Request(urlWeather)).read().decode())
+        
+        message.append('<b>{1}</b> °C - {0}'.format(weather['weather'][0]['description'].capitalize(),
+            '%.1f' % weather['main']['temp']))
         
         query.bot.delete_message(
             chat_id=update.effective_chat.id,
@@ -305,16 +304,12 @@ def comune_command(update, context):
         query.bot.send_photo(
             chat_id=update.effective_chat.id, 
             photo=config['openweathermap']['icon'].format(weather['weather'][0]['icon']),
-            caption=message, 
+            caption="\n".join(message), 
             parse_mode=ParseMode.HTML
         )        
-    except:
-        message = '{1} <b>{0}</b> {1}\n'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')
-        message += '{} {} ({})\n'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla'])
-        message += '<i>{:,.0f}</i> abitanti\n'.format(int(comune['popolazione']))
-    
+    except:    
         query.edit_message_text(
-            text=message, 
+            text="\n".join(message), 
             parse_mode=ParseMode.HTML
         )
         
@@ -337,9 +332,7 @@ def country_command(update, context):
     
     svg2png(url=country["flag"], write_to=flag_path)
     
-    message = []
-    
-    message.append("<b>{}</b>".format(build_country_name(country)))
+    message = ["<b>{}</b>".format(build_country_name(country))]
     message.append("Capitale: {}".format(country["capital"]))
     message.append("Paese in {}".format(get_country_region(country)))
     message.append("Popolazione: <i>{:,.0f}</i>".format(country["population"]))
@@ -593,6 +586,39 @@ def end(update, context):
     query.edit_message_text(text="See you next time!")
     return ConversationHandler.END
 
+def alarm(context):
+    """Send the alarm message."""
+    job = context.job
+    context.bot.send_message(job.context, text='A breve il verdetto')
+
+def remove_job_if_exists(name, context):
+    """Remove job with given name. Returns whether job was removed."""
+    current_jobs = context.job_queue.get_jobs_by_name(name)
+    if not current_jobs:
+        return False
+    for job in current_jobs:
+        job.schedule_removal()
+    return True
+
+def set_timer(update, context):
+    """Add a job to the queue."""
+    chat_id = update.message.chat_id
+    
+    job_removed = remove_job_if_exists(str(chat_id), context)
+    context.job_queue.run_daily(alarm, None, context=chat_id, name=str(chat_id))
+
+    text = 'Timer successfully set!'
+    if job_removed:
+        text += ' Old one was removed.'
+    update.message.reply_text(text)
+    
+def unset(update, context):
+    """Remove the job if the user changed their mind."""
+    chat_id = update.message.chat_id
+    job_removed = remove_job_if_exists(str(chat_id), context)
+    text = 'Timer successfully cancelled!' if job_removed else 'You have no active timer.'
+    update.message.reply_text(text)
+
 
 #================================================================================
 
@@ -726,6 +752,9 @@ def main():
     )
 
     dp.add_handler(conv_handler)
+    
+    dp.add_handler(CommandHandler("set", set_timer))
+    dp.add_handler(CommandHandler("unset", unset))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
