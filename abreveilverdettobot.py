@@ -605,7 +605,7 @@ def set_timer(update, context):
     chat_id = update.message.chat_id
     
     job_removed = remove_job_if_exists(str(chat_id), context)
-    t = datetime.time(15, 20, 00, 000000)
+    t = datetime.time(16, 30, 00, 000000)
     context.job_queue.run_daily(alarm, t, days=tuple(range(7)), context=chat_id, name=str(chat_id))
 
     text = 'Timer successfully set!'
