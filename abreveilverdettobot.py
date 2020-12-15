@@ -605,7 +605,8 @@ def set_timer(update, context):
     chat_id = update.message.chat_id
     
     job_removed = remove_job_if_exists(str(chat_id), context)
-    context.job_queue.run_daily(alarm, None, context=chat_id, name=str(chat_id))
+    t = datetime.time(10, 00, 00, 000000)
+    context.job_queue.run_daily(alarm, t, days=tuple(range(7)), context=chat_id, name=str(chat_id))
 
     text = 'Timer successfully set!'
     if job_removed:
@@ -753,7 +754,7 @@ def main():
 
     dp.add_handler(conv_handler)
     
-    dp.add_handler(CommandHandler("set", set_timer))
+    dp.add_handler(CommandHandler("set", set_timer, pass_job_queue=True))
     dp.add_handler(CommandHandler("unset", unset))
 
     # on noncommand i.e message - echo the message on Telegram
