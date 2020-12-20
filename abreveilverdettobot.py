@@ -64,6 +64,7 @@ DATE_KEY = "date"
 VALUE_KEY = "value"
 RUN_NUMBER_KEY = "run_number"
 NUMBER_OF_RUNS_KEY = "number_of_runs"
+IVA_100_100_100 = "Iva_Zanicchi_CAGA_in_diretta.gif"
 
 logger = logging.getLogger(__name__)
 
@@ -433,7 +434,7 @@ def centocentocento_anotherrun(update, context):
         new_value += centocentocento_generate_new_value()
         run_number += 1
     
-    return centocentocento_printresult(context, update.effective_user, query, new_value, run_number)
+    return centocentocento_printresult(update, context, update.effective_user, query, new_value, run_number)
 
 def is_best(value, run_number, current_max_detail, reference_date):
     if value > 100:
@@ -449,7 +450,7 @@ def is_best(value, run_number, current_max_detail, reference_date):
             return False
     return True
 
-def centocentocento_printresult(context, user, query, value, run_number):
+def centocentocento_printresult(update, context, user, query, value, run_number):
     message_lines = ["".join([emojis.numbers.get(n) for n in str(value)])]
     message_lines += centocentocento_result_emoji(value)
 
@@ -462,10 +463,23 @@ def centocentocento_printresult(context, user, query, value, run_number):
     else:
         message_lines += "Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY])
 
-    query.edit_message_text(
-        text=" ".join(message_lines), 
-        parse_mode=ParseMode.HTML
-    )
+    if value == 100:
+        query.bot.delete_message(
+            chat_id=update.effective_chat.id,
+            message_id=update.effective_message.message_id
+        )
+        query.bot.send_photo(
+            chat_id=update.effective_chat.id, 
+            photo=open(buildPath("media/centocentocento/{}".format(IVA_100_100_100)), 'rb'),
+            caption=message_lines, 
+            parse_mode=ParseMode.HTML
+        )
+    else:
+        query.edit_message_text(
+            text=" ".join(message_lines), 
+            parse_mode=ParseMode.HTML
+        )
+
     return ConversationHandler.END
 
 def centocentocento_result_emoji(value):
