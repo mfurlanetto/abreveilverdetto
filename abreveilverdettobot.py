@@ -468,9 +468,9 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
             chat_id=update.effective_chat.id,
             message_id=update.effective_message.message_id
         )
-        query.bot.send_photo(
+        query.bot.send_animation(
             chat_id=update.effective_chat.id, 
-            photo=open(buildPath("media/centocentocento/{}".format(IVA_100_100_100)), 'rb'),
+            animation=open(buildPath("media/centocentocento/{}".format(IVA_100_100_100)), 'rb'),
             caption= "".join(message_lines), 
             parse_mode=ParseMode.HTML
         )
