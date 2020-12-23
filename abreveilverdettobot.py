@@ -342,12 +342,12 @@ def country_command(update, context):
     message.append("Paese in:       {}".format(get_country_region(country)))
     message.append("Popolazione:    {:,.0f}".format(country["population"]))
     message.append("Area:           {:,.0f} km²".format(country["area"]))
-    if country["gini"] is not None:
+    if country["gini"]:
         message.append("Gini:           {}".format(country["gini"]))
     message.append("Moneta:         {}".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"]))))
     message.append("Lingua:         {}".format(", ".join(map(lambda x : x["name"], country["languages"]))))
     message.append("Fuso orario:    {}".format(", ".join(country["timezones"])))
-    if (len(country["borders"]) > 0): 
+    if (country["borders"]): 
         message.append("Confini:        {}".format(find_borders(countries, country["borders"])))
     message.append('```')
     
