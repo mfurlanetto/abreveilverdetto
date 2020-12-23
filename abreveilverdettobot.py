@@ -333,18 +333,20 @@ def country_command(update, context):
     
     svg2png(url=country["flag"], write_to=flag_path)
     
-    message = ["<b>{}</b>".format(build_country_name(country))]
-    message.append("Capitale: {}".format(country["capital"]))
-    message.append("Paese in {}".format(get_country_region(country)))
-    message.append("Popolazione: <i>{:,.0f}</i>".format(country["population"]))
-    message.append("Area: {:,.0f} km²".format(country["area"]))
+    message = ["*{}*".format(build_country_name(country))]
+    message.append('```')
+    message.append("Capitale:\t{}".format(country["capital"]))
+    message.append("Paese in:\t{}".format(get_country_region(country)))
+    message.append("Popolazione:\t_{:,.0f}_".format(country["population"]))
+    message.append("Area:\t{:,.0f} km²".format(country["area"]))
     if country["gini"] is not None:
-        message.append("Coefficiente Gini: <b>{}</b>".format(country["gini"]))
-    message.append("Moneta: {}".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"]))))
-    message.append("Lingua: {}".format(", ".join(map(lambda x : x["name"], country["languages"]))))
-    message.append("Fuso orario: <i>{}</i>".format(", ".join(country["timezones"])))
+        message.append("Coefficiente Gini:\t*{}*".format(country["gini"]))
+    message.append("Moneta:\t{}".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"]))))
+    message.append("Lingua:\t*{}*".format(", ".join(map(lambda x : x["name"], country["languages"]))))
+    message.append("Fuso orario:\t{}".format(", ".join(country["timezones"])))
+    message.append('```')
     if (len(country["borders"]) > 0): 
-        message.append("Confini: {}".format(find_borders(countries, country["borders"])))
+        message.append("Confini:\t{}".format(find_borders(countries, country["borders"])))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -354,7 +356,7 @@ def country_command(update, context):
         chat_id=update.effective_chat.id, 
         photo=open(flag_path, 'rb'),
         caption="\n".join(message), 
-        parse_mode=ParseMode.HTML
+        parse_mode=ParseMode.MARKDOWN_V2
     )
     
     return ConversationHandler.END
