@@ -288,7 +288,7 @@ def comune_command(update, context):
     regions_ita = loadJSON('data/regions_ita')
     covid_severity_color = utils.get_severity_color(comune, regions_ita)
     
-    message = ['{1} _{0}_ {1}\n'.format(" ".join(comune['nome'].upper()), zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')]
+    message = ['{1} *{0}* {1}\n'.format(" ".join(comune['nome'].upper()), zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')]
     message.append('```')
     message.append('{} {} ({})'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla']))
     message.append('{:,.0f} abitanti'.format(int(comune['popolazione'])))
