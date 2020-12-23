@@ -202,8 +202,8 @@ def cts_command(update, context):
     
     keyboard = [
         [
-            InlineKeyboardButton("5", callback_data=str(5)),
-            InlineKeyboardButton("10", callback_data=str(10)),
+            InlineKeyboardButton("5", callback_data="5"),
+            InlineKeyboardButton("10", callback_data="10"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -347,7 +347,7 @@ def country_command(update, context):
     message.append("Moneta:         {}".format("\n                ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"]))))
     message.append("Lingua:         {}".format("\n                ".join(map(lambda x : x["name"], country["languages"]))))
     message.append("Fuso orario:    {}".format("\n                ".join(country["timezones"])))
-    if (country["borders"]): 
+    if country["borders"]: 
         message.append("Confini:        {}".format(find_borders(countries, country["borders"])))
     message.append('```')
     
@@ -605,40 +605,6 @@ def end(update, context):
     query.edit_message_text(text="See you next time!")
     return ConversationHandler.END
 
-def alarm(context):
-    """Send the alarm message."""
-    job = context.job
-    context.bot.send_message(job.context, text='A breve il verdetto')
-
-def remove_job_if_exists(name, context):
-    """Remove job with given name. Returns whether job was removed."""
-    current_jobs = context.job_queue.get_jobs_by_name(name)
-    if not current_jobs:
-        return False
-    for job in current_jobs:
-        job.schedule_removal()
-    return True
-
-def set_timer(update, context):
-    """Add a job to the queue."""
-    chat_id = update.message.chat_id
-    
-    job_removed = remove_job_if_exists(str(chat_id), context)
-    t = datetime.time(16, 30, 00, 000000)
-    context.job_queue.run_daily(alarm, t, days=tuple(range(7)), context=chat_id, name=str(chat_id))
-
-    text = 'Timer successfully set!'
-    if job_removed:
-        text += ' Old one was removed.'
-    update.message.reply_text(text)
-    
-def unset(update, context):
-    """Remove the job if the user changed their mind."""
-    chat_id = update.message.chat_id
-    job_removed = remove_job_if_exists(str(chat_id), context)
-    text = 'Timer successfully cancelled!' if job_removed else 'You have no active timer.'
-    update.message.reply_text(text)
-
 
 #================================================================================
 
@@ -773,9 +739,6 @@ def main():
     )
 
     dp.add_handler(conv_handler)
-    
-    dp.add_handler(CommandHandler("set", set_timer, pass_job_queue=True))
-    dp.add_handler(CommandHandler("unset", unset))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
