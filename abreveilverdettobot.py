@@ -336,7 +336,8 @@ def country_command(update, context):
     
     svg2png(url=country["flag"], write_to=flag_path)
     
-    message = ["*{}*\n".format(" ".join(build_country_name(country).upper()))]
+    message = ["*{}*".format(" ".join(build_country_name(country).upper()))]
+    message.append("*{}*\n".format(" ".join(country["nativeName"].upper())))
     message.append('```')
     message.append("Capitale:       {}".format(country["capital"]))
     message.append("Paese in:       {}".format(get_country_region(country)))
