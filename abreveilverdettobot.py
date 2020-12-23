@@ -288,15 +288,17 @@ def comune_command(update, context):
     regions_ita = loadJSON('data/regions_ita')
     covid_severity_color = utils.get_severity_color(comune, regions_ita)
     
-    message = ['{1} <b>{0}</b> {1}'.format(comune['nome'], zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')]
+    message = ['{1} _{0}_ {1}\n'.format(" ".join(comune['nome'].upper()), zone_dict.get(covid_severity_color) if covid_severity_color is not None else '')]
+    message.append('```')
     message.append('{} {} ({})'.format(comune['cap'][0], comune['provincia']['nome'], comune['sigla']))
-    message.append('<i>{:,.0f}</i> abitanti'.format(int(comune['popolazione'])))
+    message.append('{:,.0f} abitanti'.format(int(comune['popolazione'])))
 
     try:
         weather = json.loads(urlopen(Request(urlWeather)).read().decode())
         
-        message.append('<b>{1}</b> °C - {0}'.format(weather['weather'][0]['description'].capitalize(),
-            '%.1f' % weather['main']['temp']))
+        message.append('{1} °C - {0}'.format(weather['weather'][0]['description'].capitalize(),
+            '%.1f' % weather['main']['temp']))        
+        message.append('```')
         
         query.bot.delete_message(
             chat_id=update.effective_chat.id,
@@ -306,12 +308,13 @@ def comune_command(update, context):
             chat_id=update.effective_chat.id, 
             photo=config['openweathermap']['icon'].format(weather['weather'][0]['icon']),
             caption="\n".join(message), 
-            parse_mode=ParseMode.HTML
+            parse_mode=ParseMode.MARKDOWN_V2
         )        
-    except:    
+    except:        
+        message.append('```')
         query.edit_message_text(
             text="\n".join(message), 
-            parse_mode=ParseMode.HTML
+            parse_mode=ParseMode.MARKDOWN_V2
         )
         
     return ConversationHandler.END
