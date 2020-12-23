@@ -344,9 +344,9 @@ def country_command(update, context):
     message.append("Area:           {:,.0f} km²".format(country["area"]))
     if country["gini"]:
         message.append("Gini:           {}".format(country["gini"]))
-    message.append("Moneta:         {}".format(", ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"]))))
-    message.append("Lingua:         {}".format(", ".join(map(lambda x : x["name"], country["languages"]))))
-    message.append("Fuso orario:    {}".format(", ".join(country["timezones"])))
+    message.append("Moneta:         {}".format("\n              ".join(map(lambda x : "{} ({})".format(x["name"], x["code"]), country["currencies"]))))
+    message.append("Lingua:         {}".format("\n              ".join(map(lambda x : x["name"], country["languages"]))))
+    message.append("Fuso orario:    {}".format("\n              ".join(country["timezones"])))
     if (country["borders"]): 
         message.append("Confini:        {}".format(find_borders(countries, country["borders"])))
     message.append('```')
@@ -659,7 +659,7 @@ def find_borders(countries, codes):
         result = next((country for country in countries if country['alpha3Code'] == code), None)
         if result is not None:
             name_list.append(build_country_name(result))
-    return ', '.join(name_list)
+    return "\n              ".join(name_list)
 
 def get_country_region(country):
     region = country["region"]
