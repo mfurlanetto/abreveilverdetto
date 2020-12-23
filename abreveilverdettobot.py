@@ -755,14 +755,15 @@ def main():
                 CallbackQueryHandler(santi_command, pattern='^' + str(SANTI) + '$')
             ],
             1: [
-                CallbackQueryHandler(ctsCommandHandler, pattern='^(' + str(5) + '|' + str(10) + ')$')
-            ]
-            , 2: [
+                CallbackQueryHandler(ctsCommandHandler, pattern='^(5|10)$')
+            ], 
+            2: [
                 CallbackQueryHandler(centocentocento_anotherrun, pattern='^(No|Yes)$')
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
-        persistent=True, 
+        persistent=True,
+        allow_reentry =True, 
         name=config['bot']['handlerName']
     )
 
