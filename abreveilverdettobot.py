@@ -162,8 +162,7 @@ def conte_command(update, context):
     
     frasi_conte = loadJSON('data/conte')
     index = randrange(directorySize("media/conte"))
-    numFrasiConte = len(frasi_conte)
-    randomIndexCaption = randrange(numFrasiConte)
+    randomIndexCaption = randrange(len(frasi_conte))
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -222,12 +221,8 @@ def dpcm_command(update, context):
     dpcmList = loadJSON('data/dpcm')
     randIndex = randrange(len(dpcmList))
     
-    message = ["```python"]
-    message.append("\'{}\'".format(dpcmList[randIndex]))
-    message.append("```")
-    
     query.edit_message_text(
-        text="\n".join(message), 
+        text='```"{}"```'.format(dpcmList[randIndex]), 
         parse_mode=ParseMode.MARKDOWN_V2
     )
     return ConversationHandler.END
@@ -241,9 +236,9 @@ def giurato_command(update, context):
     giurato_list = loadJSON('data/giurato')
     randIndex = randrange(len(giurato_list))
     
-    query.edit_message_text(
-        text='<i>\"{}\"</i>'.format(giurato_list[randIndex]), 
-        parse_mode=ParseMode.HTML
+    query.bot.send_message(
+        text='```"{}"```'.format(giurato_list[randIndex]),
+        parse_mode=ParseMode.MARKDOWN_V2
     )
     return ConversationHandler.END
 
