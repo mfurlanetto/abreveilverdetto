@@ -468,7 +468,7 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
         chat_data[MAX_VALUE_KEY] = {DATE_KEY: today, USER_KEY: user.username, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
         message_lines.append("This is the best score for today\\!")
     else:
-        message_lines.append("Today {} has already done the best score \\(value: {} - runs: {}\\)".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY]))
+        message_lines.append("Today {} has already done the best score \\(value: {} \\- runs: {}\\)".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY]))
 
     if value == 100:
         today = datetime.datetime.today()
