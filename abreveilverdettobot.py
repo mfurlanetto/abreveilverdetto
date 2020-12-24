@@ -472,6 +472,29 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
         message_lines += "Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY])
 
     if value == 100:
+        DATABASE_URL = os.environ['DATABASE_URL']
+        db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cursor = db_connection.cursor()
+
+        cursor.execute("select won_match_counter from winnings where username = %s", (user.username,))
+        record = cursor.fetchone()
+        if record is None:
+            won_match_counter = 1
+            cursor.execute("insert into winnings(username, won_match_counter) values (%s, %s)", (user.username, won_match_counter))
+        else:
+            won_match_counter = record[0] + 1
+            #we increment in DB without passing the value calculated in the code. anyway, we expect them to always be the same
+            cursor.execute("update winnings set won_match_counter = won_match_counter + 1 where username = %s", (user.username,))
+        
+        message_lines += "You have won {} time{}".format(won_match_counter, "s" if won_match_counter > 1 else "")
+
+        cursor.execute("select username, won_match_counter from winnings order by won_match_counter desc")
+        top_scorer, max_won_match_counter = cursor.fetchone() #we are sure at least one record exists
+        message_lines += "{} the top scorer with {} win{}".format("You are" if top_scorer == user.username else "{} is".format(top_scorer), max_won_match_counter, "s" if max_won_match_counter > 1 else "")
+
+        cursor.close()
+        db_connection.close()
+
         query.bot.delete_message(
             chat_id=update.effective_chat.id,
             message_id=update.effective_message.message_id
@@ -608,21 +631,6 @@ def end(update, context):
     query.edit_message_text(text="See you next time!")
     return ConversationHandler.END
 
-def db_test(update, context):
-    DATABASE_URL = os.environ['DATABASE_URL']
-    db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-
-    cursor = db_connection.cursor()
-    cursor.execute("select winner from games order by game_end desc")
-    record = cursor.fetchone()
-    logger.info("db_test - record = {}".format(record))
-    last_winner = record[0]
-
-    cursor.close()
-    db_connection.close()
-
-    update.message.reply_text('Last winner is {}'.format(last_winner))
-
 #================================================================================
 
 """
@@ -755,9 +763,6 @@ def main():
     )
 
     dp.add_handler(conv_handler)
-
-    #DB communication tester
-    dp.add_handler(CommandHandler("db_test", db_test))   
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
