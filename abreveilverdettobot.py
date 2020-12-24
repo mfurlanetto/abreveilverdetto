@@ -464,26 +464,17 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
     chat_data = context.dispatcher.chat_data
     current_max_detail = chat_data[MAX_VALUE_KEY] if MAX_VALUE_KEY in chat_data else None
     today = datetime.date.today()
-    logger.info("[CENTO] check if passes here 1")
-    logger.info("[CENTO] possible max = {}".format({DATE_KEY: today, USER_KEY: user.username, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}))
     if is_best(value, run_number, current_max_detail, today):
         chat_data[MAX_VALUE_KEY] = {DATE_KEY: today, USER_KEY: user.username, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
-        message_lines += "This is the best score for today"
+        message_lines.append("This is the best score for today")
     else:
-        message_lines += "Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY])
+        message_lines.append("Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY]))
 
-    logger.info("[CENTO] check if passes here 2")
     if value == 100:
-        logger.info("[CENTO] check if passes here 3")
         today = datetime.datetime.today()
         DATABASE_URL = os.environ['DATABASE_URL']
         db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-        logger.info("[CENTO] check if passes here 4")
         with db_connection.cursor() as cursor:
-            logger.info("[CENTO] update = {}".format(update))
-            logger.info("[CENTO] effective_chat = {}".format(update.effective_chat))
-            logger.info("[CENTO] chat_id = {}".format(update.effective_chat.chat_id))
-            logger.info("[CENTO] today = {}".format(today))
             cursor.execute("select won_match_counter from winnings where chat_id = %s and username = %s;", (update.effective_chat.chat_id, user.username))
             record = cursor.fetchone()
             if record is None:
@@ -495,11 +486,11 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
                 cursor.execute("update winnings set won_match_counter = won_match_counter + 1, last_win = %s where chat_id = %s and username = %s;", (today, update.effective_chat.chat_id, user.username))
             db_connection.commit()
             
-            message_lines += "You have won {} time{}".format(won_match_counter, "s" if won_match_counter > 1 else "")
+            message_lines.append("You have won {} time{}".format(won_match_counter, "s" if won_match_counter > 1 else ""))
 
             cursor.execute("select username, won_match_counter from winnings where chat_id = %s order by won_match_counter desc, last_win;", (update.effective_chat.chat_id,))
             top_scorer, max_won_match_counter = cursor.fetchone() #we are sure at least one record exists
-            message_lines += "{} the top scorer with {} win{}".format("You are" if top_scorer == user.username else "{} is".format(top_scorer), max_won_match_counter, "s" if max_won_match_counter > 1 else "")
+            message_lines.append("{} the top scorer with {} win{}".format("You are" if top_scorer == user.username else "{} is".format(top_scorer), max_won_match_counter, "s" if max_won_match_counter > 1 else ""))
         db_connection.close()
 
         query.bot.delete_message(
