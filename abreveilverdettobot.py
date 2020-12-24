@@ -411,10 +411,13 @@ def centocentocento_command(update, context):
     query.answer()
     
     new_value = centocentocento_generate_new_value()
+    #for test porupuse, we force 100 value for the tester
+    if update.effective_user == "zoggialuca":
+        new_value = 100
     run_number = 1
 
     if new_value == 100:
-        return centocentocento_printresult(context, update.effective_user, query, new_value, run_number) #by definition, there is nothing better than 100, so stop with this run
+        return centocentocento_printresult(update, context, update.effective_user, query, new_value, run_number) #by definition, there is nothing better than 100, so stop with this run
 
     #otherwise, ask for another run or not
     context.user_data[NEW_VALUE_KEY] = new_value
