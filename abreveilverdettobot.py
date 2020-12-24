@@ -25,9 +25,6 @@ from cairosvg import svg2png
 from urllib.request import Request, urlopen, urlretrieve
 from urllib.error import URLError, HTTPError
 
-#DB handling
-import psycopg2
-
 from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler, PicklePersistence
@@ -727,7 +724,8 @@ def main():
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
-    
+
+        
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start_command)],
         states={
