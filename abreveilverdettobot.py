@@ -472,14 +472,17 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
     else:
         message_lines += "Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY])
 
+    logger.info("[CENTOCENTOCENTO] value = {}".format(value))
     if value == 100:
+        logger.info("[CENTOCENTOCENTO] try to connect to DB")
         DATABASE_URL = os.environ['DATABASE_URL']
         db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = db_connection.cursor()
 
+        logger.info("[CENTOCENTOCENTO] try to query DB to get user previous wins")
         cursor.execute("select won_match_counter from winnings where username = %s", (user.username,))
         record = cursor.fetchone()
-        logger.info("record = {}".format(record))
+        logger.info("[CENTOCENTOCENTO] record = {}".format(record))
         if record is None:
             won_match_counter = 1
             cursor.execute("insert into winnings(username, won_match_counter) values (%s, %s)", (user.username, won_match_counter))
