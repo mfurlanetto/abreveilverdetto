@@ -472,36 +472,25 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
     else:
         message_lines += "Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY])
 
-    logger.info("[CENTOCENTOCENTO] value = {}".format(value))
     if value == 100:
-        logger.info("[CENTOCENTOCENTO] try to connect to DB")
         DATABASE_URL = os.environ['DATABASE_URL']
         db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-        cursor = db_connection.cursor()
+        with db_connection.cursor() as cursor:
+            cursor.execute("select won_match_counter from winnings where username = %s;", (user.username,))
+            record = cursor.fetchone()
+            if record is None:
+                won_match_counter = 1
+                cursor.execute("insert into winnings(username, won_match_counter) values (%s, %s);", (user.username, won_match_counter))
+            else:
+                won_match_counter = record[0] + 1
+                #we increment in DB without passing the value calculated in the code. anyway, we expect them to always be the same
+                cursor.execute("update winnings set won_match_counter = won_match_counter + 1 where username = %s;", (user.username,))
+            
+            message_lines += "You have won {} time{}".format(won_match_counter, "s" if won_match_counter > 1 else "")
 
-        logger.info("[CENTOCENTOCENTO] try to query DB to get user previous wins")
-        cursor.execute("select won_match_counter from winnings where username = %s;", (user.username,))
-        record = cursor.fetchone()
-        logger.info("[CENTOCENTOCENTO] record = {}".format(record))
-        if record is None:
-            won_match_counter = 1
-            logger.info("[CENTOCENTOCENTO] insert into DB")
-            cursor.execute("insert into winnings(username, won_match_counter) values (%s, %s);", (user.username, won_match_counter))
-            logger.info("[CENTOCENTOCENTO] statusmessage = {}".format(cursor.statusmessage))
-        else:
-            won_match_counter = record[0] + 1
-            logger.info("[CENTOCENTOCENTO] update DB")
-            #we increment in DB without passing the value calculated in the code. anyway, we expect them to always be the same
-            cursor.execute("update winnings set won_match_counter = won_match_counter + 1 where username = %s;", (user.username,))
-            logger.info("[CENTOCENTOCENTO] statusmessage = {}".format(cursor.statusmessage))
-        
-        message_lines += "You have won {} time{}".format(won_match_counter, "s" if won_match_counter > 1 else "")
-
-        cursor.execute("select username, won_match_counter from winnings order by won_match_counter desc;")
-        top_scorer, max_won_match_counter = cursor.fetchone() #we are sure at least one record exists
-        message_lines += "{} the top scorer with {} win{}".format("You are" if top_scorer == user.username else "{} is".format(top_scorer), max_won_match_counter, "s" if max_won_match_counter > 1 else "")
-
-        cursor.close()
+            cursor.execute("select username, won_match_counter from winnings order by won_match_counter desc;")
+            top_scorer, max_won_match_counter = cursor.fetchone() #we are sure at least one record exists
+            message_lines += "{} the top scorer with {} win{}".format("You are" if top_scorer == user.username else "{} is".format(top_scorer), max_won_match_counter, "s" if max_won_match_counter > 1 else "")
         db_connection.close()
 
         query.bot.delete_message(
