@@ -25,9 +25,6 @@ from cairosvg import svg2png
 from urllib.request import Request, urlopen, urlretrieve
 from urllib.error import URLError, HTTPError
 
-#DB handling
-import psycopg2
-
 from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler, PicklePersistence
@@ -162,7 +159,8 @@ def conte_command(update, context):
     
     frasi_conte = loadJSON('data/conte')
     index = randrange(directorySize("media/conte"))
-    randomIndexCaption = randrange(len(frasi_conte))
+    numFrasiConte = len(frasi_conte)
+    randomIndexCaption = randrange(numFrasiConte)
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -222,8 +220,8 @@ def dpcm_command(update, context):
     randIndex = randrange(len(dpcmList))
     
     query.edit_message_text(
-        text="```\"{}\"```".format(dpcmList[randIndex]), 
-        parse_mode=ParseMode.MARKDOWN_V2
+        text='<i>\"{}\"</i>'.format(dpcmList[randIndex]), 
+        parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
 
@@ -237,8 +235,8 @@ def giurato_command(update, context):
     randIndex = randrange(len(giurato_list))
     
     query.edit_message_text(
-        text='```"{}"```'.format(giurato_list[randIndex]),
-        parse_mode=ParseMode.MARKDOWN_V2
+        text='<i>\"{}\"</i>'.format(giurato_list[randIndex]), 
+        parse_mode=ParseMode.HTML
     )
     return ConversationHandler.END
 
@@ -607,20 +605,6 @@ def end(update, context):
     query.edit_message_text(text="See you next time!")
     return ConversationHandler.END
 
-def db_test(update, context):
-    DATABASE_URL = os.environ['DATABASE_URL']
-    db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-
-    cursor = db_connection.cursor()
-    cursor.execute("select winner from games order by game_end desc")
-    record = cursor.fetchone()
-    logger.info("db_test - record = {}".format(record))
-    last_winner = record[0]
-
-    cursor.close()
-    db_connection.close()
-
-    update.message.reply_text('Last winner is {}'.format(last_winner))
 
 #================================================================================
 
@@ -718,7 +702,8 @@ def main():
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
-    
+
+        
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start_command)],
         states={
@@ -754,9 +739,6 @@ def main():
     )
 
     dp.add_handler(conv_handler)
-
-    #DB communication tester
-    dp.add_handler(CommandHandler("db_test", db_test))   
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
