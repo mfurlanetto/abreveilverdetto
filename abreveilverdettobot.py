@@ -480,20 +480,24 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
         cursor = db_connection.cursor()
 
         logger.info("[CENTOCENTOCENTO] try to query DB to get user previous wins")
-        cursor.execute("select won_match_counter from winnings where username = %s", (user.username,))
+        cursor.execute("select won_match_counter from winnings where username = %s;", (user.username,))
         record = cursor.fetchone()
         logger.info("[CENTOCENTOCENTO] record = {}".format(record))
         if record is None:
             won_match_counter = 1
-            cursor.execute("insert into winnings(username, won_match_counter) values (%s, %s)", (user.username, won_match_counter))
+            logger.info("[CENTOCENTOCENTO] insert into DB")
+            cursor.execute("insert into winnings(username, won_match_counter) values (%s, %s);", (user.username, won_match_counter))
+            logger.info("[CENTOCENTOCENTO] statusmessage = {}".format(cursor.statusmessage))
         else:
             won_match_counter = record[0] + 1
+            logger.info("[CENTOCENTOCENTO] update DB")
             #we increment in DB without passing the value calculated in the code. anyway, we expect them to always be the same
-            cursor.execute("update winnings set won_match_counter = won_match_counter + 1 where username = %s", (user.username,))
+            cursor.execute("update winnings set won_match_counter = won_match_counter + 1 where username = %s;", (user.username,))
+            logger.info("[CENTOCENTOCENTO] statusmessage = {}".format(cursor.statusmessage))
         
         message_lines += "You have won {} time{}".format(won_match_counter, "s" if won_match_counter > 1 else "")
 
-        cursor.execute("select username, won_match_counter from winnings order by won_match_counter desc")
+        cursor.execute("select username, won_match_counter from winnings order by won_match_counter desc;")
         top_scorer, max_won_match_counter = cursor.fetchone() #we are sure at least one record exists
         message_lines += "{} the top scorer with {} win{}".format("You are" if top_scorer == user.username else "{} is".format(top_scorer), max_won_match_counter, "s" if max_won_match_counter > 1 else "")
 
