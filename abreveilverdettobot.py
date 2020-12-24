@@ -609,6 +609,9 @@ def end(update, context):
     return ConversationHandler.END
 
 def db_test(update, context):
+    last_winner = "TEST"
+    update.message.reply_text('Last winner is {}'.format(last_winner))
+    """
     logger.info("db_test - exeution start")
     DATABASE_URL = os.environ['DATABASE_URL']
     logger.info("db_test - DATABASE_URL set")
@@ -628,6 +631,7 @@ def db_test(update, context):
     logger.info("db_test - db_connection closed")
 
     update.message.reply_text('Last winner is {}'.format(last_winner))
+    """
 
 #================================================================================
 
