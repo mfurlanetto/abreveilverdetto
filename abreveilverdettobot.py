@@ -609,24 +609,17 @@ def end(update, context):
     return ConversationHandler.END
 
 def db_test(update, context):
-    logger.info("db_test - exeution start")
     DATABASE_URL = os.environ['DATABASE_URL']
-    logger.info("db_test - DATABASE_URL set")
     db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-    logger.info("db_test - db_connection created")
 
     cursor = db_connection.cursor()
-    logger.info("db_test - cursor created")
     cursor.execute("select winner from games order by game_end desc")
-    logger.info("db_test - cursor executed")
-    last_winner = cursor.fetchone()[0]
-    logger.info("db_test - cursor fetched")
-    logger.info("db_test - last_winner = {}".format(last_winner))
+    record = cursor.fetchone()
+    logger.info("db_test - record = {}".format(record))
+    last_winner = record[0]
 
     cursor.close()
-    logger.info("db_test - cursor closed")
     db_connection.close()
-    logger.info("db_test - db_connection closed")
 
     update.message.reply_text('Last winner is {}'.format(last_winner))
 
@@ -726,8 +719,7 @@ def main():
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
-
-    '''        
+    
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start_command)],
         states={
@@ -763,10 +755,9 @@ def main():
     )
 
     dp.add_handler(conv_handler)
-    ''' 
 
     #DB communication tester
-    dp.add_handler(CommandHandler("start", db_test))   
+    dp.add_handler(CommandHandler("db_test", db_test))   
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
