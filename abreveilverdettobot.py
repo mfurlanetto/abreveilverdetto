@@ -617,10 +617,11 @@ def db_test(update, context):
 
     cursor = db_connection.cursor()
     logger.info("db_test - cursor created")
-    cursor.execute("select winner from games order by end desc")
+    cursor.execute("select winner from games order by game_end desc")
     logger.info("db_test - cursor executed")
     last_winner = cursor.fetchone()[0]
     logger.info("db_test - cursor fetched")
+    logger.info("db_test - last_winner = {}".format(last_winner))
 
     cursor.close()
     logger.info("db_test - cursor closed")
