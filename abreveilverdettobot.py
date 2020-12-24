@@ -726,7 +726,7 @@ def main():
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-        
+    '''        
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start_command)],
         states={
@@ -762,13 +762,14 @@ def main():
     )
 
     dp.add_handler(conv_handler)
+    '''    
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
     dp.add_handler(MessageHandler(Filters.sticker, handle_sticker))
 
     #DB communication tester
-    dp.add_handler(CommandHandler("db_test", db_test))
+    dp.add_handler(CommandHandler("start", db_test))
 
      # log all errors
     dp.add_error_handler(error)
