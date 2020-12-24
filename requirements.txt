@@ -6,3 +6,4 @@ APScheduler==3.6.3
 pytz>=2018.6
 cairosvg
 PyYAML
+psycopg2
