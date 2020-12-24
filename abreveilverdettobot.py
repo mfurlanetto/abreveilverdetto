@@ -25,6 +25,8 @@ from cairosvg import svg2png
 from urllib.request import Request, urlopen, urlretrieve
 from urllib.error import URLError, HTTPError
 
+import psycopg2 #DB communication library
+
 from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler, PicklePersistence
