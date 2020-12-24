@@ -471,23 +471,24 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
         message_lines += "Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY])
 
     if value == 100:
+        today = datetime.datetime.today()
         DATABASE_URL = os.environ['DATABASE_URL']
         db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
         with db_connection.cursor() as cursor:
-            cursor.execute("select won_match_counter from winnings where username = %s;", (user.username,))
+            cursor.execute("select won_match_counter from winnings where chat_id = %s and username = %s;", (update.effective_chat.chat_id, user.username))
             record = cursor.fetchone()
             if record is None:
                 won_match_counter = 1
-                cursor.execute("insert into winnings(username, won_match_counter) values (%s, %s);", (user.username, won_match_counter))
+                cursor.execute("insert into winnings(username, won_match_counter, last_win, chat_id) values (%s, %s);", (user.username, won_match_counter, today, update.effective_chat.chat_id))
             else:
                 won_match_counter = record[0] + 1
                 #we increment in DB without passing the value calculated in the code. anyway, we expect them to always be the same
-                cursor.execute("update winnings set won_match_counter = won_match_counter + 1 where username = %s;", (user.username,))
+                cursor.execute("update winnings set won_match_counter = won_match_counter + 1, last_win = %s where chat_id = %s and username = %s;", (today, update.effective_chat.chat_id, user.username))
             db_connection.commit()
             
             message_lines += "You have won {} time{}".format(won_match_counter, "s" if won_match_counter > 1 else "")
 
-            cursor.execute("select username, won_match_counter from winnings order by won_match_counter desc;")
+            cursor.execute("select username, won_match_counter from winnings where chat_id = %s order by won_match_counter desc, last_win;", (update.effective_chat.chat_id,))
             top_scorer, max_won_match_counter = cursor.fetchone() #we are sure at least one record exists
             message_lines += "{} the top scorer with {} win{}".format("You are" if top_scorer == user.username else "{} is".format(top_scorer), max_won_match_counter, "s" if max_won_match_counter > 1 else "")
         db_connection.close()
@@ -499,13 +500,13 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
         query.bot.send_animation(
             chat_id=update.effective_chat.id, 
             animation=open(buildPath("media/centocentocento/{}".format(IVA_100_100_100)), 'rb'),
-            caption= "".join(message_lines), 
-            parse_mode=ParseMode.HTML
+            caption= "\n".join(message_lines), 
+            parse_mode=ParseMode.MARKDOWN_V2
         )
     else:
         query.edit_message_text(
-            text=" ".join(message_lines), 
-            parse_mode=ParseMode.HTML
+            text="\n".join(message_lines), 
+            parse_mode=ParseMode.MARKDOWN_V2
         )
 
     return ConversationHandler.END
