@@ -485,6 +485,7 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
                 won_match_counter = record[0] + 1
                 #we increment in DB without passing the value calculated in the code. anyway, we expect them to always be the same
                 cursor.execute("update winnings set won_match_counter = won_match_counter + 1 where username = %s;", (user.username,))
+            db_connection.commit()
             
             message_lines += "You have won {} time{}".format(won_match_counter, "s" if won_match_counter > 1 else "")
 
