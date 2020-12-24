@@ -25,6 +25,9 @@ from cairosvg import svg2png
 from urllib.request import Request, urlopen, urlretrieve
 from urllib.error import URLError, HTTPError
 
+#DB handling
+import psycopg2
+
 from random import randrange
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler, PicklePersistence
@@ -605,6 +608,18 @@ def end(update, context):
     query.edit_message_text(text="See you next time!")
     return ConversationHandler.END
 
+def db_test(update, context):
+    DATABASE_URL = os.environ['DATABASE_URL']
+    db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+    cursor = db_connection.cursor()
+    cursor.execute("select winner from games order by end desc")
+    last_winner = cursor.fetchone()[0]
+
+    cursor.close()
+    db_connection.close()
+
+    update.message.reply_text('Last winner is {}'.format(last_winner))
 
 #================================================================================
 
@@ -743,6 +758,9 @@ def main():
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
     dp.add_handler(MessageHandler(Filters.sticker, handle_sticker))
+
+    #DB communication tester
+    dp.add_handler(CommandHandler("db_test", db_test))
 
      # log all errors
     dp.add_error_handler(error)
