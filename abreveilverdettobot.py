@@ -411,8 +411,6 @@ def centocentocento_command(update, context):
     query.answer()
     
     new_value = centocentocento_generate_new_value()
-    #for test porupuse, we force 100 value
-    new_value = 100
     run_number = 1
 
     if new_value == 100:
