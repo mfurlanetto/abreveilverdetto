@@ -467,7 +467,7 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
     logger.info("[CENTO] check if passes here 1")
     if is_best(value, run_number, current_max_detail, today):
         chat_data[MAX_VALUE_KEY] = {DATE_KEY: today, USER_KEY: user.username, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
-        message_lines += "This is the best score for today\!"
+        message_lines += "This is the best score for today"
     else:
         message_lines += "Today {} has already done the best score (value: {} - runs: {})".format(current_max_detail[USER_KEY], current_max_detail[VALUE_KEY], current_max_detail[NUMBER_OF_RUNS_KEY])
 
