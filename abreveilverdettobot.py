@@ -766,14 +766,14 @@ def main():
     )
 
     dp.add_handler(conv_handler)
-    '''    
+    ''' 
+
+    #DB communication tester
+    dp.add_handler(CommandHandler("start", db_test))   
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
     dp.add_handler(MessageHandler(Filters.sticker, handle_sticker))
-
-    #DB communication tester
-    dp.add_handler(CommandHandler("start", db_test))
 
      # log all errors
     dp.add_error_handler(error)
