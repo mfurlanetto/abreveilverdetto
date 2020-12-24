@@ -465,6 +465,7 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
     current_max_detail = chat_data[MAX_VALUE_KEY] if MAX_VALUE_KEY in chat_data else None
     today = datetime.date.today()
     logger.info("[CENTO] check if passes here 1")
+    logger.info("[CENTO] possible max = {}".format({DATE_KEY: today, USER_KEY: user.username, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}))
     if is_best(value, run_number, current_max_detail, today):
         chat_data[MAX_VALUE_KEY] = {DATE_KEY: today, USER_KEY: user.username, VALUE_KEY: value, NUMBER_OF_RUNS_KEY: run_number}
         message_lines += "This is the best score for today"
