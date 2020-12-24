@@ -609,15 +609,23 @@ def end(update, context):
     return ConversationHandler.END
 
 def db_test(update, context):
+    logger.info("db_test - exeution start")
     DATABASE_URL = os.environ['DATABASE_URL']
+    logger.info("db_test - DATABASE_URL set")
     db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+    logger.info("db_test - db_connection created")
 
     cursor = db_connection.cursor()
+    logger.info("db_test - cursor created")
     cursor.execute("select winner from games order by end desc")
+    logger.info("db_test - cursor executed")
     last_winner = cursor.fetchone()[0]
+    logger.info("db_test - cursor fetched")
 
     cursor.close()
+    logger.info("db_test - cursor closed")
     db_connection.close()
+    logger.info("db_test - db_connection closed")
 
     update.message.reply_text('Last winner is {}'.format(last_winner))
 
