@@ -222,9 +222,13 @@ def dpcm_command(update, context):
     dpcmList = loadJSON('data/dpcm')
     randIndex = randrange(len(dpcmList))
     
+    message = ["```python"]
+    message.append("\'{}\'".format(dpcmList[randIndex]))
+    message.append("```")
+    
     query.edit_message_text(
-        text='<i>\"{}\"</i>'.format(dpcmList[randIndex]), 
-        parse_mode=ParseMode.HTML
+        text="\n".join(message), 
+        parse_mode=ParseMode.MARKDOWN_V2
     )
     return ConversationHandler.END
 
