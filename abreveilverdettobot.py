@@ -479,6 +479,7 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
 
         cursor.execute("select won_match_counter from winnings where username = %s", (user.username,))
         record = cursor.fetchone()
+        logger.info("record = {}".format(record))
         if record is None:
             won_match_counter = 1
             cursor.execute("insert into winnings(username, won_match_counter) values (%s, %s)", (user.username, won_match_counter))
