@@ -475,6 +475,7 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
         DATABASE_URL = os.environ['DATABASE_URL']
         db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
         with db_connection.cursor() as cursor:
+            logger.info("[CENTO] update = {}".format(update))
             logger.info("[CENTO] effective_chat = {}".format(update.effective_chat))
             logger.info("[CENTO] chat_id = {}".format(update.effective_chat.chat_id))
             logger.info("[CENTO] today = {}".format(today))
