@@ -222,7 +222,7 @@ def dpcm_command(update, context):
     randIndex = randrange(len(dpcmList))
     
     query.edit_message_text(
-        text='```"{}"```'.format(dpcmList[randIndex]), 
+        text="```\"{}\"```".format(dpcmList[randIndex]), 
         parse_mode=ParseMode.MARKDOWN_V2
     )
     return ConversationHandler.END
@@ -236,7 +236,7 @@ def giurato_command(update, context):
     giurato_list = loadJSON('data/giurato')
     randIndex = randrange(len(giurato_list))
     
-    query.bot.send_message(
+    query.edit_message_text(
         text='```"{}"```'.format(giurato_list[randIndex]),
         parse_mode=ParseMode.MARKDOWN_V2
     )
