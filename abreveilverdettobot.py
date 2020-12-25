@@ -479,7 +479,7 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
             record = cursor.fetchone()
             if record is None:
                 won_match_counter = 1
-                cursor.execute("insert into winnings(username, won_match_counter, last_win, chat_id) values (%s, %s);", (user.username, won_match_counter, today, update.effective_chat.id))
+                cursor.execute("insert into winnings(username, won_match_counter, last_win, chat_id) values (%s, %s, %s, %s);", (user.username, won_match_counter, today, update.effective_chat.id))
             else:
                 won_match_counter = record[0] + 1
                 #we increment in DB without passing the value calculated in the code. anyway, we expect them to always be the same
