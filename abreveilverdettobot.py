@@ -475,20 +475,20 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
         DATABASE_URL = os.environ['DATABASE_URL']
         db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
         with db_connection.cursor() as cursor:
-            cursor.execute("select won_match_counter from winnings where chat_id = %s and username = %s;", (update.effective_chat.chat_id, user.username))
+            cursor.execute("select won_match_counter from winnings where chat_id = %s and username = %s;", (update.effective_chat.id, user.username))
             record = cursor.fetchone()
             if record is None:
                 won_match_counter = 1
-                cursor.execute("insert into winnings(username, won_match_counter, last_win, chat_id) values (%s, %s);", (user.username, won_match_counter, today, update.effective_chat.chat_id))
+                cursor.execute("insert into winnings(username, won_match_counter, last_win, chat_id) values (%s, %s);", (user.username, won_match_counter, today, update.effective_chat.id))
             else:
                 won_match_counter = record[0] + 1
                 #we increment in DB without passing the value calculated in the code. anyway, we expect them to always be the same
-                cursor.execute("update winnings set won_match_counter = won_match_counter + 1, last_win = %s where chat_id = %s and username = %s;", (today, update.effective_chat.chat_id, user.username))
+                cursor.execute("update winnings set won_match_counter = won_match_counter + 1, last_win = %s where chat_id = %s and username = %s;", (today, update.effective_chat.id, user.username))
             db_connection.commit()
             
             message_lines.append("You have won {} time{}".format(won_match_counter, "s" if won_match_counter > 1 else ""))
 
-            cursor.execute("select username, won_match_counter from winnings where chat_id = %s order by won_match_counter desc, last_win;", (update.effective_chat.chat_id,))
+            cursor.execute("select username, won_match_counter from winnings where chat_id = %s order by won_match_counter desc, last_win;", (update.effective_chat.id,))
             top_scorer, max_won_match_counter = cursor.fetchone() #we are sure at least one record exists
             message_lines.append("{} the top scorer with {} win{}".format("You are" if top_scorer == user.username else "{} is".format(top_scorer), max_won_match_counter, "s" if max_won_match_counter > 1 else ""))
         db_connection.close()
