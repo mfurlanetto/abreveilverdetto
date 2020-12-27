@@ -164,6 +164,9 @@ def conte_command(update, context):
     numFrasiConte = len(frasi_conte)
     randomIndexCaption = randrange(numFrasiConte)
     
+    user = update.effective_user
+    logger.debug('User {} chose saluti.'.format(user.username))
+    
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
         message_id=update.effective_message.message_id
@@ -219,7 +222,10 @@ def dpcm_command(update, context):
     query.answer()
     
     dpcmList = loadJSON('data/dpcm')
-    randIndex = randrange(len(dpcmList))
+    randIndex = randrange(len(dpcmList))    
+    
+    user = update.effective_user
+    logger.error('User {} chose saluti.'.format(user.username))
     
     query.edit_message_text(
         text='<i>\"{}\"</i>'.format(dpcmList[randIndex]), 
