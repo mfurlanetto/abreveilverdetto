@@ -384,6 +384,7 @@ def fibonacci_start(update, context):
     return 3
 
 def fibonacci_command(update, context):   
+    logger.info("FIBONACCI update.message.text = {}".format(update.message.text))
     response = []
     error = False
     try:
@@ -398,12 +399,14 @@ def fibonacci_command(update, context):
     except:
         response.append("Generic exception while reading maxNumberOfIterations parameter")
         error = True
+    logger.info("FIBONACCI maxNumberOfIterations = {}".format(maxNumberOfIterations))
     if (error == True):
         maxNumberOfIterations = 10
         response.append("Default will be {}".format(maxNumberOfIterations))
     elif (maxNumberOfIterations > 10):
         maxNumberOfIterations = 10
         response.append("The maximum number of iterations will be set to {}, that is the maximum allowed".format(maxNumberOfIterations))
+    logger.info("FIBONACCI maxNumberOfIterations after a check = {}".format(maxNumberOfIterations))
 
     numberOfIterations = randrange(maxNumberOfIterations)
     sequence = [1, 1]
@@ -414,6 +417,7 @@ def fibonacci_command(update, context):
             sequence.append(sequence[-1] + sequence[-2])
     response.append(', '.join(map(str, sequence)))
     
+    logger.info("FIBONACCI response = {}".format(response))
     update.message.reply_text(
         text="\n".join(response), 
         parse_mode=ParseMode.HTML
