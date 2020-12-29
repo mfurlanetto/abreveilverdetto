@@ -372,6 +372,16 @@ def country_command(update, context):
     
     return ConversationHandler.END
 
+def fibonacci_start(update, context):
+    query = update.callback_query
+    query.answer()
+
+    query.edit_message_text(
+        text="Maximum number of iterations?"
+        , parse_mode=ParseMode.MARKDOWN_V2
+    )
+
+    return 3
 
 def fibonacci_command(update, context):
     query = update.callback_query
@@ -380,13 +390,13 @@ def fibonacci_command(update, context):
     response = []
     error = False
     try:
-        maxNumberOfIterations = int(context.args[0])
+        maxNumberOfIterations = int(update.message.text)
     except (IndexError):    
         response.append("maxNumberOfIterations parameter not passed")
         error = True
     except (ValueError):
         response.append("Exception converting maxNumberOfIterations parameter")
-        response.append("Received value is {}".format(context.args[0]))
+        response.append("Received value is {}".format(update.message.text))
         error = True
     except:
         response.append("Generic exception while reading maxNumberOfIterations parameter")
@@ -394,6 +404,10 @@ def fibonacci_command(update, context):
     if (error == True):
         maxNumberOfIterations = 10
         response.append("Default will be {}".format(maxNumberOfIterations))
+    elif (maxNumberOfIterations > 10):
+        maxNumberOfIterations = 10
+        response.append("The maximum number of iterations will be set to {}, that is the maximum allowed".format(maxNumberOfIterations))
+
     numberOfIterations = randrange(maxNumberOfIterations)
     sequence = [1, 1]
     if (numberOfIterations <= len(sequence)):
@@ -759,6 +773,9 @@ def main():
             ], 
             2: [
                 CallbackQueryHandler(centocentocento_anotherrun, pattern='^(No|Yes)$')
+            ]
+            , 3: [
+                MessageHandler(Filters.regex(r'\d'), )
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
