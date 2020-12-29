@@ -760,7 +760,7 @@ def main():
                 CallbackQueryHandler(covid_command, pattern='^' + str(COVID) + '$'),
                 CallbackQueryHandler(giurato_command, pattern='^' + str(GIURATO) + '$'),
                 CallbackQueryHandler(torta_command, pattern='^' + str(TORTADIMELE) + '$'),
-                CallbackQueryHandler(fibonacci_command, pattern='^' + str(FIBONACCI) + '$'),
+                CallbackQueryHandler(fibonacci_start, pattern='^' + str(FIBONACCI) + '$'),
                 CallbackQueryHandler(centocentocento_command, pattern='^' + str(CENTOCENTOCENTO) + '$'),
                 CallbackQueryHandler(ghesboro_command, pattern='^' + str(GHESBORO) + '$'),
                 CallbackQueryHandler(pokemon_command, pattern='^' + str(POKEMON) + '$'),
@@ -775,7 +775,7 @@ def main():
                 CallbackQueryHandler(centocentocento_anotherrun, pattern='^(No|Yes)$')
             ]
             , 3: [
-                MessageHandler(Filters.regex(r'\d'), )
+                MessageHandler(Filters.regex(r'\d'), fibonacci_command)
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
