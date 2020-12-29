@@ -776,7 +776,7 @@ def main():
                 CallbackQueryHandler(centocentocento_anotherrun, pattern='^(No|Yes)$')
             ]
             , 3: [
-                MessageHandler(Filters.regex(r'\d'), fibonacci_command)
+                MessageHandler(Filters.regex(r'^\d$'), fibonacci_command)
             ]
         },
         fallbacks=[CallbackQueryHandler(end)],
