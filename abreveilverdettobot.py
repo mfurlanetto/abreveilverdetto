@@ -383,10 +383,7 @@ def fibonacci_start(update, context):
 
     return 3
 
-def fibonacci_command(update, context):
-    query = update.callback_query
-    query.answer()
-    
+def fibonacci_command(update, context):   
     response = []
     error = False
     try:
@@ -417,7 +414,7 @@ def fibonacci_command(update, context):
             sequence.append(sequence[-1] + sequence[-2])
     response.append(', '.join(map(str, sequence)))
     
-    query.edit_message_text(
+    update.message.reply_text(
         text="\n".join(response), 
         parse_mode=ParseMode.HTML
     )
