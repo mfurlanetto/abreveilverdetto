@@ -546,7 +546,9 @@ def bravitutti_command(update, context):
     with db_connection.cursor() as cursor:
         cursor.execute("select username, won_match_counter from winnings where chat_id = %s;", (update.effective_chat.id))
         records = cursor.fetchall()
+        logger.info('[BRAVITUTTI] - records : {}'.format(records))
         for record in records:
+            logger.info('[BRAVITUTTI] - record : {}'.format(record))
             message.append("{}:     {}".format(record[0], record[1]))
     db_connection.close()
     message.append('```')
