@@ -479,9 +479,7 @@ def is_best(value, run_number, current_max_detail, reference_date):
     return True
 
 def centocentocento_printresult(update, context, user, query, value, run_number):
-    message_lines = ["".join([emojis.numbers.get(n) for n in str(value)])]
-    message_lines += centocentocento_result_emoji(value)
-
+    message_lines = ["{} {}".format("".join([emojis.numbers.get(n) for n in str(value)]), centocentocento_result_emoji(value))]
     chat_data = context.dispatcher.chat_data
     current_max_detail = chat_data[MAX_VALUE_KEY] if MAX_VALUE_KEY in chat_data else None
     today = datetime.date.today()
@@ -538,6 +536,24 @@ def centocentocento_result_emoji(value):
     elif value == 100:
         return emojis.centocentocentoresult["win"]
     return emojis.centocentocentoresult["above"]
+
+def bravitutti_command(update, context):
+    message = ["*{}*\n".format(" ".join("HIGHSCORES"))]
+    message.append('```')
+    chat_id = update.effective_chat.id
+    DATABASE_URL = os.environ['DATABASE_URL']
+    db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+    with db_connection.cursor() as cursor:
+        cursor.execute("select username, won_match_counter from winnings where chat_id = %s;", (update.effective_chat.id))
+        records = cursor.fetchall()
+        for record in records:
+            message.append("{}:     {}".format(record[0], record[1]))
+    db_connection.close()
+    message.append('```')
+    update.message.bot.send_message(
+        chat_id=chat_id, 
+        text="\n".join(message), 
+        parse_mode=ParseMode.MARKDOWN_V2)
 
 def ghesboro_command(update, context):
     """Send a message when the command /ghesboro is issued."""
@@ -786,6 +802,8 @@ def main():
     )
 
     dp.add_handler(conv_handler)
+    
+    dp.add_handler(CommandHandler("bravitutti", bravitutti_command))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, handle_message))
