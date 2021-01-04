@@ -545,7 +545,7 @@ def bravitutti_command(update, context):
     db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     logger.info('[BRAVITUTTI] - db connection')
     with db_connection.cursor() as cursor:
-        cursor.execute("select username, won_match_counter from winnings where chat_id = %s;", (update.effective_chat.id))
+        cursor.execute("select username, won_match_counter from winnings where chat_id = %s", (update.effective_chat.id, ))
         logger.info('[BRAVITUTTI] - query executed')
         records = cursor.fetchall()
         logger.info('[BRAVITUTTI] - records : {}'.format(records))
