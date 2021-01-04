@@ -539,16 +539,14 @@ def centocentocento_result_emoji(value):
 
 def bravitutti_command(update, context):
     message = ["*HIGHSCORES*"]
-    message.append('```')
     chat_id = update.effective_chat.id
     DATABASE_URL = os.environ['DATABASE_URL']
     db_connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     with db_connection.cursor() as cursor:
-        cursor.execute("select username, won_match_counter from winnings where chat_id = %s ORDER BY won_match_counter", (update.effective_chat.id, ))
+        cursor.execute("select username, won_match_counter from winnings where chat_id = %s ORDER BY won_match_counter DESC", (update.effective_chat.id, ))
         records = cursor.fetchall()
         for record in records:
-            message.append("{}:     *{}*".format(record[0], record[1]))
-        message.append('```')
+            message.append("{}:\t\t*{}*".format(record[0], record[1]))
     db_connection.close()
     
     update.message.bot.send_message(
