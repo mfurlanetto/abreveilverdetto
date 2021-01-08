@@ -630,8 +630,8 @@ def cocktail_command(update, context):
     query.answer()
     #--------------------------------
     reqRecipes = Request(config['cocktail']['url2'])
-    drinks = json.loads(urlopen(reqRecipes).read().decode())
-    drink = drinks.drink[0]
+    drinkList = json.loads(urlopen(reqRecipes).read().decode())
+    drink = drinkList.drinks[0]
     message = '<b>\"{}\"</b>\n'.format(drink['strDrink'].upper())
     message += 'Tipo: <i>{}</i>\n'.format(drink['strCategory'])
     message += 'Bicchiere: <i>{}</i>\n'.format(drink['strGlass'])
