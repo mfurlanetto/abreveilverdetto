@@ -634,16 +634,16 @@ def cocktail_command(update, context):
     drink = drinkList['drinks'][0]
     message = '<b>\"{}\"</b>\n'.format(drink['strDrink'].upper())
     message += 'Tipo: <i>{}</i>\n'.format(drink['strCategory'])
-    message += 'Bicchiere: <i>{}</i>\n'.format(drink['strGlass'])
+    message += '{} Bicchiere: <i>{}</i>\n'.format(emojis.cocktails.get('glass'), drink['strGlass'])
     message += '{} Ingredienti:\n'.format(emojis.cocktails.get('receipt'))
     drinkImage = drink['strDrinkThumb']
     for index in range(1,16):
         ingredient = drink['strIngredient{}'.format(index)]
         measure = drink['strMeasure{}'.format(index)]
-        if ingredient != 'None' :
+        if ingredient != 'None':
             message += '∘ {} di {}\n'.format(measure, ingredient)
 
-    message += 'Istruzioni:\n'
+    message += '{} Istruzioni:\n'.format(emojis.cocktails.get('spoon'))
     message += '<i>{}</i>'.format(drink['strInstructions'])
 
     query.bot.delete_message(
