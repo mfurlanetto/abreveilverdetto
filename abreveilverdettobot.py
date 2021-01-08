@@ -530,7 +530,7 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
         )
         query.bot.send_animation(
             chat_id=update.effective_chat.id, 
-            animation=open(buildPath("media/centocentocento/{}".format(MR_BEAN_FUCK_YOU0)), 'rb'),
+            animation=open(buildPath("media/centocentocento/{}".format(MR_BEAN_FUCK_YOU)), 'rb'),
             caption= "\n".join(message_lines), 
             parse_mode=ParseMode.MARKDOWN_V2
         )
