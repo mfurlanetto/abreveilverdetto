@@ -635,7 +635,16 @@ def cocktail_command(update, context):
     message = '<b>\"{}\"</b>\n'.format(drink['strDrink'].upper())
     message += 'Tipo: <i>{}</i>\n'.format(drink['strCategory'])
     message += 'Bicchiere: <i>{}</i>\n'.format(drink['strGlass'])
+    message += 'Ingredienti:\n'
     drinkImage = drink['strDrinkThumb']
+    for index in range(1,16):
+        ingredient = drink['strIngredient{}'.format(index)]
+        measure = drink['strMeasure{}'.format(index)]
+        if ingredient != '' :
+            message += '∘ {} di {}\n'.format(measure, ingredient)
+
+    message += 'Istruzioni:\n'
+    message += '<i>{}</i>'.format(drink['strInstructions'])
 
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
