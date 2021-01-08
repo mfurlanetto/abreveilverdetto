@@ -640,7 +640,7 @@ def cocktail_command(update, context):
     for index in range(1,16):
         ingredient = drink['strIngredient{}'.format(index)]
         measure = drink['strMeasure{}'.format(index)]
-        if ingredient != 'None':
+        if ingredient is not None:
             message += '∘ {} di {}\n'.format(measure, ingredient)
 
     message += '{} Istruzioni:\n'.format(emojis.cocktails.get('spoon'))
