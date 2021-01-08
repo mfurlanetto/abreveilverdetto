@@ -635,12 +635,12 @@ def cocktail_command(update, context):
     message = '<b>\"{}\"</b>\n'.format(drink['strDrink'].upper())
     message += 'Tipo: <i>{}</i>\n'.format(drink['strCategory'])
     message += 'Bicchiere: <i>{}</i>\n'.format(drink['strGlass'])
-    message += 'Ingredienti:\n'
+    message += '{} Ingredienti:\n'.format(emojis.cocktails.get('receipt'))
     drinkImage = drink['strDrinkThumb']
     for index in range(1,16):
         ingredient = drink['strIngredient{}'.format(index)]
         measure = drink['strMeasure{}'.format(index)]
-        if ingredient != '' :
+        if ingredient != 'None' :
             message += '∘ {} di {}\n'.format(measure, ingredient)
 
     message += 'Istruzioni:\n'

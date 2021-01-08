@@ -90,3 +90,7 @@ centocentocentoresult = {
     , "win": u'\U0001F4AF'
     , "above": u'\U0001F595'
 }
+
+cocktails = {
+    "receipt": u'\U0001F9FE'
+}
