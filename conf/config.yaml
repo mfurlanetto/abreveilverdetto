@@ -26,3 +26,4 @@ countries:
 
 cocktail:
     url: https://raw.githubusercontent.com/teijo/iba-cocktails/master/recipes.json
+    url2: https://www.thecocktaildb.com/api/json/v1/1/random.php

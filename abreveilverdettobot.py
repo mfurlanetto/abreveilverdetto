@@ -628,7 +628,27 @@ def cocktail_command(update, context):
     """Send a message when the command /cocktail is issued."""
     query = update.callback_query
     query.answer()
+    #--------------------------------
+    reqRecipes = Request(config['cocktail']['url2'])
+    drinks = json.loads(urlopen(reqRecipes).read().decode())
+    drink = drinks.drink[0]
+    message = '<b>\"{}\"</b>\n'.format(drink['strDrink'].upper())
+    message += 'Tipo: <i>{}</i>\n'.format(drink['strCategory'])
+    message += 'Bicchiere: <i>{}</i>\n'.format(drink['strGlass'])
+    drinkImage = drink['strDrinkThumb']
 
+    query.bot.delete_message(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id
+    )
+    query.bot.send_photo(
+        chat_id=update.effective_chat.id, 
+        photo=drinkImage,
+        caption=message, 
+        parse_mode=ParseMode.HTML
+    ) 
+    #--------------------------------
+    """
     reqRecipes = Request(config['cocktail']['url'])
     recipes = json.loads(urlopen(reqRecipes).read().decode())
     index_drink = randrange(len(recipes))
@@ -644,7 +664,7 @@ def cocktail_command(update, context):
         text=message, 
         parse_mode=ParseMode.HTML
     )
-
+    """
     return ConversationHandler.END
 
 def santi_command(update, context):
