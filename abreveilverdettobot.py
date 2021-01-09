@@ -639,7 +639,7 @@ def translate_measure(measText):
     for el in dictEnIt:
         newText = re.sub(el["en"], el["it"], measText)
         if newText != measText:
-            print(newText)
+            print(newText, ' ', measText)
             return newText
 
 def cocktail_command(update, context):
