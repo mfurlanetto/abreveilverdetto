@@ -625,19 +625,25 @@ def pokemon_command(update, context):
     
     return ConversationHandler.END
 
-dictEnIt = [
-    { "en":"[Tt]sp",   "it":"cucchiaini" },
+dictEnIt = [ 
+    { "en":"[Cc]ans",   "it":"lattine" },
+    { "en":"[Cc]an",    "it":"lattina" },
+    { "en":"[Cc]ups",   "it":"tazzine" },
+    { "en":"[Cc]up",    "it":"tazzina" },
+    { "en":"[Dd]ashes", "it": "pizzichi" },
+    { "en":"[Dd]ash",   "it":"pizzico" },
+    { "en":"[Dd]rops",  "it":"gocce" },
+    { "en":"[Dd]rop",   "it":"goccia" },
+    { "en":"[Gg]round", "it":"Base" },
+    { "en":"[Jj]uice",  "it":"Succo" },
+    { "en":"[Pp]arts",  "it":"parti" },
+    { "en":"[Pp]art",   "it":"parte" },
+    { "en":"[Ss]coops", "it":"porzioni" },
+    { "en":"[Ss]coop",  "it":"porzione" },
+    { "en":"[Ss]lices", "it":"fette" },
+    { "en":"[Ss]lice",  "it":"fetta" },
+    { "en":"[Tt]sp",    "it":"cucchiaini" },
     { "en":"[Tt]blsp",  "it":"cucchiai" },
-    { "en":"[Dd]ashes","it": "pizzichi" },
-    { "en":"[Dd]ash", "it":"pizzico" },
-    { "en":"[Dd]rop", "it":"goccia" },
-    { "en":"[Dd]rops", "it":"gocce" },
-    { "en":"[Cc]ups", "it":"tazzine" },
-    { "en":"[Cc]up", "it":"tazzina" },
-    { "en":"[Pp]art", "it":"parte" },
-    { "en":"[Pp]arts", "it":"parti" },
-    { "en":"[Ss]lice", "it":"fetta" },
-    { "en":"[Ss]lices", "it":"fette" }
 ]
 
 def translate_measure(measText):
