@@ -636,11 +636,19 @@ dictEnIt = [
 ]
 
 def translate_measure(measText):
+    a = [re.sub(el["en"], el["it"], measText) for el in dictEnIt]
+    if len(a) > 0:
+        return a[0]
+    else
+        return ''
+
+    """
     for el in dictEnIt:
         newText = re.sub(el["en"], el["it"], measText)
         if newText != measText:
             print(newText, ' ', measText)
             return newText
+    """
 
 def cocktail_command(update, context):
     """Send a message when the command /cocktail is issued."""
