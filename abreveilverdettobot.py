@@ -654,25 +654,18 @@ def translate_measure(measText):
     else:
         return measText
 
-    """
-    for el in dictEnIt:
-        newText = re.sub(el["en"], el["it"], measText)
-        if newText != measText:
-            print(newText, ' ', measText)
-            return newText
-    """
-
 def cocktail_command(update, context):
     """Send a message when the command /cocktail is issued."""
     query = update.callback_query
     query.answer()
-    #--------------------------------
+
     reqRecipes = Request(config['cocktail']['url2'])
     drinkList = json.loads(urlopen(reqRecipes).read().decode())
     drink = drinkList['drinks'][0]
     message = '<b>\"{}\"</b>\n'.format(drink['strDrink'].upper())
     message += 'Tipo: <i>{}</i>\n'.format(drink['strCategory'])
     message += '{} Bicchiere: <i>{}</i>\n'.format(emojis.cocktails.get('glass'), drink['strGlass'])
+    message += '~~~~~~~~~~~~~~~~~~\r\n'
     message += '{} Ingredienti:\n'.format(emojis.cocktails.get('receipt'))
     drinkImage = drink['strDrinkThumb']
     for index in range(1,16):
@@ -680,7 +673,7 @@ def cocktail_command(update, context):
         if ingredient is not None:
             measure = translate_measure(drink['strMeasure{}'.format(index)])
             message += '∘ {}{}\n'.format("{} di ".format(measure) if measure is not None else "", ingredient)
-
+    message += '~~~~~~~~~~~~~~~~~~\r\n'
     message += '{} Istruzioni:\n'.format(emojis.cocktails.get('spoon'))
     message += '<i>{}</i>'.format(drink['strInstructions'])
 
