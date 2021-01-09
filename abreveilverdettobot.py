@@ -641,7 +641,7 @@ def translate_measure(measText):
     if len(a) > 0:
         return a[0]
     else:
-        return ''
+        return measText
 
     """
     for el in dictEnIt:
