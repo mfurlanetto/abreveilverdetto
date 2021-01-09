@@ -627,7 +627,7 @@ def pokemon_command(update, context):
 
 dictEnIt = [
     { "en":"[Tt]sp\b",   "it":"cucchiaini" },
-    { "en":"[Dd]ashes","it": "pizzichi" },
+    { "en":"[Dd]ashes\b","it": "pizzichi" },
     { "en":"[Dd]ash\b", "it":"pizzico" },
     { "en":"[Cc]ups\b", "it":"tazzine" },
     { "en":"[Cc]up\b", "it":"tazzina" },
@@ -637,6 +637,7 @@ dictEnIt = [
 
 def translate_measure(measText):
     a = [re.sub(el["en"], el["it"], measText) for el in dictEnIt]
+    a = [x for x in a if x != measText]
     if len(a) > 0:
         return a[0]
     else:
