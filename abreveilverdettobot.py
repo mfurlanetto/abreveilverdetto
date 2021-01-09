@@ -625,10 +625,21 @@ def pokemon_command(update, context):
     
     return ConversationHandler.END
 
+dictEnIt = [
+    { "en":"[Tt]sp\b",   "it":"cucchiaini" },
+    { "en":"[Dd]ashes","it": "pizzichi" },
+    { "en":"[Dd]ash\b", "it":"pizzico" },
+    { "en":"[Cc]ups\b", "it":"tazzine" },
+    { "en":"[Cc]up\b", "it":"tazzina" },
+    { "en":"[Pp]art\b", "it":"parte" },
+    { "en":"[Pp]arts\b", "it":"parti" }
+]
+
 def translate_measure(measText):
-    text = re.sub("tsp", "cucchiaini", measText)
-    text = re.sub("Dash", "Pizzico", text)
-    return text
+    for el in dictEnIt:
+        newText = re.sub(el["en"], el["it"], measText)
+        if newText != measText:
+            return newText
 
 def cocktail_command(update, context):
     """Send a message when the command /cocktail is issued."""
