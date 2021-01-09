@@ -635,8 +635,8 @@ dictEnIt = [
     { "en":"[Cc]ups", "it":"tazzine" },
     { "en":"[Cc]up", "it":"tazzina" },
     { "en":"[Pp]art", "it":"parte" },
-    { "en":"[Pp]arts", "it":"parti" }
-    { "en":"[Ss]lice", "it":"fetta" }
+    { "en":"[Pp]arts", "it":"parti" },
+    { "en":"[Ss]lice", "it":"fetta" },
     { "en":"[Ss]lices", "it":"fette" }
 ]
 
