@@ -627,12 +627,17 @@ def pokemon_command(update, context):
 
 dictEnIt = [
     { "en":"[Tt]sp",   "it":"cucchiaini" },
+    { "en":"[Tt]blsp",  "it":"cucchiai" },
     { "en":"[Dd]ashes","it": "pizzichi" },
     { "en":"[Dd]ash", "it":"pizzico" },
+    { "en":"[Dd]rop", "it":"goccia" },
+    { "en":"[Dd]rops", "it":"gocce" },
     { "en":"[Cc]ups", "it":"tazzine" },
     { "en":"[Cc]up", "it":"tazzina" },
     { "en":"[Pp]art", "it":"parte" },
     { "en":"[Pp]arts", "it":"parti" }
+    { "en":"[Ss]lice", "it":"fetta" }
+    { "en":"[Ss]lices", "it":"fette" }
 ]
 
 def translate_measure(measText):
