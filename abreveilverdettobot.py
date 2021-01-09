@@ -639,7 +639,7 @@ def translate_measure(measText):
     a = [re.sub(el["en"], el["it"], measText) for el in dictEnIt]
     if len(a) > 0:
         return a[0]
-    else
+    else:
         return ''
 
     """
