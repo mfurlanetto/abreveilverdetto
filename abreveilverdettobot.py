@@ -626,13 +626,13 @@ def pokemon_command(update, context):
     return ConversationHandler.END
 
 dictEnIt = [
-    { "en":"[Tt]sp\b",   "it":"cucchiaini" },
-    { "en":"[Dd]ashes\b","it": "pizzichi" },
-    { "en":"[Dd]ash\b", "it":"pizzico" },
-    { "en":"[Cc]ups\b", "it":"tazzine" },
-    { "en":"[Cc]up\b", "it":"tazzina" },
-    { "en":"[Pp]art\b", "it":"parte" },
-    { "en":"[Pp]arts\b", "it":"parti" }
+    { "en":"[Tt]sp",   "it":"cucchiaini" },
+    { "en":"[Dd]ashes","it": "pizzichi" },
+    { "en":"[Dd]ash", "it":"pizzico" },
+    { "en":"[Cc]ups", "it":"tazzine" },
+    { "en":"[Cc]up", "it":"tazzina" },
+    { "en":"[Pp]art", "it":"parte" },
+    { "en":"[Pp]arts", "it":"parti" }
 ]
 
 def translate_measure(measText):
