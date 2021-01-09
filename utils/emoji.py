@@ -94,5 +94,6 @@ centocentocentoresult = {
 cocktails = {
     "receipt": u'\U0001F9FE',
     "glass": u'\U0001F378',
-    "spoon": u'\U0001F944'
+    "spoon": u'\U0001F944',
+    "bartender": u'\U0001F935',
 }

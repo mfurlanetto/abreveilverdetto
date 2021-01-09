@@ -663,7 +663,7 @@ def cocktail_command(update, context):
     drinkList = json.loads(urlopen(reqRecipes).read().decode())
     drink = drinkList['drinks'][0]
     message = '<b>\"{}\"</b>\n'.format(drink['strDrink'].upper())
-    message += 'Tipo: <i>{}</i>\n'.format(drink['strCategory'])
+    message += '{} Tipo: <i>{}</i>\n'.format(emojis.cocktails.get('bartender'), drink['strCategory'])
     message += '{} Bicchiere: <i>{}</i>\n'.format(emojis.cocktails.get('glass'), drink['strGlass'])
     message += '~~~~~~~~~~~~~~~~~~\r\n'
     message += '{} Ingredienti:\n'.format(emojis.cocktails.get('receipt'))
