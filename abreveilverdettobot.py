@@ -18,6 +18,7 @@ Telegram commands:
 start - Lista dei comandi
 """
 
+import re
 import logging, json, yaml, os, time, utils.emoji as emojis, utils.commandutils as utils, datetime
 import base64
 from cairosvg import svg2png
@@ -624,6 +625,11 @@ def pokemon_command(update, context):
     
     return ConversationHandler.END
 
+def translate_measure(measText):
+    text = re.sub("tsp", "cucchiaini", measText)
+    text = re.sub("Dash", "Pizzico", text)
+    return text
+
 def cocktail_command(update, context):
     """Send a message when the command /cocktail is issued."""
     query = update.callback_query
@@ -640,7 +646,7 @@ def cocktail_command(update, context):
     for index in range(1,16):
         ingredient = drink['strIngredient{}'.format(index)]
         if ingredient is not None:
-            measure = drink['strMeasure{}'.format(index)]
+            measure = translate_measure(drink['strMeasure{}'.format(index)])
             message += '∘ {}{}\n'.format("{} di ".format(measure) if measure is not None else "", ingredient)
 
     message += '{} Istruzioni:\n'.format(emojis.cocktails.get('spoon'))
