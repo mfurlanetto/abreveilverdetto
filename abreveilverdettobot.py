@@ -440,7 +440,7 @@ def centocentocento_command(update, context):
         min_moment_next_try = last_run + datetime.timedelta(minutes=1)
         if min_moment_next_try > now:
             query.edit_message_text(
-                text="You should wait for {} for the next try".format(min_moment_next_try)
+                text="You should wait for the next try".format(min_moment_next_try)
                 , parse_mode=ParseMode.MARKDOWN_V2
             )
             return ConversationHandler.END
