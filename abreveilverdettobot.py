@@ -434,7 +434,7 @@ def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
 
-    now = datetime.date.now()
+    now = datetime.datetime.now()
     last_run = context.user_data.get(LAST_RUN_KEY, None)
     if last_run is not None:
         min_moment_next_try = last_run + datetime.timedelta(minutes=1)
@@ -444,7 +444,7 @@ def centocentocento_command(update, context):
                 , parse_mode=ParseMode.MARKDOWN_V2
             )
             return ConversationHandler.END
-            
+
     context.user_data[LAST_RUN_KEY] = now
 
     new_value = centocentocento_generate_new_value()
