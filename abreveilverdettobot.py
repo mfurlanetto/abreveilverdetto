@@ -69,6 +69,7 @@ RUN_NUMBER_KEY = "run_number"
 NUMBER_OF_RUNS_KEY = "number_of_runs"
 IVA_100_100_100 = "Iva_Zanicchi_CAGA_in_diretta.gif"
 MR_BEAN_FUCK_YOU = "Mr_Bean_Middle_Finger.gif"
+LAST_RUN_KEY = "last_run"
 
 logger = logging.getLogger(__name__)
 
@@ -432,7 +433,20 @@ def centocentocento_generate_new_value():
 def centocentocento_command(update, context):
     query = update.callback_query
     query.answer()
-    
+
+    now = datetime.date.now()
+    last_run = context.user_data.get(LAST_RUN_KEY, None)
+    if last_run is not None:
+        min_moment_next_try = last_run + datetime.timedelta(minutes=1)
+        if min_moment_next_try > now:
+            query.edit_message_text(
+                text="You should wait for {} for the next try".format(min_moment_next_try)
+                , parse_mode=ParseMode.MARKDOWN_V2
+            )
+            return ConversationHandler.END
+            
+    context.user_data[LAST_RUN_KEY] = now
+
     new_value = centocentocento_generate_new_value()
     run_number = 1
 
