@@ -674,6 +674,8 @@ def cocktail_command(update, context):
     ingredients = [(value, translate_measure(drink.get(key.replace(INGREDIENT_KEY, MEASURE_KEY), None))) for key, value in drink.items() if INGREDIENT_KEY in key and value is not None]
     ingredients = ['∘ {}{}'.format("{} di ".format(e[1]) if e[1] is not None else "", e[0]) for e in ingredients]
     message += "\n".join(ingredients)
+    if len(ingredients) > 0:
+        message += "\n"
 
     message += '~~~~~~~~~~~~~~~~~~\r\n'
     message += '{} Istruzioni:\n'.format(emojis.cocktails.get('spoon'))
