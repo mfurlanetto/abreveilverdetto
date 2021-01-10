@@ -647,12 +647,12 @@ dictEnIt = [
 ]
 
 def translate_measure(measText):
+    if measText is None:
+        return measText
+
     a = [re.sub(el["en"], el["it"], measText) for el in dictEnIt]
     a = [x for x in a if x != measText]
-    if len(a) > 0:
-        return a[0]
-    else:
-        return measText
+    return a[0] if len(a) > 0 else measText #no nedd to check if a is not None becasue of previous instructions
 
 def cocktail_command(update, context):
     """Send a message when the command /cocktail is issued."""
@@ -668,11 +668,13 @@ def cocktail_command(update, context):
     message += '~~~~~~~~~~~~~~~~~~\r\n'
     message += '{} Ingredienti:\n'.format(emojis.cocktails.get('receipt'))
     drinkImage = drink['strDrinkThumb']
-    for index in range(1,16):
-        ingredient = drink['strIngredient{}'.format(index)]
-        if ingredient is not None:
-            measure = translate_measure(drink['strMeasure{}'.format(index)])
-            message += '∘ {}{}\n'.format("{} di ".format(measure) if measure is not None else "", ingredient)
+
+    INGREDIENT_KEY = "strIngredient"
+    MEASURE_KEY = "strMeasure"
+    ingredients = [(value, translate_measure(drink.get(key.replace(INGREDIENT_KEY, MEASURE_KEY), None))) for key, value in drink.items() if INGREDIENT_KEY in key and value is not None]
+    ingredients = ['∘ {}{}'.format("{} di ".format(e[1]) if e[1] is not None else "", e[0]) for e in ingredients]
+    message += "\n".join(ingredients)
+
     message += '~~~~~~~~~~~~~~~~~~\r\n'
     message += '{} Istruzioni:\n'.format(emojis.cocktails.get('spoon'))
     message += '<i>{}</i>'.format(drink['strInstructions'])
