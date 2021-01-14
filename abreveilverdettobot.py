@@ -894,7 +894,7 @@ def main():
                 CallbackQueryHandler(pokemon_command, pattern='^' + str(POKEMON) + '$'),
                 CallbackQueryHandler(country_command, pattern='^' + str(COUNTRY) + '$'),
                 CallbackQueryHandler(cocktail_command, pattern='^' + str(COCKTAIL) + '$'),
-                CallbackQueryHandler(santi_command, pattern='^' + str(SANTI) + '$')
+                CallbackQueryHandler(santi_command, pattern='^' + str(SANTI) + '$'),
                 CallbackQueryHandler(magic_command, pattern='^' + str(MAGIC) + '$')
             ],
             1: [
