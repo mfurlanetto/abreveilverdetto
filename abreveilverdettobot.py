@@ -56,7 +56,7 @@ config = loadYAML('conf/config')
 os.environ['TZ'] = config['bot']['localTimezone']
 time.tzset()
 
-SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI = range(16)
+SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI, MAGIC = range(17)
 
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
 
@@ -116,6 +116,7 @@ def start_command(update, context):
         [
             InlineKeyboardButton(u'\U0001F378' + " cocktail", callback_data=str(COCKTAIL)),
             InlineKeyboardButton(u'\U0001F47C' + " santi", callback_data=str(SANTI)),
+            InlineKeyboardButton(u'\U0001F0CF' + " santi", callback_data=str(MAGIC)),
         ]
        
     ]
@@ -750,7 +751,23 @@ def santi_command(update, context):
         parse_mode=ParseMode.HTML
     ) 
     
-    return ConversationHandler.END    
+    return ConversationHandler.END
+
+def magic_command(update, context):
+    query = update.callback_query
+    query.answer()
+    
+    index = randrange(directorySize("media/magic_cards"))
+    
+    query.bot.delete_message(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id
+    )
+    query.bot.send_photo(
+        chat_id=update.effective_chat.id, 
+        photo=open(buildPath("media/magic_cards/MC_{}.png".format(index)), 'rb')
+    )
+    return ConversationHandler.END
 
 def end(update, context):
     """Returns `ConversationHandler.END`, which tells the
@@ -878,6 +895,7 @@ def main():
                 CallbackQueryHandler(country_command, pattern='^' + str(COUNTRY) + '$'),
                 CallbackQueryHandler(cocktail_command, pattern='^' + str(COCKTAIL) + '$'),
                 CallbackQueryHandler(santi_command, pattern='^' + str(SANTI) + '$')
+                CallbackQueryHandler(magic_command, pattern='^' + str(MAGIC) + '$')
             ],
             1: [
                 CallbackQueryHandler(ctsCommandHandler, pattern='^(5|10)$')
