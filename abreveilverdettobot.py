@@ -116,7 +116,7 @@ def start_command(update, context):
         [
             InlineKeyboardButton(u'\U0001F378' + " cocktail", callback_data=str(COCKTAIL)),
             InlineKeyboardButton(u'\U0001F47C' + " santi", callback_data=str(SANTI)),
-            InlineKeyboardButton(u'\U0001F0CF' + " santi", callback_data=str(MAGIC)),
+            InlineKeyboardButton(u'\U0001F0CF' + " Magic", callback_data=str(MAGIC)),
         ]
        
     ]
