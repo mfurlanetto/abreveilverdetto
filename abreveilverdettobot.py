@@ -68,6 +68,8 @@ VALUE_KEY = "value"
 RUN_NUMBER_KEY = "run_number"
 NUMBER_OF_RUNS_KEY = "number_of_runs"
 IVA_100_100_100 = "Iva_Zanicchi_CAGA_in_diretta.gif"
+CENTODICIOTTO = "118.gif"
+MARTINGARRIX = "130_MartinGarrix.gif"
 MR_BEAN_FUCK_YOU = "Mr_Bean_Middle_Finger.gif"
 LAST_RUN_KEY = "last_run"
 
@@ -539,6 +541,30 @@ def centocentocento_printresult(update, context, user, query, value, run_number)
             caption= "\n".join(message_lines), 
             parse_mode=ParseMode.MARKDOWN_V2
         )
+    elif value == 118:
+        message_lines = "118! Chiamate un po' il 118!"
+        query.bot.delete_message(
+            chat_id=update.effective_chat.id,
+            message_id=update.effective_message.message_id
+        )
+        query.bot.send_animation(
+            chat_id=update.effective_chat.id, 
+            animation=open(buildPath("media/centocentocento/{}".format(CENTODICIOTTO)), 'rb'),
+            caption= "\n".join(message_lines), 
+            parse_mode=ParseMode.MARKDOWN_V2
+        )       
+    elif value == 130:
+        message_lines = "130 km/h! Martin Garrix! The Animals! Si volaaaaaaaaaa"
+        query.bot.delete_message(
+            chat_id=update.effective_chat.id,
+            message_id=update.effective_message.message_id
+        )
+        query.bot.send_animation(
+            chat_id=update.effective_chat.id, 
+            animation=open(buildPath("media/centocentocento/{}".format(MARTINGARRIX)), 'rb'),
+            caption= "\n".join(message_lines), 
+            parse_mode=ParseMode.MARKDOWN_V2
+        )   
     elif run_number == 2 and (value == 95 or value == 105):
         query.bot.delete_message(
             chat_id=update.effective_chat.id,
