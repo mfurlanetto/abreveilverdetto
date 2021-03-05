@@ -638,10 +638,11 @@ def pokemon_command(update, context):
     reqPokemon = Request(config['pokemon']['url'])
     pokedex = json.loads(urlopen(reqPokemon).read().decode())
 
-    index_pokemon = randrange(152)
+    #index_pokemon = randrange(152)
+    index_pokemon = randrange(171) + 1
     logger.info('[POKEMON] - index_pokemon : {}'.format(index_pokemon))
     
-    if(index_pokemon):
+    if(index_pokemon < 152):
         pokemon = pokedex['pokemon'][str(index_pokemon)]
         logger.info('[POKEMON] - pokemon : {}'.format(pokemon))
         message = '#{} - <b>{}</b>\n'.format(index_pokemon, pokemon['N'].upper())
