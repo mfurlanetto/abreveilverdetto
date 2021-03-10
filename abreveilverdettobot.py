@@ -783,8 +783,35 @@ def santi_command(update, context):
 def magic_command(update, context):
     query = update.callback_query
     query.answer()
-    
-    index = randrange(directorySize("media/magic_cards"))
+
+    #context.user_data[NEW_VALUE_KEY] = new_value
+    #context.user_data[RUN_NUMBER_KEY] = run_number
+    keyboard = [
+        [
+            InlineKeyboardButton(u'\U0001F48E' + "Artifact", callback_data="artifact"),
+            #InlineKeyboardButton(u'\U0001F984' + "Creature", callback_data="creature"),
+            InlineKeyboardButton(u'\U000026F0' + "Land", callback_data="land"),
+            InlineKeyboardButton("Other", callback_data="other"),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    message_lines = ["Choose Card Type"]
+    query.edit_message_text("\n".join(message_lines), reply_markup=reply_markup)
+    return 4
+
+def magicCommandHandler(update, context):
+    query = update.callback_query
+    query.answer()
+
+    if query.data == "artifact":
+        index = randrange(directorySize("media/magic_cards/artifacts"))
+        path = "media/magic_cards/artifacts/MC_A_{}.png".format(index)
+    elif query.data == "land":
+        index = randrange(directorySize("media/magic_cards/lands"))
+        path = "media/magic_cards/lands/MC_L_{}.png".format(index)
+    else:
+        index = randrange(directorySize("media/magic_cards"))
+        path = "media/magic_cards/MC_{}.png".format(index)
     
     query.bot.delete_message(
         chat_id=update.effective_chat.id,
@@ -792,7 +819,7 @@ def magic_command(update, context):
     )
     query.bot.send_photo(
         chat_id=update.effective_chat.id, 
-        photo=open(buildPath("media/magic_cards/MC_{}.png".format(index)), 'rb')
+        photo=open(buildPath(path), 'rb')
     )
     return ConversationHandler.END
 
@@ -929,10 +956,13 @@ def main():
             ], 
             2: [
                 CallbackQueryHandler(centocentocento_anotherrun, pattern='^(No|Yes)$')
-            ]
-            , 3: [
+            ],
+            3: [
                 MessageHandler(Filters.regex(r'^\d$'), fibonacci_command)
-            ]
+            ],
+            4: [
+                CallbackQueryHandler(magicCommandHandler, pattern='^(artifact|land|other)$')
+            ],
         },
         fallbacks=[CallbackQueryHandler(end)],
         persistent=True,
