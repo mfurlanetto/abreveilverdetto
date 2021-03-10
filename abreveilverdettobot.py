@@ -788,10 +788,13 @@ def magic_command(update, context):
     #context.user_data[RUN_NUMBER_KEY] = run_number
     keyboard = [
         [
+            InlineKeyboardButton(u'\U00002B50' + "Special", callback_data="special"),
             InlineKeyboardButton(u'\U0001F48E' + "Artifact", callback_data="artifact"),
-            #InlineKeyboardButton(u'\U0001F984' + "Creature", callback_data="creature"),
+            InlineKeyboardButton(u'\U0001F984' + "Creature", callback_data="creature"),
+        ],
+        [
             InlineKeyboardButton(u'\U000026F0' + "Land", callback_data="land"),
-            InlineKeyboardButton("Other", callback_data="other"),
+            InlineKeyboardButton(u'\U0001FA84' + "Sorcery", callback_data="sorcery"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -803,12 +806,21 @@ def magicCommandHandler(update, context):
     query = update.callback_query
     query.answer()
 
-    if query.data == "artifact":
+    if query.data == "special":
+        index = randrange(directorySize("media/magic_cards/special"))
+        path = "media/magic_cards/artifacts/MC_S_{}.png".format(index)
+    elif query.data == "artifact":
         index = randrange(directorySize("media/magic_cards/artifacts"))
         path = "media/magic_cards/artifacts/MC_A_{}.png".format(index)
+    elif query.data == "creature":
+        index = randrange(directorySize("media/magic_cards/creatures"))
+        path = "media/magic_cards/creatures/MC_C_{}.png".format(index)
     elif query.data == "land":
         index = randrange(directorySize("media/magic_cards/lands"))
         path = "media/magic_cards/lands/MC_L_{}.png".format(index)
+    elif query.data == "sorcery":
+        index = randrange(directorySize("media/magic_cards/sorceries"))
+        path = "media/magic_cards/lands/MC_S_{}.png".format(index)
     else:
         index = randrange(directorySize("media/magic_cards"))
         path = "media/magic_cards/MC_{}.png".format(index)
@@ -961,7 +973,7 @@ def main():
                 MessageHandler(Filters.regex(r'^\d$'), fibonacci_command)
             ],
             4: [
-                CallbackQueryHandler(magicCommandHandler, pattern='^(artifact|land|other)$')
+                CallbackQueryHandler(magicCommandHandler, pattern='^(special|artifact|creature|land|sorcery)$')
             ],
         },
         fallbacks=[CallbackQueryHandler(end)],
