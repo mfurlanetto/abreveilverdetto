@@ -808,7 +808,7 @@ def magicCommandHandler(update, context):
 
     if query.data == "special":
         index = randrange(directorySize("media/magic_cards/special"))
-        path = "media/magic_cards/artifacts/MC_S_{}.png".format(index)
+        path = "media/magic_cards/special/MC_S_{}.png".format(index)
     elif query.data == "artifact":
         index = randrange(directorySize("media/magic_cards/artifacts"))
         path = "media/magic_cards/artifacts/MC_A_{}.png".format(index)
@@ -820,7 +820,7 @@ def magicCommandHandler(update, context):
         path = "media/magic_cards/lands/MC_L_{}.png".format(index)
     elif query.data == "sorcery":
         index = randrange(directorySize("media/magic_cards/sorceries"))
-        path = "media/magic_cards/lands/MC_S_{}.png".format(index)
+        path = "media/magic_cards/sorceries/MC_S_{}.png".format(index)
     else:
         index = randrange(directorySize("media/magic_cards"))
         path = "media/magic_cards/MC_{}.png".format(index)
