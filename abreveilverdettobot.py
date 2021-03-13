@@ -827,16 +827,20 @@ def magicCommandHandler(update, context):
         path = "media/magic_cards/MC_{}.png".format(index)
     
     if query.data == "info":
-        message = '<b>DECKS</b>\n'
-        message += '{} <i>Special</i>: {}\n'.format(u'\U00002B50', directorySize("media/magic_cards/special"))
-        message += '{} <i>Artifact</i>: {}\n'.format(u'\U0001F48E', directorySize("media/magic_cards/artifacts"))
-        message += '{} <i>Creature</i>: {}\n'.format(u'\U0001F984', directorySize("media/magic_cards/creatures"))
-        message += '{} <i>Land</i>: {}\n'.format(u'\U000026F0', directorySize("media/magic_cards/lands"))
-        message += '{} <i>Sorcery</i>: {}\n'.format(u'\U0001FA84', directorySize("media/magic_cards/sorceries"))
-        query.edit_message_text(
-            text=message,
-            parse_mode=ParseMode.HTML
+        message = ['<b>DECKS</b>']
+        message.append('{} <i>Special</i>: {}'.format(u'\U00002B50', directorySize("media/magic_cards/special")))
+        message.append('{} <i>Artifact</i>: {}'.format(u'\U0001F48E', directorySize("media/magic_cards/artifacts")))
+        message.append('{} <i>Creature</i>: {}'.format(u'\U0001F984', directorySize("media/magic_cards/creatures")))
+        message.append('{} <i>Land</i>: {}'.format(u'\U000026F0', directorySize("media/magic_cards/lands")))
+        message.append('{} <i>Sorcery</i>: {}'.format(u'\U0001FA84', directorySize("media/magic_cards/sorceries")))
+        query.bot.delete_message(
+            chat_id=update.effective_chat.id,
+            message_id=update.effective_message.message_id
         )
+        update.message.bot.send_message(
+            chat_id=chat_id, 
+            text="\n".join(message), 
+            parse_mode=ParseMode.HTML)
     else:
         query.bot.delete_message(
             chat_id=update.effective_chat.id,
