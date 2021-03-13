@@ -795,6 +795,7 @@ def magic_command(update, context):
         [
             InlineKeyboardButton(u'\U000026F0' + "Land", callback_data="land"),
             InlineKeyboardButton(u'\U0001FA84' + "Sorcery", callback_data="sorcery"),
+            InlineKeyboardButton(u'\U00002139' + "Info", callback_data="info"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -825,14 +826,26 @@ def magicCommandHandler(update, context):
         index = randrange(directorySize("media/magic_cards"))
         path = "media/magic_cards/MC_{}.png".format(index)
     
-    query.bot.delete_message(
-        chat_id=update.effective_chat.id,
-        message_id=update.effective_message.message_id
-    )
-    query.bot.send_photo(
-        chat_id=update.effective_chat.id, 
-        photo=open(buildPath(path), 'rb')
-    )
+    if query.data == "info":
+        message = '<b>DECKS</b>\n'
+        message += '{} <i>Special</i>: {}\n'.format(u'\U00002B50', directorySize("media/magic_cards/special"))
+        message += '{} <i>Artifact</i>: {}\n'.format(u'\U0001F48E', directorySize("media/magic_cards/artifacts"))
+        message += '{} <i>Creature</i>: {}\n'.format(u'\U0001F984', directorySize("media/magic_cards/creatures"))
+        message += '{} <i>Land</i>: {}\n'.format(u'\U000026F0', directorySize("media/magic_cards/lands"))
+        message += '{} <i>Sorcery</i>: {}\n'.format(u'\U0001FA84', directorySize("media/magic_cards/sorceries"))
+        query.edit_message_text(
+            text=message,
+            parse_mode=ParseMode.HTML
+        )
+    else:
+        query.bot.delete_message(
+            chat_id=update.effective_chat.id,
+            message_id=update.effective_message.message_id
+        )
+        query.bot.send_photo(
+            chat_id=update.effective_chat.id, 
+            photo=open(buildPath(path), 'rb')
+        )
     return ConversationHandler.END
 
 def end(update, context):
@@ -973,7 +986,7 @@ def main():
                 MessageHandler(Filters.regex(r'^\d$'), fibonacci_command)
             ],
             4: [
-                CallbackQueryHandler(magicCommandHandler, pattern='^(special|artifact|creature|land|sorcery)$')
+                CallbackQueryHandler(magicCommandHandler, pattern='^(special|artifact|creature|land|sorcery|info)$')
             ],
         },
         fallbacks=[CallbackQueryHandler(end)],
