@@ -830,10 +830,12 @@ def magicCommandHandler(update, context):
         message.append('{} <i>Creature</i>: {}'.format(u'\U0001F984', directorySize("media/magic_cards/creatures")))
         message.append('{} <i>Land</i>: {}'.format(u'\U000026F0', directorySize("media/magic_cards/lands")))
         message.append('{} <i>Sorcery</i>: {}'.format(u'\U0001FA84', directorySize("media/magic_cards/sorceries")))
+        """
         query.bot.delete_message(
             chat_id=update.effective_chat.id,
             message_id=update.effective_message.message_id
         )
+        """
         query.edit_message_text(
             text="\n".join(message),
             parse_mode=ParseMode.HTML
