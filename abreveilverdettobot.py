@@ -835,7 +835,7 @@ def magicCommandHandler(update, context):
             message_id=update.effective_message.message_id
         )
         update.message.bot.send_message(
-            chat_id=chat_id, 
+            chat_id=update.effective_chat.id,  
             text="\n".join(message), 
             parse_mode=ParseMode.HTML)
     else:
