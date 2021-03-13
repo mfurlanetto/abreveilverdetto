@@ -822,9 +822,6 @@ def magicCommandHandler(update, context):
     elif query.data == "sorcery":
         index = randrange(directorySize("media/magic_cards/sorceries"))
         path = "media/magic_cards/sorceries/MC_S_{}.png".format(index)
-    else:
-        index = randrange(directorySize("media/magic_cards"))
-        path = "media/magic_cards/MC_{}.png".format(index)
     
     if query.data == "info":
         message = ['<b>DECKS</b>']
