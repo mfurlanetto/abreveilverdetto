@@ -834,10 +834,16 @@ def magicCommandHandler(update, context):
             chat_id=update.effective_chat.id,
             message_id=update.effective_message.message_id
         )
+        query.edit_message_text(
+            text="\n".join(message),
+            parse_mode=ParseMode.HTML
+        )
+        """
         update.message.bot.send_message(
             chat_id=update.effective_chat.id,  
             text="\n".join(message), 
             parse_mode=ParseMode.HTML)
+        """
     else:
         query.bot.delete_message(
             chat_id=update.effective_chat.id,
