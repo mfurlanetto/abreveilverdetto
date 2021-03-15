@@ -56,7 +56,7 @@ config = loadYAML('conf/config')
 os.environ['TZ'] = config['bot']['localTimezone']
 time.tzset()
 
-SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI, MAGIC = range(17)
+SALUTI, CTS, DPCM, CONTE, BIMBE, COMUNE, COVID, GIURATO, TORTADIMELE, FIBONACCI, CENTOCENTOCENTO, GHESBORO, POKEMON, COUNTRY, COCKTAIL, SANTI, MAGIC, LERCIO = range(18)
 
 BRISCOLA = 'Come fa 15+18 non fa 36 dio te maledica te do \'n sciafon che te copo d** ***'
 
@@ -119,6 +119,9 @@ def start_command(update, context):
             InlineKeyboardButton(u'\U0001F378' + " cocktail", callback_data=str(COCKTAIL)),
             InlineKeyboardButton(u'\U0001F47C' + " santi", callback_data=str(SANTI)),
             InlineKeyboardButton(u'\U0001F0CF' + " Magic", callback_data=str(MAGIC)),
+        ],
+        [
+            InlineKeyboardButton(u'\U0001F4F0' + " Lercio.it", callback_data=str(LERCIO)),
         ]
        
     ]
@@ -857,6 +860,20 @@ def magicCommandHandler(update, context):
         )
     return ConversationHandler.END
 
+def lercio_command(update, context):
+    """Send a message when the command /astrazeneca is issued."""
+    query = update.callback_query
+    query.answer()
+    
+    lercioList = loadJSON('data/lercio')
+    randIndex = randrange(len(lercioList))    
+    
+    query.edit_message_text(
+        text="+++ {} ULTIM'ORA: {}".format(u'\U0001F534', lercioList[randIndex]), 
+        parse_mode=ParseMode.HTML
+    )
+    return ConversationHandler.END
+
 def end(update, context):
     """Returns `ConversationHandler.END`, which tells the
     ConversationHandler that the conversation is over"""
@@ -983,7 +1000,8 @@ def main():
                 CallbackQueryHandler(country_command, pattern='^' + str(COUNTRY) + '$'),
                 CallbackQueryHandler(cocktail_command, pattern='^' + str(COCKTAIL) + '$'),
                 CallbackQueryHandler(santi_command, pattern='^' + str(SANTI) + '$'),
-                CallbackQueryHandler(magic_command, pattern='^' + str(MAGIC) + '$')
+                CallbackQueryHandler(magic_command, pattern='^' + str(MAGIC) + '$'),
+                CallbackQueryHandler(lercio_command, pattern='^' + str(LERCIO) + '$')
             ],
             1: [
                 CallbackQueryHandler(ctsCommandHandler, pattern='^(5|10)$')
