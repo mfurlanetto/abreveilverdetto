@@ -1,9 +1,4 @@
-certifi
-tornado>=5.1
-cryptography
-decorator>=4.4.0
-APScheduler==3.6.3
-pytz>=2018.6
-cairosvg
-PyYAML
-psycopg2
+# Dipendenze di runtime (versioni bloccate per build riproducibili)
+python-telegram-bot[webhooks]==22.8
+asyncpg==0.32.0
+httpx==0.28.1
