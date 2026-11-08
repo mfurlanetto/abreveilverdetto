@@ -28,3 +28,22 @@ def test_webhook():
 def test_webhook_secret_non_valido(secret):
     with pytest.raises(ConfigError):
         Settings.from_env({"TELEGRAM_TOKEN": "1:abc", "WEBHOOK_SECRET": secret})
+
+
+def test_render_external_url_attiva_il_webhook():
+    s = Settings.from_env(
+        {"TELEGRAM_TOKEN": "1:abc", "RENDER_EXTERNAL_URL": "https://abv.onrender.com", "PORT": "10000"}
+    )
+    assert s.webhook_url == "https://abv.onrender.com/telegram"
+    assert s.port == 10000
+
+
+def test_webhook_base_url_ha_precedenza_su_render():
+    s = Settings.from_env(
+        {
+            "TELEGRAM_TOKEN": "1:abc",
+            "RENDER_EXTERNAL_URL": "https://abv.onrender.com",
+            "WEBHOOK_BASE_URL": "https://x.it",
+        }
+    )
+    assert s.webhook_url == "https://x.it/telegram"

@@ -3,7 +3,7 @@
 Bot Telegram goliardico: concettualmente da non prendere sul serio, tecnicamente sì.
 
 Python 3.13, [python-telegram-bot](https://docs.python-telegram-bot.org/) 22 (asyncio), Postgres via asyncpg.
-Pensato per girare gratis su **Koyeb** (webhook, scale-to-zero) con database su **Neon**.
+Pensato per girare gratis su **Render** (web service Docker, webhook) con database su **Neon**.
 
 ## Comandi
 
@@ -26,7 +26,7 @@ Solo chi ha avviato la partita può premere "Yes/No".
 
 ```
 abreveilverdetto/
-  __main__.py   avvio: webhook se WEBHOOK_BASE_URL è impostato, altrimenti polling
+  __main__.py   avvio: webhook se c'è un URL pubblico (WEBHOOK_BASE_URL/RENDER_EXTERNAL_URL), altrimenti polling
   app.py        costruzione dell'Application e registrazione degli handler
   handlers.py   handler Telegram (menu, comandi, gioco, errori)
   game.py       regole pure di 💯💯💯 e Fibonacci
@@ -61,10 +61,10 @@ Variabili d'ambiente (vedi `.env.example`):
 |---|---|---|
 | `TELEGRAM_TOKEN` | sì | Token di @BotFather |
 | `DATABASE_URL` | in produzione | Connection string Postgres (Neon). Senza: storage in memoria |
-| `WEBHOOK_BASE_URL` | in produzione | URL pubblico del servizio. Senza: long polling |
+| `WEBHOOK_BASE_URL` | no | URL pubblico del servizio. Su Render si usa `RENDER_EXTERNAL_URL`. Senza nessuno dei due: long polling |
 | `WEBHOOK_SECRET` | no | Default: derivato dal token (stabile tra i riavvii) |
 | `OPENWEATHERMAP_API_KEY` | no | Senza chiave `/comune` non mostra il meteo |
-| `PORT` | no | Default 8000 |
+| `PORT` | no | Default 8000 (Render la imposta da sé, 10000) |
 | `BOT_TIMEZONE` | no | Default `Europe/Rome` |
 
 ## Messa in produzione (gratuita)
@@ -83,21 +83,26 @@ Token del bot e chiave OpenWeatherMap erano committati nella history pubblica de
 Piano gratuito Neon (documentazione ufficiale, ottobre 2026): 1 GB per progetto, 100 CU-ore al mese;
 il database si sospende quando è inattivo e si riattiva da solo alla prima connessione.
 
-### 2. Servizio su Koyeb
-1. Crea un account su <https://www.koyeb.com> e un nuovo *Web Service* da GitHub,
-   repository `mfurlanetto/abreveilverdetto`, builder **Dockerfile**, istanza **Free**.
-2. Porta esposta: `8000` (HTTP).
-3. Variabili d'ambiente: `TELEGRAM_TOKEN`, `DATABASE_URL`, `OPENWEATHERMAP_API_KEY`
-   (marcale come *secret*).
-4. Dopo il primo deploy copia l'URL pubblico del servizio, impostalo in `WEBHOOK_BASE_URL`
-   e rideploya. All'avvio il bot registra il webhook da solo.
+### 2. Web service su Render
+Due modi equivalenti:
 
-L'istanza gratuita si spegne dopo 1 ora senza traffico e si riaccende alla prima richiesta
-([documentazione Koyeb](https://www.koyeb.com/docs/run-and-scale/scale-to-zero)): il primo messaggio
-dopo una pausa può impiegare qualche secondo. Il bot non scarta mai gli update in coda all'avvio.
+- **Blueprint**: Dashboard → *New* → *Blueprint* → repository `mfurlanetto/abreveilverdetto`.
+  Render legge `render.yaml` (web service Docker, piano Free, Frankfurt) e chiede i valori di
+  `TELEGRAM_TOKEN`, `DATABASE_URL` e `OPENWEATHERMAP_API_KEY`.
+- **Manuale**: *New* → *Web Service* → repository → *Language* **Docker**, *Instance Type* **Free**,
+  regione Frankfurt; in *Environment* aggiungi le stesse tre variabili.
 
-Il codice non dipende da Koyeb: funziona uguale su Render, Google Cloud Run o qualsiasi host
-che esegua un container ed esponga una porta HTTP.
+Non servono altre impostazioni: Render imposta `PORT` e `RENDER_EXTERNAL_URL`, e all'avvio il bot
+registra da solo il webhook su `https://<servizio>.onrender.com/telegram`. Lascia vuoto l'health check.
+
+Piano Free ([documentazione Render](https://render.com/docs/free)): 750 ore-istanza al mese per workspace,
+consumate solo mentre il servizio è acceso; si spegne dopo 15 minuti senza traffico e si riaccende
+in circa un minuto alla prima richiesta. Telegram ritenta la consegna, quindi il primo messaggio dopo
+una pausa arriva in ritardo ma non va perso (il bot non scarta mai gli update in coda). Non usare il
+Postgres gratuito di Render: scade dopo 30 giorni.
+
+Il codice non dipende da Render: funziona su qualsiasi host che esegua un container ed esponga una porta HTTP
+(in quel caso imposta `WEBHOOK_BASE_URL`).
 
 ### 3. Gruppi
 Per far funzionare la risposta a "15 e 18" nei gruppi il bot deve leggere tutti i messaggi:

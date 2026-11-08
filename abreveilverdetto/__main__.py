@@ -1,6 +1,6 @@
 """Avvio: ``python -m abreveilverdetto``.
 
-Con WEBHOOK_BASE_URL impostato usa il webhook (produzione, es. Koyeb);
+Con WEBHOOK_BASE_URL (o RENDER_EXTERNAL_URL, impostata da Render) usa il webhook;
 altrimenti usa il long polling (sviluppo locale).
 """
 

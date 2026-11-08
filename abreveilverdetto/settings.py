@@ -65,7 +65,8 @@ class Settings:
         kwargs: dict[str, object] = {
             "telegram_token": token,
             "database_url": env.get("DATABASE_URL") or None,
-            "webhook_base_url": env.get("WEBHOOK_BASE_URL") or None,
+            # Su Render RENDER_EXTERNAL_URL (https://<servizio>.onrender.com) è impostata in automatico.
+            "webhook_base_url": env.get("WEBHOOK_BASE_URL") or env.get("RENDER_EXTERNAL_URL") or None,
             "openweathermap_api_key": env.get("OPENWEATHERMAP_API_KEY") or None,
             "telegram_api_base_url": env.get("TELEGRAM_API_BASE_URL") or None,
         }
