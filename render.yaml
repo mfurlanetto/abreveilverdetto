@@ -1,0 +1,16 @@
+# Blueprint Render: https://render.com/docs/blueprint-spec
+# Crea il web service gratuito; i segreti (sync: false) vengono chiesti alla creazione.
+services:
+  - type: web
+    name: abreveilverdetto
+    runtime: docker
+    plan: free
+    region: frankfurt
+    autoDeploy: true
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENWEATHERMAP_API_KEY
+        sync: false

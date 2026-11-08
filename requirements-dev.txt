@@ -1,12 +1,4 @@
-flake8
-pep257
-pylint
-flaky
-yapf
-mypy==0.770
-pre-commit
-beautifulsoup4
-pytest==4.2.0
-pytest-timeout
-wheel
-attrs==19.1.0
+-r requirements.txt
+pytest==9.2.0
+pytest-asyncio==1.4.1.post1
+ruff==0.17.4

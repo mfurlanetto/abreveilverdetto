@@ -1,11 +1,25 @@
-[tool.black]
-line-length = 99
-target-version = ['py36']
-skip-string-normalization = true
+[project]
+name = "abreveilverdetto"
+version = "2.0.0"
+description = "Bot Telegram goliardico, tecnicamente serio"
+requires-python = ">=3.12"
 
-# We need to force-exclude the negated include pattern
-# so that pre-commit run --all-files does the correct thing
-# see https://github.com/psf/black/issues/1778
-force-exclude = '^(?!/(telegram|examples|tests)/).*\.py$'
-include = '(telegram|examples|tests)/.*\.py$'
-exclude = 'telegram/vendor'
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["media", "data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF", "SIM"]
+ignore = [
+    "S311",    # random non crittografico: va benissimo per un gioco
+    "RUF001",  # caratteri ambigui: le emoji e le virgolette sono volute
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S105", "S106"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
