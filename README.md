@@ -15,6 +15,7 @@ parola (parola a caso dal Wikizionario con la sua definizione).
 |---|---|
 | `/fibonacci N` | Sequenza di Fibonacci di lunghezza casuale fino a N (max 10) |
 | `/bravitutti` | Classifica delle vittorie a 💯💯💯 nella chat |
+| `/parola` | Parola a caso dal Wikizionario con definizione (come il pulsante 📖 PAROLA) |
 | (testo con "15" e "18") | Risposta sulla briscola |
 
 ### 💯💯💯

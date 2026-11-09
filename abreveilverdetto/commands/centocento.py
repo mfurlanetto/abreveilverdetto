@@ -32,8 +32,8 @@ async def c100_menu(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) ->
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("No", callback_data=C100_ANSWER.data(game_id, "n")),
-                InlineKeyboardButton("Yes", callback_data=C100_ANSWER.data(game_id, "y")),
+                InlineKeyboardButton("NO", callback_data=C100_ANSWER.data(game_id, "n")),
+                InlineKeyboardButton("YES", callback_data=C100_ANSWER.data(game_id, "y")),
             ]
         ]
     )
