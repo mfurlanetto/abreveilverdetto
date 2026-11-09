@@ -16,6 +16,7 @@ parola (parola a caso dal Wikizionario con la sua definizione).
 | `/fibonacci N` | Sequenza di Fibonacci di lunghezza casuale fino a N (max 10) |
 | `/bravitutti` | Classifica delle vittorie a 💯💯💯 nella chat |
 | `/parola` | Parola a caso dal Wikizionario con definizione (come il pulsante 📖 PAROLA) |
+| `/trombin` | Indici di borsa e materie prime: ultimo valore e variazione % sulla chiusura precedente |
 | (testo con "15" e "18") | Risposta sulla briscola |
 
 ### 💯💯💯
@@ -38,12 +39,14 @@ abreveilverdetto/
     fibonacci.py    Fibonacci (menu e /fibonacci)
     chat.py         messaggi liberi (15 e 18, risposte a Fibonacci)
     dizionario.py   parola a caso dal Wikizionario
+    trombin.py      /trombin: indici di borsa e materie prime
   registry.py   dichiarazione e validazione dei comandi
   telegram_io.py dipendenze condivise e invio di media con cache dei file_id
   errors.py     gestione degli errori
   game.py       regole pure di 💯💯💯 e Fibonacci
   wiktionary.py estrazione delle definizioni italiane dal wikitext del Wikizionario
-  services.py   API esterne con timeout e cache (comuni, COVID, Pokédex, meteo, cocktail, Wikizionario)
+  markets.py    strumenti di /trombin e lettura delle quotazioni di Yahoo Finance
+  services.py   API esterne con timeout e cache (comuni, COVID, Pokédex, meteo, cocktail, Wikizionario, Yahoo Finance)
   storage.py    Postgres (produzione) / memoria (sviluppo), stessa interfaccia e stessi test
   schema.sql    schema del DB, applicato in modo idempotente a ogni avvio
   content.py    frasi (data/*.json) e immagini (media/), validate all'avvio
@@ -170,6 +173,7 @@ TEST_DATABASE_URL=postgresql://… pytest -q           # anche contro un Postgre
 | nazione | [mledoze/countries](https://github.com/mledoze/countries), IANA tz database, [samayo/country-json](https://github.com/samayo/country-json) (popolazione, **non ufficiale**, ~2018) | snapshot statico in `data/countries.json`, rigenerabile con `scripts/build_countries.py` |
 | cocktail | [TheCocktailDB](https://www.thecocktaildb.com/api.php) | chiave pubblica di test `1` |
 | parola | [Wikizionario](https://it.wiktionary.org) (API MediaWiki) | in tempo reale; contenuti **CC BY-SA 4.0**: ogni risposta cita la voce e la licenza |
+| trombin | Yahoo Finance (endpoint `v7/finance/spark`, **non ufficiale**) | una richiesta per tutti i 13 strumenti, cache 60 s; dati per uso personale, possibili ritardi |
 
 ### Wikizionario
 - Ogni click fa una richiesta all'API con 20 pagine casuali; il bot sceglie una di quelle con una
@@ -182,3 +186,11 @@ TEST_DATABASE_URL=postgresql://… pytest -q           # anche contro un Postgre
   scattare anche per traffico di altri.
 - `tests/data/wiktionary_samples.json` contiene voci reali del Wikizionario (CC BY-SA 4.0,
   autori: contributori del Wikizionario) usate per testare il parser.
+
+### Yahoo Finance
+- Yahoo non ha un'API pubblica documentata: l'endpoint usato può cambiare o essere bloccato senza
+  preavviso, e i dati sono per uso personale e non commerciale.
+- Una sola richiesta restituisce indici e materie prime: 13 richieste singole in sequenza
+  ricevevano già HTTP 429 (verificato il 9/11/2026). Senza User-Agent Yahoo risponde sempre 429.
+- I valori di un mercato fuori dalla sessione regolare sono segnati con `*` (ultima chiusura).
+- `tests/data/yahoo_spark_sample.json` è una risposta reale salvata per i test.

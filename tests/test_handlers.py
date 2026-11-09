@@ -334,7 +334,7 @@ async def test_alias_menu(h):
 async def test_avvio_pubblica_i_comandi_slash(h):
     await h.app.post_init(h.app)
     commands = h.api.last("setMyCommands").params["commands"]
-    assert [c["command"] for c in commands] == ["start", "fibonacci", "bravitutti", "parola"]
+    assert [c["command"] for c in commands] == ["start", "fibonacci", "bravitutti", "parola", "trombin"]
 
 
 async def test_avvio_prosegue_se_set_my_commands_fallisce(h):
@@ -388,3 +388,23 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
     ]
     assert len(labels) == 19 + 2 + 6 + 2
     assert all(label == label.upper() for label in labels), [x for x in labels if x != x.upper()]
+
+
+async def test_trombin(h):
+    await h.text("/trombin")
+    text = h.api.last("sendMessage").params["text"]
+    assert text.startswith("📈 <b>TROMBIN</b>")
+    assert "FTSE MIB" in text and "Brent" in text and "Yahoo Finance" in text
+
+
+async def test_trombin_con_limite_di_yahoo(h):
+    h.services.fail.add("markets_rate_limited")
+    await h.text("/trombin")
+    assert "rallentare" in h.api.last("sendMessage").params["text"]
+
+
+async def test_trombin_errore_generico(h):
+    h.expect_errors = True
+    h.services.fail.add("markets")
+    await h.text("/trombin")
+    assert h.api.last("sendMessage").params["text"] == GENERIC_ERROR
