@@ -17,6 +17,8 @@ from typing import Any, TypeVar
 
 import httpx
 
+from . import __version__, wiktionary
+
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
@@ -32,6 +34,18 @@ POKEMON_ARTWORK_URL = (
 COCKTAIL_URL = "https://www.thecocktaildb.com/api/json/v1/1/random.php"
 WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
 WEATHER_ICON_URL = "https://openweathermap.org/img/wn/{}@4x.png"
+WIKTIONARY_API_URL = "https://it.wiktionary.org/w/api.php"
+
+# Wikimedia chiede uno User-Agent descrittivo con un contatto (qui l'URL del progetto):
+# https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_API_Usage_Guidelines
+# Con gli header predefiniti di httpx (Accept: */*, Accept-Encoding: gzip, deflate) il filtro
+# anti-bot di Wikimedia risponde 403 "Please respect our robot policy" anche con uno User-Agent
+# conforme; con questi header la stessa richiesta passa (verificato il 9/11/2026).
+WIKIMEDIA_HEADERS = {"Accept": "application/json", "Accept-Encoding": "gzip"}
+
+USER_AGENT = (
+    f"abreveilverdetto-bot/{__version__} (https://github.com/mfurlanetto/abreveilverdetto) httpx/{httpx.__version__}"
+)
 
 HOUR = 3600.0
 DAY = 24 * HOUR
@@ -39,6 +53,14 @@ DAY = 24 * HOUR
 
 class ServiceError(RuntimeError):
     """Una fonte esterna non ha risposto o ha risposto in modo inatteso."""
+
+
+class RateLimitedError(ServiceError):
+    """La fonte esterna chiede di rallentare (HTTP 429)."""
+
+    def __init__(self, message: str, retry_after: int | None = None) -> None:
+        super().__init__(message)
+        self.retry_after = retry_after
 
 
 class TTLCache:
@@ -128,7 +150,7 @@ class Services:
         client = httpx.AsyncClient(
             timeout=httpx.Timeout(timeout),
             follow_redirects=True,
-            headers={"User-Agent": "abreveilverdetto-bot (+https://github.com/mfurlanetto/abreveilverdetto)"},
+            headers={"User-Agent": USER_AGENT},
         )
         return cls(client, weather_api_key)
 
@@ -139,9 +161,15 @@ class Services:
     def weather_enabled(self) -> bool:
         return bool(self._weather_key)
 
-    async def _get_json(self, url: str, **params: Any) -> Any:
+    async def _get_json(self, url: str, *, headers: dict[str, str] | None = None, **params: Any) -> Any:
         try:
-            response = await self._client.get(url, params=params or None)
+            response = await self._client.get(url, params=params or None, headers=headers)
+            if response.status_code == 429:
+                retry = response.headers.get("Retry-After", "")
+                raise RateLimitedError(
+                    f"{httpx.URL(url).host} chiede di rallentare (HTTP 429)",
+                    int(retry) if retry.isdigit() else None,
+                )
             response.raise_for_status()
             return response.json()
         except (httpx.HTTPError, ValueError) as exc:
@@ -233,3 +261,43 @@ class Services:
             return data["drinks"][0]
         except (KeyError, IndexError, TypeError) as exc:
             raise ServiceError("Risposta TheCocktailDB inattesa") from exc
+
+    # --- Wikizionario ---------------------------------------------------------------
+
+    async def random_words(self, batch: int = 20, attempts: int = 3) -> list[wiktionary.Entry]:
+        """Voci casuali del Wikizionario con almeno una definizione italiana.
+
+        Una richiesta restituisce ``batch`` pagine casuali con il loro wikitext; circa
+        metà sono parole italiane (il resto: altre lingue). Si ripete al massimo
+        ``attempts`` volte se nessuna pagina del lotto è utilizzabile.
+        """
+        for _ in range(attempts):
+            data = await self._get_json(
+                WIKTIONARY_API_URL,
+                headers=WIKIMEDIA_HEADERS,
+                action="query",
+                format="json",
+                formatversion="2",
+                generator="random",
+                grnnamespace="0",
+                grnlimit=str(batch),
+                prop="revisions",
+                rvprop="content",
+                rvslots="main",
+            )
+            try:
+                pages = data["query"]["pages"]
+            except (KeyError, TypeError) as exc:
+                raise ServiceError("Risposta del Wikizionario inattesa") from exc
+            entries = []
+            for page in pages:
+                try:
+                    text = page["revisions"][0]["slots"]["main"]["content"]
+                except (KeyError, IndexError, TypeError):
+                    continue
+                entry = wiktionary.parse(page["title"], text)
+                if entry.has_definitions():
+                    entries.append(entry)
+            if entries:
+                return entries
+        raise ServiceError("Nessuna voce italiana con definizioni nei lotti casuali")
