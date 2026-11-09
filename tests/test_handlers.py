@@ -316,13 +316,13 @@ async def test_layout_del_menu_invariato(h):
     await h.text("/start")
     rows = [[b["text"] for b in row] for row in h.api.last("sendMessage").params["reply_markup"]["inline_keyboard"]]
     assert rows == [
-        ["👋 saluti", "🔬 cts", "📜 dpcm"],
-        ["🙇 conte", "😻 bimbe", "🏙 comune"],
-        ["🧪 covid", "🤦 giurato", "🥧 torta"],
-        ["🔢 fibonacci", "💯 💯 💯", "🦁 ghesboro"],
-        ["🦕 pokemon", "🌍 nazione"],
-        ["🍸 cocktail", "👼 santi", "🃏 Magic"],
-        ["📰 Lercio.it", "📖 parola"],
+        ["👋 SALUTI", "🔬 CTS", "📜 DPCM"],
+        ["🙇 CONTE", "😻 BIMBE", "🏙 COMUNE"],
+        ["🧪 COVID", "🤦 GIURATO", "🥧 TORTA"],
+        ["🔢 FIBONACCI", "💯 💯 💯", "🦁 GHESBORO"],
+        ["🦕 POKEMON", "🌍 NAZIONE"],
+        ["🍸 COCKTAIL", "👼 SANTI", "🃏 MAGIC"],
+        ["📰 LERCIO.IT", "📖 PAROLA"],
     ]
 
 
@@ -334,7 +334,7 @@ async def test_alias_menu(h):
 async def test_avvio_pubblica_i_comandi_slash(h):
     await h.app.post_init(h.app)
     commands = h.api.last("setMyCommands").params["commands"]
-    assert [c["command"] for c in commands] == ["start", "fibonacci", "bravitutti"]
+    assert [c["command"] for c in commands] == ["start", "fibonacci", "bravitutti", "parola"]
 
 
 async def test_avvio_prosegue_se_set_my_commands_fallisce(h):
@@ -356,3 +356,35 @@ async def test_parola_con_limite_di_wikimedia(h):
     h.services.fail.add("words_rate_limited")
     await h.click("menu:parola")
     assert "rallentare" in h.api.last("editMessageText").params["text"]
+
+
+async def test_parola_come_slash_command_risponde_con_un_nuovo_messaggio(h):
+    await h.text("/parola")
+    call = h.api.last("sendMessage")
+    assert call.params["text"].startswith("📖 <b>")
+    assert "CC BY-SA 4.0" in call.params["text"]
+    assert call.params["link_preview_options"]["is_disabled"] is True
+    assert "editMessageText" not in h.api.methods()
+
+
+async def test_parola_slash_con_limite_di_wikimedia(h):
+    h.services.fail.add("words_rate_limited")
+    await h.text("/parola")
+    assert "rallentare" in h.api.last("sendMessage").params["text"]
+
+
+async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
+    h.rng.randranges = draws(60)
+    await h.text("/start")
+    await h.click("menu:cts")
+    await h.click("menu:magic")
+    await h.click("menu:c100")
+    labels = [
+        b["text"]
+        for c in h.api.calls
+        if isinstance(c.params.get("reply_markup"), dict)
+        for row in c.params["reply_markup"].get("inline_keyboard", [])
+        for b in row
+    ]
+    assert len(labels) == 19 + 2 + 6 + 2
+    assert all(label == label.upper() for label in labels), [x for x in labels if x != x.upper()]

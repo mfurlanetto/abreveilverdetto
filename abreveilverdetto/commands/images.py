@@ -43,10 +43,10 @@ async def santi(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 async def magic(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -> None:
     buttons = [
-        InlineKeyboardButton(f"{icon}{label}", callback_data=MAGIC_PICK.data(key))
+        InlineKeyboardButton(f"{icon}{label.upper()}", callback_data=MAGIC_PICK.data(key))
         for key, (icon, label, _) in MAGIC_DECKS.items()
     ]
-    buttons.append(InlineKeyboardButton("ℹ Info", callback_data=MAGIC_PICK.data("info")))
+    buttons.append(InlineKeyboardButton("ℹ INFO", callback_data=MAGIC_PICK.data("info")))
     keyboard = InlineKeyboardMarkup([buttons[:3], buttons[3:]])
     await query.edit_message_text("Choose Card Type", reply_markup=keyboard)
 
