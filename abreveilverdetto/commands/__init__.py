@@ -19,7 +19,6 @@ from .external import cocktail, comune, covid, nazione, pokemon
 from .fibonacci import fibonacci_command, fibonacci_menu
 from .images import MAGIC_PICK, bimbe, conte, magic, santi, torta
 from .quotes import CTS_SIZE, cts, lercio, quote_action, saluti
-from .trombin import trombin
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +78,5 @@ COMMANDS = Registry(
         SlashCommand(("fibonacci",), fibonacci_command, "Sequenza di Fibonacci casuale (max 10)"),
         SlashCommand(("bravitutti",), bravitutti, "Classifica di 💯💯💯 in questa chat"),
         SlashCommand(("parola",), parola_command, "Parola a caso dal Wikizionario con definizione"),
-        SlashCommand(("trombin",), trombin, "Indici di borsa e materie prime"),
     ),
 )

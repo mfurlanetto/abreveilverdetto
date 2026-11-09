@@ -191,14 +191,6 @@ class FakeServices:
         samples = load_wiktionary_samples()
         return [parse(t, samples[t]) for t in ("cazzo", "casa")]
 
-    async def market_quotes(self):
-        self._check("markets")
-        if "markets_rate_limited" in self.fail:
-            raise RateLimitedError("query1.finance.yahoo.com chiede di rallentare (HTTP 429)", 10)
-        from abreveilverdetto.markets import parse_spark
-
-        return parse_spark(json.loads((Path(__file__).parent / "data" / "yahoo_spark_sample.json").read_text()))
-
     async def random_cocktail(self):
         self._check("cocktail")
         drink = {

@@ -1,5 +1,3 @@
-import json
-
 import httpx
 import pytest
 
@@ -199,36 +197,3 @@ async def test_user_agent_conforme_alle_regole_wikimedia():
         await s.close()
     assert ua == svc.USER_AGENT
     assert ua.startswith("abreveilverdetto-bot/2.0.0 (https://github.com/mfurlanetto/abreveilverdetto) httpx/")
-
-
-def spark_sample():
-    from pathlib import Path
-
-    return json.loads((Path(__file__).parent / "data" / "yahoo_spark_sample.json").read_text())
-
-
-async def test_market_quotes_una_richiesta_e_cache():
-    from abreveilverdetto import markets
-
-    handler, calls = route({markets.SPARK_URL: (200, spark_sample())})
-    s = make_services(handler)
-    first = await s.market_quotes()
-    second = await s.market_quotes()
-    assert first is second and len(calls) == 1  # in cache per 60 s
-    params = calls[0].url.params
-    assert params["symbols"].split(",") == [i.symbol for i in markets.INSTRUMENTS]
-    assert (params["range"], params["interval"]) == ("1d", "1d")
-    assert len(first) == 13
-
-
-async def test_market_quotes_429_e_risposta_vuota():
-    from abreveilverdetto import markets
-
-    def limited(request):
-        return httpx.Response(429, headers={"Retry-After": "7"})
-
-    with pytest.raises(svc.RateLimitedError):
-        await make_services(limited).market_quotes()
-    handler, _ = route({markets.SPARK_URL: (200, {"spark": {"result": []}})})
-    with pytest.raises(ServiceError):
-        await make_services(handler).market_quotes()
