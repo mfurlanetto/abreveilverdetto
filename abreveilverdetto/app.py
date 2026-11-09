@@ -18,32 +18,35 @@ from telegram.ext import (
 )
 from telegram.request import BaseRequest
 
-from . import handlers
+from .commands import COMMANDS, on_menu, on_stale_button
+from .commands.chat import on_text
 from .content import Content
+from .errors import on_error
 from .registry import Registry
 from .services import Services
 from .settings import Settings
 from .storage import Storage, create_storage
+from .telegram_io import Deps
 
 logger = logging.getLogger(__name__)
 
 ALLOWED_UPDATES = [Update.MESSAGE, Update.CALLBACK_QUERY]
 
 
-def register_handlers(app: Application, registry: Registry = handlers.COMMANDS) -> None:
+def register_handlers(app: Application, registry: Registry = COMMANDS) -> None:
     for slash in registry.slash:
         app.add_handler(CommandHandler(list(slash.names), slash.handler))
 
-    app.add_handler(CallbackQueryHandler(handlers.on_menu, pattern=registry.menu_regex))
+    app.add_handler(CallbackQueryHandler(on_menu, pattern=registry.menu_regex))
     for callback in registry.callbacks():
         app.add_handler(CallbackQueryHandler(callback.handler, pattern=callback.regex))
-    app.add_handler(CallbackQueryHandler(handlers.on_stale_button))  # deve restare l'ultimo
+    app.add_handler(CallbackQueryHandler(on_stale_button))  # deve restare l'ultimo
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handlers.on_text))
-    app.add_error_handler(handlers.on_error)
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
+    app.add_error_handler(on_error)
 
 
-def bot_commands(registry: Registry = handlers.COMMANDS) -> list[BotCommand]:
+def bot_commands(registry: Registry = COMMANDS) -> list[BotCommand]:
     """Comandi mostrati da Telegram nell'autocompletamento (solo il primo nome di ciascuno)."""
     return [BotCommand(s.names[0], s.description) for s in registry.slash]
 
@@ -60,7 +63,7 @@ def build_application(
     content = content or Content.load()
     storage = storage or create_storage(settings.database_url)
     services = services or Services.create(settings.http_timeout, settings.openweathermap_api_key)
-    deps = handlers.Deps(settings, content, storage, services, rng or random.SystemRandom())
+    deps = Deps(settings, content, storage, services, rng or random.SystemRandom())
 
     async def post_init(app: Application) -> None:
         await storage.setup()

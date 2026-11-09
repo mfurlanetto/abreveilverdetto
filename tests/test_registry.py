@@ -1,6 +1,8 @@
 import pytest
 
-from abreveilverdetto import handlers
+from abreveilverdetto.commands import COMMANDS
+from abreveilverdetto.commands.images import MAGIC_PICK
+from abreveilverdetto.commands.quotes import CTS_SIZE
 from abreveilverdetto.registry import Callback, MenuCommand, Registry, RegistryError, SlashCommand
 
 
@@ -13,7 +15,7 @@ def menu(key, row=0, callbacks=(), label=None):
 
 
 def test_registro_reale_valido_e_completo():
-    reg = handlers.COMMANDS
+    reg = COMMANDS
     assert len(reg.keys()) == 18
     assert {cb.prefix for cb in reg.callbacks()} == {"cts", "magic", "c100"}
     assert [len(r) for r in reg.layout()] == [3, 3, 3, 3, 2, 3, 1]
@@ -26,8 +28,8 @@ def test_callback_data_validati():
         cb.data("abc", "y")  # non rispetta il pattern
     with pytest.raises(RegistryError):
         cb.data("9" * 70, "y")  # oltre 64 byte
-    assert handlers.CTS_SIZE.data(5) == "cts:5"
-    assert handlers.MAGIC_PICK.data("info") == "magic:info"
+    assert CTS_SIZE.data(5) == "cts:5"
+    assert MAGIC_PICK.data("info") == "magic:info"
 
 
 def test_regex_ancorata():

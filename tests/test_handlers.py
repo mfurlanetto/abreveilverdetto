@@ -4,9 +4,11 @@ import logging
 import pytest
 from telegram import Update
 
-from abreveilverdetto import handlers
 from abreveilverdetto.app import build_application
+from abreveilverdetto.commands import COMMANDS
+from abreveilverdetto.commands.fibonacci import FIBONACCI_PROMPT
 from abreveilverdetto.content import Content
+from abreveilverdetto.errors import GENERIC_ERROR
 from abreveilverdetto.services import Weather
 from abreveilverdetto.settings import Settings
 from abreveilverdetto.storage import MemoryStorage
@@ -108,10 +110,10 @@ async def test_start_mostra_il_menu(h):
     call = h.api.last("sendMessage")
     data = [b["callback_data"] for b in buttons(call)]
     assert len(data) == 18
-    assert set(d.removeprefix("menu:") for d in data) == set(handlers.COMMANDS.keys())
+    assert set(d.removeprefix("menu:") for d in data) == set(COMMANDS.keys())
 
 
-@pytest.mark.parametrize("key", sorted(handlers.COMMANDS.keys()))
+@pytest.mark.parametrize("key", sorted(COMMANDS.keys()))
 async def test_ogni_voce_del_menu_risponde_senza_errori(h, key):
     await h.click(f"menu:{key}")
     methods = h.api.methods()
@@ -197,7 +199,7 @@ async def test_errore_di_un_servizio_avvisa_l_utente(h):
     h.services.fail.add("covid")
     await h.click("menu:covid")
     answers = [c for c in h.api.calls if c.method == "answerCallbackQuery"]
-    assert answers[-1].params["text"] == handlers.GENERIC_ERROR
+    assert answers[-1].params["text"] == GENERIC_ERROR
 
 
 @pytest.mark.parametrize("index", range(250))
@@ -219,7 +221,7 @@ async def test_fibonacci_dal_menu_con_force_reply(h):
         "date": 0,
         "chat": {"id": CHAT, "type": "supergroup"},
         "from": {"id": BOT_ID, "is_bot": True, "first_name": "Bot"},
-        "text": "Alice " + handlers.FIBONACCI_PROMPT,
+        "text": "Alice " + FIBONACCI_PROMPT,
     }
     h.rng.randints = [6]
     await h.text("7", reply_to=replied)
