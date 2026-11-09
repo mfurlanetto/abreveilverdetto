@@ -6,7 +6,8 @@ import logging
 import random
 from datetime import timedelta
 
-from telegram import Update
+from telegram import BotCommand, Update
+from telegram.error import TelegramError
 from telegram.ext import (
     Application,
     ApplicationBuilder,
@@ -18,7 +19,8 @@ from telegram.ext import (
 from telegram.request import BaseRequest
 
 from . import handlers
-from .content import MAGIC_DECKS, Content
+from .content import Content
+from .registry import Registry
 from .services import Services
 from .settings import Settings
 from .storage import Storage, create_storage
@@ -28,20 +30,22 @@ logger = logging.getLogger(__name__)
 ALLOWED_UPDATES = [Update.MESSAGE, Update.CALLBACK_QUERY]
 
 
-def register_handlers(app: Application) -> None:
-    app.add_handler(CommandHandler(["start", "menu"], handlers.start))
-    app.add_handler(CommandHandler("fibonacci", handlers.fibonacci_command))
-    app.add_handler(CommandHandler("bravitutti", handlers.bravitutti))
+def register_handlers(app: Application, registry: Registry = handlers.COMMANDS) -> None:
+    for slash in registry.slash:
+        app.add_handler(CommandHandler(list(slash.names), slash.handler))
 
-    app.add_handler(CallbackQueryHandler(handlers.on_menu, pattern=r"^menu:[a-z0-9]+$"))
-    app.add_handler(CallbackQueryHandler(handlers.on_cts, pattern=r"^cts:(5|10)$"))
-    decks = "|".join([*MAGIC_DECKS, "info"])
-    app.add_handler(CallbackQueryHandler(handlers.on_magic, pattern=rf"^magic:({decks})$"))
-    app.add_handler(CallbackQueryHandler(handlers.on_c100, pattern=r"^c100:\d+:[yn]$"))
+    app.add_handler(CallbackQueryHandler(handlers.on_menu, pattern=registry.menu_regex))
+    for callback in registry.callbacks():
+        app.add_handler(CallbackQueryHandler(callback.handler, pattern=callback.regex))
     app.add_handler(CallbackQueryHandler(handlers.on_stale_button))  # deve restare l'ultimo
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handlers.on_text))
     app.add_error_handler(handlers.on_error)
+
+
+def bot_commands(registry: Registry = handlers.COMMANDS) -> list[BotCommand]:
+    """Comandi mostrati da Telegram nell'autocompletamento (solo il primo nome di ciascuno)."""
+    return [BotCommand(s.names[0], s.description) for s in registry.slash]
 
 
 def build_application(
@@ -63,6 +67,10 @@ def build_application(
         purged = await storage.purge_games(deps.now() - timedelta(days=7))
         if purged:
             logger.info("Eliminate %d partite vecchie", purged)
+        try:
+            await app.bot.set_my_commands(bot_commands())
+        except TelegramError:  # non indispensabile: il bot funziona anche senza
+            logger.warning("Impossibile aggiornare l'elenco dei comandi su Telegram", exc_info=True)
 
     async def post_shutdown(app: Application) -> None:
         await services.close()
