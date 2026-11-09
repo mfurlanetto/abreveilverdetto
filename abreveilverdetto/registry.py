@@ -5,8 +5,8 @@ bottoni propri e comandi slash. Menu, routing e registrazione degli handler si
 ricavano da qui, e le incoerenze (chiavi duplicate, prefissi in conflitto,
 callback_data troppo lunghi) fanno fallire l'avvio invece di un bottone muto.
 
-Aggiungere un comando del menu = una voce ``MenuCommand`` nella lista ``COMMANDS``
-di handlers.py.
+Aggiungere un comando del menu = una voce ``MenuCommand`` in ``COMMANDS``
+(abreveilverdetto/commands/__init__.py).
 """
 
 from __future__ import annotations

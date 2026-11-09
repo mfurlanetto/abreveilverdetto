@@ -28,8 +28,16 @@ Solo chi ha avviato la partita può premere "Yes/No".
 abreveilverdetto/
   __main__.py   avvio: webhook se c'è un URL pubblico (WEBHOOK_BASE_URL/RENDER_EXTERNAL_URL), altrimenti polling
   app.py        costruzione dell'Application e registrazione degli handler
-  handlers.py   handler Telegram e registro COMMANDS (menu, comandi, gioco, errori)
+  commands/     comandi divisi per tipo; __init__.py contiene il registro COMMANDS e il menu
+    quotes.py       frasi a caso e CTS
+    images.py       immagini locali e Magic
+    external.py     COVID, comune, nazione, Pokémon, cocktail
+    centocento.py   💯💯💯 e /bravitutti
+    fibonacci.py    Fibonacci (menu e /fibonacci)
+    chat.py         messaggi liberi (15 e 18, risposte a Fibonacci)
   registry.py   dichiarazione e validazione dei comandi
+  telegram_io.py dipendenze condivise e invio di media con cache dei file_id
+  errors.py     gestione degli errori
   game.py       regole pure di 💯💯💯 e Fibonacci
   services.py   API esterne con timeout e cache (comuni, COVID, Pokédex, meteo, cocktail)
   storage.py    Postgres (produzione) / memoria (sviluppo), stessa interfaccia e stessi test
@@ -56,7 +64,8 @@ Scelte principali:
 
 ## Aggiungere un comando
 
-Tutto passa dal registro `COMMANDS` in fondo a `abreveilverdetto/handlers.py`:
+Scrivi la funzione nel modulo di `abreveilverdetto/commands/` del tipo giusto (o in uno nuovo)
+e aggiungila al registro `COMMANDS` in `abreveilverdetto/commands/__init__.py`:
 
 ```python
 MenuCommand("chiave", "🎲 etichetta", funzione, row=2)
