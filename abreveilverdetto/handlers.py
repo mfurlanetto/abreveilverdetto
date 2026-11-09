@@ -4,11 +4,8 @@ Il bot è senza stato in memoria: i bottoni portano nel ``callback_data`` tutto 
 che serve e lo stato di gioco sta nello storage. Riavvii e scale-to-zero non
 interrompono nulla, e più persone possono usare il menu nello stesso gruppo.
 
-Formato del callback_data (max 64 byte per la Bot API):
-    menu:<comando>          voce del menu principale
-    cts:<n>                 numero di membri del CTS
-    magic:<mazzo>|info      pesca una carta o mostra i mazzi
-    c100:<id>:y|n           un altro giro a /centocentocento
+I comandi sono dichiarati una volta sola nel registro ``COMMANDS`` in fondo al file
+(vedi registry.py): menu, routing e registrazione degli handler derivano da lì.
 """
 
 from __future__ import annotations
@@ -38,6 +35,7 @@ from telegram.ext import ContextTypes
 
 from . import emoji, game
 from .content import MAGIC_DECKS, Content
+from .registry import Callback, MenuCommand, Registry, SlashCommand
 from .services import ServiceError, Services
 from .settings import Settings
 from .storage import Storage
@@ -153,21 +151,10 @@ async def replace_with_remote_photo(query: CallbackQuery, url: str, caption: str
 
 MenuAction = Callable[[CallbackQuery, ContextTypes.DEFAULT_TYPE], Awaitable[None]]
 
-# (chiave, etichetta); l'ordine definisce la tastiera, 3 bottoni per riga.
-MENU_LAYOUT: list[list[tuple[str, str]]] = [
-    [("saluti", "👋 saluti"), ("cts", "🔬 cts"), ("dpcm", "📜 dpcm")],
-    [("conte", "🙇 conte"), ("bimbe", "😻 bimbe"), ("comune", "🏙 comune")],
-    [("covid", "🧪 covid"), ("giurato", "🤦 giurato"), ("torta", "🥧 torta")],
-    [("fibonacci", "🔢 fibonacci"), ("c100", "💯 💯 💯"), ("ghesboro", "🦁 ghesboro")],
-    [("pokemon", "🦕 pokemon"), ("nazione", "🌍 nazione")],
-    [("cocktail", "🍸 cocktail"), ("santi", "👼 santi"), ("magic", "🃏 Magic")],
-    [("lercio", "📰 Lercio.it")],
-]
-
 
 def menu_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
-        [[InlineKeyboardButton(label, callback_data=f"menu:{key}") for key, label in row] for row in MENU_LAYOUT]
+        [[InlineKeyboardButton(c.label, callback_data=c.callback_data) for c in row] for row in COMMANDS.layout()]
     )
 
 
@@ -178,13 +165,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def on_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
-    key = query.data.removeprefix("menu:")
-    action = MENU_ACTIONS.get(key)
-    if action is None:
+    key = query.data.split(":", 1)[1]
+    command = COMMANDS.get(key)
+    if command is None:  # bottone di un menu precedente a una modifica del registro
         await query.edit_message_text("Comando sconosciuto. Usa /start.")
         return
     logger.info("Comando %s", key)
-    await action(query, context)
+    await command.action(query, context)
 
 
 async def on_stale_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -259,9 +246,7 @@ async def santi(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 
 async def cts(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -> None:
-    keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("5", callback_data="cts:5"), InlineKeyboardButton("10", callback_data="cts:10")]]
-    )
+    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(str(n), callback_data=CTS_SIZE.data(n)) for n in CTS_SIZES]])
     await query.edit_message_text("Quanti membri desideri?", reply_markup=keyboard)
 
 
@@ -270,7 +255,7 @@ async def on_cts(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await query.answer()
     d = deps(context)
     members = d.content.texts["cts_list"]
-    size = min(int(query.data.removeprefix("cts:")), len(members))
+    size = min(int(query.data.split(":", 1)[1]), len(members))
     lines = ["<b>Comitato Tecnico-Scientifico</b>"] + [f"∘ {esc(m)}" for m in d.rng.sample(members, size)]
     await query.edit_message_text("\n".join(lines), parse_mode=HTML)
 
@@ -282,10 +267,10 @@ async def on_cts(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def magic(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -> None:
     buttons = [
-        InlineKeyboardButton(f"{icon}{label}", callback_data=f"magic:{key}")
+        InlineKeyboardButton(f"{icon}{label}", callback_data=MAGIC_PICK.data(key))
         for key, (icon, label, _) in MAGIC_DECKS.items()
     ]
-    buttons.append(InlineKeyboardButton("ℹ Info", callback_data="magic:info"))
+    buttons.append(InlineKeyboardButton("ℹ Info", callback_data=MAGIC_PICK.data("info")))
     keyboard = InlineKeyboardMarkup([buttons[:3], buttons[3:]])
     await query.edit_message_text("Choose Card Type", reply_markup=keyboard)
 
@@ -294,7 +279,7 @@ async def on_magic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
     d = deps(context)
-    choice = query.data.removeprefix("magic:")
+    choice = query.data.split(":", 1)[1]
     if choice == "info":
         lines = ["<b>DECKS</b>"] + [
             f"{icon} <i>{label}</i>: {len(d.content.images[directory])}"
@@ -500,8 +485,8 @@ async def c100_menu(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) ->
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("No", callback_data=f"c100:{game_id}:n"),
-                InlineKeyboardButton("Yes", callback_data=f"c100:{game_id}:y"),
+                InlineKeyboardButton("No", callback_data=C100_ANSWER.data(game_id, "n")),
+                InlineKeyboardButton("Yes", callback_data=C100_ANSWER.data(game_id, "y")),
             ]
         ]
     )
@@ -629,23 +614,40 @@ async def on_error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
         logger.debug("Impossibile notificare l'errore all'utente", exc_info=True)
 
 
-MENU_ACTIONS: dict[str, MenuAction] = {
-    "saluti": saluti,
-    "cts": cts,
-    "dpcm": _quote_action("dpcm"),
-    "conte": conte,
-    "bimbe": bimbe,
-    "comune": comune,
-    "covid": covid,
-    "giurato": _quote_action("giurato"),
-    "torta": torta,
-    "fibonacci": fibonacci_menu,
-    "c100": c100_menu,
-    "ghesboro": _quote_action("ghesboro"),
-    "pokemon": pokemon,
-    "nazione": nazione,
-    "cocktail": cocktail,
-    "santi": santi,
-    "magic": magic,
-    "lercio": lercio,
-}
+# --------------------------------------------------------------------------------------
+# Registro dei comandi
+# --------------------------------------------------------------------------------------
+
+CTS_SIZES = (5, 10)
+CTS_SIZE = Callback("cts", "|".join(map(str, CTS_SIZES)), on_cts)
+MAGIC_PICK = Callback("magic", "|".join([*MAGIC_DECKS, "info"]), on_magic)
+C100_ANSWER = Callback("c100", r"\d+:[yn]", on_c100)
+
+# L'ordine delle voci con lo stesso ``row`` è l'ordine dei bottoni nella riga.
+COMMANDS = Registry(
+    menu=(
+        MenuCommand("saluti", "👋 saluti", saluti, row=0),
+        MenuCommand("cts", "🔬 cts", cts, row=0, callbacks=(CTS_SIZE,)),
+        MenuCommand("dpcm", "📜 dpcm", _quote_action("dpcm"), row=0),
+        MenuCommand("conte", "🙇 conte", conte, row=1),
+        MenuCommand("bimbe", "😻 bimbe", bimbe, row=1),
+        MenuCommand("comune", "🏙 comune", comune, row=1),
+        MenuCommand("covid", "🧪 covid", covid, row=2),
+        MenuCommand("giurato", "🤦 giurato", _quote_action("giurato"), row=2),
+        MenuCommand("torta", "🥧 torta", torta, row=2),
+        MenuCommand("fibonacci", "🔢 fibonacci", fibonacci_menu, row=3),
+        MenuCommand("c100", "💯 💯 💯", c100_menu, row=3, callbacks=(C100_ANSWER,)),
+        MenuCommand("ghesboro", "🦁 ghesboro", _quote_action("ghesboro"), row=3),
+        MenuCommand("pokemon", "🦕 pokemon", pokemon, row=4),
+        MenuCommand("nazione", "🌍 nazione", nazione, row=4),
+        MenuCommand("cocktail", "🍸 cocktail", cocktail, row=5),
+        MenuCommand("santi", "👼 santi", santi, row=5),
+        MenuCommand("magic", "🃏 Magic", magic, row=5, callbacks=(MAGIC_PICK,)),
+        MenuCommand("lercio", "📰 Lercio.it", lercio, row=6),
+    ),
+    slash=(
+        SlashCommand(("start", "menu"), start, "Apri il menu dei comandi"),
+        SlashCommand(("fibonacci",), fibonacci_command, "Sequenza di Fibonacci casuale (max 10)"),
+        SlashCommand(("bravitutti",), bravitutti, "Classifica di 💯💯💯 in questa chat"),
+    ),
+)

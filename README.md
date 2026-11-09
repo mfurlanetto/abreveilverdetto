@@ -28,7 +28,8 @@ Solo chi ha avviato la partita può premere "Yes/No".
 abreveilverdetto/
   __main__.py   avvio: webhook se c'è un URL pubblico (WEBHOOK_BASE_URL/RENDER_EXTERNAL_URL), altrimenti polling
   app.py        costruzione dell'Application e registrazione degli handler
-  handlers.py   handler Telegram (menu, comandi, gioco, errori)
+  handlers.py   handler Telegram e registro COMMANDS (menu, comandi, gioco, errori)
+  registry.py   dichiarazione e validazione dei comandi
   game.py       regole pure di 💯💯💯 e Fibonacci
   services.py   API esterne con timeout e cache (comuni, COVID, Pokédex, meteo, cocktail)
   storage.py    Postgres (produzione) / memoria (sviluppo), stessa interfaccia e stessi test
@@ -52,6 +53,24 @@ Scelte principali:
 - **Solo HTML con escape** in tutti i messaggi (niente più errori di MarkdownV2 su nomi con `-`, `_`, `'`).
 - **Nessun segreto nel repository.** Il webhook è protetto da `secret_token` (header
   `X-Telegram-Bot-Api-Secret-Token`); i log non contengono il token né la API key del meteo.
+
+## Aggiungere un comando
+
+Tutto passa dal registro `COMMANDS` in fondo a `abreveilverdetto/handlers.py`:
+
+```python
+MenuCommand("chiave", "🎲 etichetta", funzione, row=2)
+```
+
+- `funzione(query, context)` riceve il click sul bottone del menu.
+- `row` è la riga del menu; l'ordine nella lista è l'ordine dei bottoni nella riga.
+- Se il comando ha bottoni propri, dichiara un `Callback("prefisso", "regex", handler)` in
+  `callbacks=(...)` e genera il `callback_data` con `Callback.data(...)`.
+- I comandi slash vanno in `slash=(SlashCommand(("nome",), handler, "descrizione"),)`:
+  all'avvio il bot pubblica l'elenco su Telegram per l'autocompletamento.
+
+Chiavi o prefissi duplicati, righe non consecutive, nomi non validi e `callback_data` oltre
+i 64 byte fanno fallire l'avvio (e i test) con l'elenco degli errori.
 
 ## Configurazione
 

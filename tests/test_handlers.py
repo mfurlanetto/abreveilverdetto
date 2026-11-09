@@ -108,10 +108,10 @@ async def test_start_mostra_il_menu(h):
     call = h.api.last("sendMessage")
     data = [b["callback_data"] for b in buttons(call)]
     assert len(data) == 18
-    assert set(d.removeprefix("menu:") for d in data) == set(handlers.MENU_ACTIONS)
+    assert set(d.removeprefix("menu:") for d in data) == set(handlers.COMMANDS.keys())
 
 
-@pytest.mark.parametrize("key", sorted(handlers.MENU_ACTIONS))
+@pytest.mark.parametrize("key", sorted(handlers.COMMANDS.keys()))
 async def test_ogni_voce_del_menu_risponde_senza_errori(h, key):
     await h.click(f"menu:{key}")
     methods = h.api.methods()
@@ -308,3 +308,33 @@ async def test_record_di_un_altro_utente_e_classifica(h):
     await h.text("/bravitutti")
     board = h.api.last("sendMessage").params["text"]
     assert "Carl &amp; Co:" in board
+
+
+async def test_layout_del_menu_invariato(h):
+    await h.text("/start")
+    rows = [[b["text"] for b in row] for row in h.api.last("sendMessage").params["reply_markup"]["inline_keyboard"]]
+    assert rows == [
+        ["👋 saluti", "🔬 cts", "📜 dpcm"],
+        ["🙇 conte", "😻 bimbe", "🏙 comune"],
+        ["🧪 covid", "🤦 giurato", "🥧 torta"],
+        ["🔢 fibonacci", "💯 💯 💯", "🦁 ghesboro"],
+        ["🦕 pokemon", "🌍 nazione"],
+        ["🍸 cocktail", "👼 santi", "🃏 Magic"],
+        ["📰 Lercio.it"],
+    ]
+
+
+async def test_alias_menu(h):
+    await h.text("/menu")
+    assert h.api.last("sendMessage").params["text"] == "Seleziona comando:"
+
+
+async def test_avvio_pubblica_i_comandi_slash(h):
+    await h.app.post_init(h.app)
+    commands = h.api.last("setMyCommands").params["commands"]
+    assert [c["command"] for c in commands] == ["start", "fibonacci", "bravitutti"]
+
+
+async def test_avvio_prosegue_se_set_my_commands_fallisce(h):
+    h.api.fail["setMyCommands"] = "Bad Request: boom"
+    await h.app.post_init(h.app)  # nessuna eccezione
