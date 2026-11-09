@@ -9,11 +9,21 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from html.parser import HTMLParser
+from pathlib import Path
 from typing import Any
 
 from telegram.request import BaseRequest, RequestData
 
-from abreveilverdetto.services import CovidReport, Pokemon, ServiceError, Weather
+from abreveilverdetto.services import CovidReport, Pokemon, RateLimitedError, ServiceError, Weather
+from abreveilverdetto.wiktionary import parse
+
+SAMPLES_PATH = Path(__file__).parent / "data" / "wiktionary_samples.json"
+
+
+def load_wiktionary_samples() -> dict[str, str]:
+    """Voci reali del Wikizionario (CC BY-SA 4.0), salvate il 9/11/2026."""
+    return json.loads(SAMPLES_PATH.read_text(encoding="utf-8"))["pages"]
+
 
 BOT_ID = 999
 ALLOWED_TAGS = {"b", "i", "u", "s", "a", "code", "pre", "tg-spoiler", "blockquote"}
@@ -173,6 +183,13 @@ class FakeServices:
     async def pokemon(self, number):
         self._check("pokemon")
         return Pokemon(number, "pikachu", ["electric"])
+
+    async def random_words(self):
+        self._check("words")
+        if "words_rate_limited" in self.fail:
+            raise RateLimitedError("it.wiktionary.org chiede di rallentare (HTTP 429)", 30)
+        samples = load_wiktionary_samples()
+        return [parse(t, samples[t]) for t in ("cazzo", "casa")]
 
     async def random_cocktail(self):
         self._check("cocktail")

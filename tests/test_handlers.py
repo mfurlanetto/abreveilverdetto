@@ -109,7 +109,7 @@ async def test_start_mostra_il_menu(h):
     await h.text("/start")
     call = h.api.last("sendMessage")
     data = [b["callback_data"] for b in buttons(call)]
-    assert len(data) == 18
+    assert len(data) == 19
     assert set(d.removeprefix("menu:") for d in data) == set(COMMANDS.keys())
 
 
@@ -322,7 +322,7 @@ async def test_layout_del_menu_invariato(h):
         ["🔢 fibonacci", "💯 💯 💯", "🦁 ghesboro"],
         ["🦕 pokemon", "🌍 nazione"],
         ["🍸 cocktail", "👼 santi", "🃏 Magic"],
-        ["📰 Lercio.it"],
+        ["📰 Lercio.it", "📖 parola"],
     ]
 
 
@@ -340,3 +340,19 @@ async def test_avvio_pubblica_i_comandi_slash(h):
 async def test_avvio_prosegue_se_set_my_commands_fallisce(h):
     h.api.fail["setMyCommands"] = "Bad Request: boom"
     await h.app.post_init(h.app)  # nessuna eccezione
+
+
+async def test_parola_mostra_definizione_e_attribuzione(h):
+    h.rng.choices = []  # scelta casuale vera tra le voci finte
+    await h.click("menu:parola")
+    call = h.api.last("editMessageText")
+    text = call.params["text"]
+    assert text.startswith("📖 <b>")
+    assert "Wikizionario" in text and "CC BY-SA 4.0" in text
+    assert call.params["link_preview_options"]["is_disabled"] is True
+
+
+async def test_parola_con_limite_di_wikimedia(h):
+    h.services.fail.add("words_rate_limited")
+    await h.click("menu:parola")
+    assert "rallentare" in h.api.last("editMessageText").params["text"]

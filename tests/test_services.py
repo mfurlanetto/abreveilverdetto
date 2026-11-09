@@ -151,3 +151,49 @@ async def test_ttl_cache_scade_e_usa_copia_vecchia_se_il_refresh_fallisce():
     assert await cache.get("k", 10, failing) == 2
     with pytest.raises(ServiceError):
         await cache.get("altro", 10, failing)
+
+
+def wiktionary_batch(*titles):
+    from tests.fakes import load_wiktionary_samples
+
+    samples = load_wiktionary_samples()
+    pages = [{"title": t, "revisions": [{"slots": {"main": {"content": samples[t]}}}]} for t in titles]
+    return {"batchcomplete": True, "query": {"pages": pages}}
+
+
+async def test_random_words_solo_voci_italiane_con_definizioni():
+    handler, calls = route({svc.WIKTIONARY_API_URL: (200, wiktionary_batch("tribunal", "casa", "fondisse", "ciao"))})
+    entries = await make_services(handler).random_words()
+    assert [e.title for e in entries] == ["casa", "ciao"]
+    params = calls[0].url.params
+    assert (params["generator"], params["grnnamespace"], params["prop"]) == ("random", "0", "revisions")
+    # header che evitano il 403 del filtro anti-bot di Wikimedia
+    assert calls[0].headers["Accept"] == "application/json"
+    assert calls[0].headers["Accept-Encoding"] == "gzip"
+
+
+async def test_random_words_riprova_e_poi_si_arrende():
+    handler, calls = route({svc.WIKTIONARY_API_URL: (200, wiktionary_batch("tribunal", "EMI"))})
+    with pytest.raises(ServiceError):
+        await make_services(handler).random_words(attempts=3)
+    assert len(calls) == 3
+
+
+async def test_random_words_429_diventa_rate_limited():
+    def handler(request):
+        return httpx.Response(429, headers={"Retry-After": "11"}, text="You are making too many requests")
+
+    with pytest.raises(svc.RateLimitedError) as info:
+        await make_services(handler).random_words()
+    assert info.value.retry_after == 11
+
+
+async def test_user_agent_conforme_alle_regole_wikimedia():
+    # Nome/versione, contatto (URL del progetto) e libreria: senza, Wikimedia applica limiti molto più bassi.
+    s = Services.create(5, None)
+    try:
+        ua = s._client.headers["User-Agent"]
+    finally:
+        await s.close()
+    assert ua == svc.USER_AGENT
+    assert ua.startswith("abreveilverdetto-bot/2.0.0 (https://github.com/mfurlanetto/abreveilverdetto) httpx/")

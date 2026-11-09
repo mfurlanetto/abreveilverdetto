@@ -14,6 +14,7 @@ from telegram.ext import ContextTypes
 
 from ..registry import MenuCommand, Registry, SlashCommand
 from .centocento import C100_ANSWER, bravitutti, c100_menu
+from .dizionario import parola
 from .external import cocktail, comune, covid, nazione, pokemon
 from .fibonacci import fibonacci_command, fibonacci_menu
 from .images import MAGIC_PICK, bimbe, conte, magic, santi, torta
@@ -70,6 +71,7 @@ COMMANDS = Registry(
         MenuCommand("santi", "👼 santi", santi, row=5),
         MenuCommand("magic", "🃏 Magic", magic, row=5, callbacks=(MAGIC_PICK,)),
         MenuCommand("lercio", "📰 Lercio.it", lercio, row=6),
+        MenuCommand("parola", "📖 parola", parola, row=6),
     ),
     slash=(
         SlashCommand(("start", "menu"), start, "Apri il menu dei comandi"),
