@@ -17,7 +17,7 @@ from typing import Any, TypeVar
 
 import httpx
 
-from . import __version__, wiktionary
+from . import __version__, markets, wiktionary
 
 logger = logging.getLogger(__name__)
 
@@ -301,3 +301,26 @@ class Services:
             if entries:
                 return entries
         raise ServiceError("Nessuna voce italiana con definizioni nei lotti casuali")
+
+    # --- Mercati (Yahoo Finance) ----------------------------------------------------
+
+    async def market_quotes(self) -> dict[str, markets.Quote]:
+        """Quotazioni di tutti gli strumenti di markets.INSTRUMENTS, con una sola richiesta.
+
+        In cache per 60 secondi: più /trombin ravvicinati (es. in un gruppo) non
+        moltiplicano le richieste a Yahoo, che limita molto presto (HTTP 429).
+        """
+
+        async def load() -> dict[str, markets.Quote]:
+            data = await self._get_json(
+                markets.SPARK_URL,
+                symbols=",".join(i.symbol for i in markets.INSTRUMENTS),
+                range="1d",
+                interval="1d",
+            )
+            quotes = markets.parse_spark(data)
+            if not quotes:
+                raise ServiceError("Risposta di Yahoo Finance senza quotazioni")
+            return quotes
+
+        return await self._cache.get("market_quotes", 60, load)
