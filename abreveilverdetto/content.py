@@ -16,7 +16,17 @@ from .settings import DATA_DIR, MEDIA_DIR
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
-TEXT_LISTS = ("saluti", "conte", "cts_list", "dpcm", "ghesboro", "giurato", "lercio", "santi_frasi")
+TEXT_LISTS = (
+    "saluti",
+    "conte",
+    "cts_list",
+    "dpcm",
+    "ghesboro",
+    "giurato",
+    "lercio",
+    "santi_frasi",
+    "morra_battute",
+)
 
 MAGIC_DECKS = {
     "special": ("⭐", "Special", "magic_cards/special"),
@@ -54,6 +64,11 @@ class Content:
         for name, items in texts.items():
             if not items or not all(isinstance(i, str) for i in items):
                 raise ValueError(f"data/{name}.json deve essere una lista non vuota di stringhe")
+        for battuta in texts["morra_battute"]:
+            try:
+                battuta.format(vincitore="", perdente="")
+            except (KeyError, IndexError, ValueError) as exc:
+                raise ValueError(f"data/morra_battute.json: segnaposto non valido in {battuta!r}") from exc
 
         santi = _load_json("santi", data_dir)
         for santo in santi:

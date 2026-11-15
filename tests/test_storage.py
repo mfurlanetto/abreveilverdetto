@@ -1,6 +1,10 @@
 import asyncio
 from datetime import UTC, date, datetime, timedelta
 
+import pytest
+
+from abreveilverdetto import morra as morra_rules
+from abreveilverdetto.morra import MorraError
 from abreveilverdetto.storage import DailyBest, is_better, normalize_dsn
 
 NOW = datetime(2026, 11, 6, 12, 0, tzinfo=UTC)
@@ -93,3 +97,53 @@ async def test_purge(storage):
 
 async def test_setup_idempotente(storage):
     await storage.setup()
+
+
+# --- Morra cinese ------------------------------------------------------------------
+
+
+async def test_morra_ciclo_completo_e_statistiche(storage):
+    g = await storage.create_morra(CHAT, 1, "Ada", None, None, NOW)
+    assert (g.status, g.challenger_name) == (morra_rules.OPEN, "Ada")
+    assert await storage.get_morra(g.id) == g
+
+    g, _ = await storage.apply_morra(g.id, lambda x: (morra_rules.accept(x, 2, "Bob", NOW), None))
+    for c, o in [("r", "s"), ("p", "p"), ("r", "s")]:
+        await storage.apply_morra(g.id, lambda x, c=c: morra_rules.choose(x, 1, c, NOW))
+        g, _ = await storage.apply_morra(g.id, lambda x, o=o: morra_rules.choose(x, 2, o, NOW))
+    assert g.status == morra_rules.FINISHED and g.winner == (1, "Ada")
+    assert (await storage.get_morra(g.id)).history == "rs,rs"
+    assert await storage.morra_leaderboard(CHAT) == [("Ada", 1, 0), ("Bob", 0, 1)]
+    assert await storage.morra_leaderboard(CHAT + 1) == []
+
+
+async def test_morra_errore_non_modifica_lo_stato(storage):
+    g = await storage.create_morra(CHAT, 1, "Ada", None, None, NOW)
+    with pytest.raises(MorraError):
+        await storage.apply_morra(g.id, lambda x: (morra_rules.accept(x, 1, "Ada", NOW), None))
+    assert (await storage.get_morra(g.id)).status == morra_rules.OPEN
+    with pytest.raises(MorraError, match="non trovata"):
+        await storage.apply_morra(999_999, lambda x: (x, None))
+
+
+async def test_morra_accettazioni_contemporanee(storage):
+    g = await storage.create_morra(CHAT, 1, "Ada", None, None, NOW)
+
+    async def try_accept(uid):
+        try:
+            await storage.apply_morra(g.id, lambda x: (morra_rules.accept(x, uid, f"U{uid}", NOW), None))
+            return uid
+        except MorraError:
+            return None
+
+    winners = [u for u in await asyncio.gather(*(try_accept(u) for u in range(2, 7))) if u]
+    assert len(winners) == 1
+    assert (await storage.get_morra(g.id)).opponent_id == winners[0]
+
+
+async def test_morra_purge(storage):
+    old = await storage.create_morra(CHAT, 1, "Ada", None, None, NOW - timedelta(days=10))
+    new = await storage.create_morra(CHAT, 1, "Ada", None, None, NOW)
+    assert await storage.purge_games(NOW - timedelta(days=7)) == 1
+    assert await storage.get_morra(old.id) is None
+    assert await storage.get_morra(new.id) is not None

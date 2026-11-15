@@ -102,16 +102,35 @@ async def c100_finish(
     await replace_with_media(query, context, d.content.media(animation.file), kind="animation", caption=caption)
 
 
+def _short(name: str) -> str:
+    return name if len(name) <= 20 else name[:19] + "…"
+
+
 async def bravitutti(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Classifiche della chat: vittorie a 💯💯💯 e vittorie/sconfitte alla morra cinese."""
     d = deps(context)
-    rows = await d.storage.leaderboard(update.effective_chat.id)
-    if not rows:
+    chat_id = update.effective_chat.id
+    c100 = await d.storage.leaderboard(chat_id)
+    morra = await d.storage.morra_leaderboard(chat_id)
+    if not c100 and not morra:
         await update.effective_message.reply_text("Nessuna vittoria registrata in questa chat. Ancora.")
         return
-    names = [name if len(name) <= 20 else name[:19] + "…" for name, _ in rows]
-    width = max(len(n) for n in names) + 2
-    body = "\n".join(f"{n + ':':<{width}}{wins:>4}" for n, (_, wins) in zip(names, rows, strict=True))
-    await update.effective_message.reply_text(f"<b>HIGHSCORES</b>\n<pre>{esc(body)}</pre>", parse_mode=HTML)
+
+    sections = []
+    if c100:
+        names = [_short(name) for name, _ in c100]
+        width = max(len(n) for n in names) + 2
+        body = "\n".join(f"{n + ':':<{width}}{wins:>4}" for n, (_, wins) in zip(names, c100, strict=True))
+        sections.append(f"<b>HIGHSCORES 💯💯💯</b>\n<pre>{esc(body)}</pre>")
+    if morra:
+        names = [_short(name) for name, _, _ in morra]
+        width = max(len(n) for n in names) + 2
+        header = f"{'':<{width}}{'V':>4}{'S':>4}"
+        rows = [f"{n + ':':<{width}}{w:>4}{lo:>4}" for n, (_, w, lo) in zip(names, morra, strict=True)]
+        sections.append(
+            f"<b>MORRA CINESE ✊✋✌️</b> (V vinte, S perse)\n<pre>{esc(chr(10).join([header, *rows]))}</pre>"
+        )
+    await update.effective_message.reply_text("\n\n".join(sections), parse_mode=HTML)
 
 
 C100_ANSWER = Callback("c100", r"\d+:[yn]", on_c100)

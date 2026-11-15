@@ -14,10 +14,20 @@ parola (parola a caso dal Wikizionario con la sua definizione), accadde oggi (ev
 | Comando | |
 |---|---|
 | `/fibonacci N` | Sequenza di Fibonacci di lunghezza casuale fino a N (max 10) |
-| `/bravitutti` | Classifica delle vittorie a 💯💯💯 nella chat |
+| `/bravitutti` | Classifiche della chat: vittorie a 💯💯💯 e vittorie/sconfitte alla morra cinese |
+| `/morra` | Sfida a morra cinese; in risposta al messaggio di qualcuno sfida solo quella persona |
 | `/parola` | Parola a caso dal Wikizionario con definizione (come il pulsante 📖 PAROLA) |
 | `/trombin` | Indici di borsa e materie prime: ultimo valore e variazione % sulla chiusura precedente |
 | (testo con "15" e "18") | Risposta sulla briscola |
+
+### ✊ Morra cinese
+Si gioca in gruppo tra due persone (pulsante ✊ MORRA o `/morra`). La sfida dal pulsante è aperta:
+accetta il primo che preme ACCETTO; `/morra` in risposta al messaggio di qualcuno sfida solo lui.
+Al meglio di 3: vince chi arriva a 2 round vinti, i round pari si ripetono e non contano.
+Le mosse restano segrete: chi sceglie lo vede solo nella notifica del bottone, il messaggio
+pubblico dice soltanto chi ha già scelto. La sfida scade dopo 10 minuti senza mosse
+(il messaggio si aggiorna al primo click successivo). Le battute finali sono in
+`data/morra_battute.json` (segnaposto `{vincitore}` e `{perdente}`).
 
 ### 💯💯💯
 Ogni tiro vale un multiplo di 5 tra 5 e 100. Dopo il primo tiro si può tentare un secondo giro:
@@ -36,6 +46,7 @@ abreveilverdetto/
     images.py       immagini locali e Magic
     external.py     COVID, comune, nazione, Pokémon, cocktail
     centocento.py   💯💯💯 e /bravitutti
+    morra.py        morra cinese: sfida, mosse segrete, risultato
     fibonacci.py    Fibonacci (menu e /fibonacci)
     chat.py         messaggi liberi (15 e 18, risposte a Fibonacci)
     dizionario.py   parola a caso dal Wikizionario
@@ -45,6 +56,7 @@ abreveilverdetto/
   telegram_io.py dipendenze condivise e invio di media con cache dei file_id
   errors.py     gestione degli errori
   game.py       regole pure di 💯💯💯 e Fibonacci
+  morra.py      regole pure della morra cinese (al meglio di 3, scadenza)
   wiktionary.py estrazione delle definizioni italiane dal wikitext del Wikizionario
   onthisday.py  feed "accadde oggi" di Wikipedia: lettura e nome/URL della pagina del giorno
   markets.py    strumenti di /trombin e lettura delle quotazioni di Yahoo Finance

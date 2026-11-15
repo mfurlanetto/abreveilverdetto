@@ -109,7 +109,7 @@ async def test_start_mostra_il_menu(h):
     await h.text("/start")
     call = h.api.last("sendMessage")
     data = [b["callback_data"] for b in buttons(call)]
-    assert len(data) == 20
+    assert len(data) == 21
     assert set(d.removeprefix("menu:") for d in data) == set(COMMANDS.keys())
 
 
@@ -320,7 +320,7 @@ async def test_layout_del_menu_invariato(h):
         ["🙇 CONTE", "😻 BIMBE", "🏙 COMUNE"],
         ["🧪 COVID", "🤦 GIURATO", "🥧 TORTA"],
         ["🔢 FIBONACCI", "💯 💯 💯", "🦁 GHESBORO"],
-        ["🦕 POKEMON", "🌍 NAZIONE"],
+        ["🦕 POKEMON", "🌍 NAZIONE", "✊ MORRA"],
         ["🍸 COCKTAIL", "👼 SANTI", "🃏 MAGIC"],
         ["📰 LERCIO.IT", "📖 PAROLA", "📅 ACCADDE OGGI"],
     ]
@@ -334,7 +334,7 @@ async def test_alias_menu(h):
 async def test_avvio_pubblica_i_comandi_slash(h):
     await h.app.post_init(h.app)
     commands = h.api.last("setMyCommands").params["commands"]
-    assert [c["command"] for c in commands] == ["start", "fibonacci", "bravitutti", "parola", "trombin"]
+    assert [c["command"] for c in commands] == ["start", "fibonacci", "bravitutti", "morra", "parola", "trombin"]
 
 
 async def test_avvio_prosegue_se_set_my_commands_fallisce(h):
@@ -386,7 +386,7 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
         for row in c.params["reply_markup"].get("inline_keyboard", [])
         for b in row
     ]
-    assert len(labels) == 20 + 2 + 6 + 2
+    assert len(labels) == 21 + 2 + 6 + 2
     assert all(label == label.upper() for label in labels), [x for x in labels if x != x.upper()]
 
 
@@ -431,3 +431,122 @@ async def test_accadde_oggi_con_limite_di_wikimedia(h):
     h.services.fail.add("onthisday_rate_limited")
     await h.click("menu:accaddeoggi")
     assert "rallentare" in h.api.last("editMessageText").params["text"]
+
+
+# --- Morra cinese ---------------------------------------------------------------------
+
+
+def morra_buttons(h):
+    return [b["callback_data"] for b in buttons(h.api.last("editMessageText"))]
+
+
+def last_answer(h):
+    return h.api.last("answerCallbackQuery").params.get("text", "")
+
+
+async def test_morra_partita_completa_e_classifica(h):
+    await h.click("menu:morra")  # Alice sfida chiunque
+    text = h.api.last("editMessageText").params["text"]
+    assert "Alice sfida chiunque abbia il coraggio!" in text
+    accept, cancel = morra_buttons(h)
+    game_id = accept.split(":")[1]
+    assert (accept, cancel) == (f"morra:{game_id}:a", f"morra:{game_id}:x")
+
+    await h.click(accept, user=ALICE)
+    assert last_answer(h) == "Non puoi sfidare te stesso"
+    await h.click(accept, user=BOB)
+    assert last_answer(h).startswith("Sfida accettata")
+    assert morra_buttons(h) == [f"morra:{game_id}:{m}" for m in "rps"]
+
+    await h.click(f"morra:{game_id}:r", user=CARL)
+    assert last_answer(h) == "Non stai giocando questa partita"
+
+    await h.click(f"morra:{game_id}:r", user=ALICE)
+    assert last_answer(h) == "Hai scelto ✊ SASSO (gli altri non lo vedono)"
+    text = h.api.last("editMessageText").params["text"]
+    assert "SASSO" not in text and "Alice: ✅ · Bob &lt;3: ⏳" in text  # la mossa resta segreta
+    await h.click(f"morra:{game_id}:p", user=ALICE)
+    assert last_answer(h) == "Hai già scelto in questo round"
+
+    await h.click(f"morra:{game_id}:s", user=BOB)  # Alice vince il round 1
+    text = h.api.last("editMessageText").params["text"]
+    assert "<b>Alice 1 – 0 Bob &lt;3</b>" in text
+    assert "Round 1: ✊ vs ✌️ → Alice" in text and "Il sasso spacca le forbici." in text
+
+    for a, b in [("p", "p"), ("s", "p")]:  # un pari, poi Alice vince 2-0
+        await h.click(f"morra:{game_id}:{a}", user=ALICE)
+        await h.click(f"morra:{game_id}:{b}", user=BOB)
+    final = h.api.last("editMessageText").params
+    assert "🏆 <b>Vince Alice!</b>" in final["text"]
+    assert "reply_markup" not in final or not final["reply_markup"]  # niente più bottoni
+
+    await h.click(f"morra:{game_id}:r", user=ALICE)
+    assert last_answer(h) == "Partita già finita"
+
+    await h.text("/bravitutti")
+    board = h.api.last("sendMessage").params["text"]
+    assert "MORRA CINESE" in board and "Alice:" in board and "Bob &lt;3:" in board
+
+
+async def test_morra_sfida_diretta_con_risposta(h):
+    bob_message = h._message("ciao", user=BOB)
+    await h.text("/morra", reply_to=bob_message)
+    sent = h.api.last("sendMessage").params
+    assert "Alice sfida Bob &lt;3!" in sent["text"]
+    accept = sent["reply_markup"]["inline_keyboard"][0][0]["callback_data"]
+    await h.click(accept, user=CARL)
+    assert last_answer(h) == "La sfida è per Bob <3"
+    await h.click(accept, user=BOB)
+    assert last_answer(h).startswith("Sfida accettata")
+
+
+async def test_morra_risposta_a_se_stessi_o_al_bot_e_sfida_aperta(h):
+    await h.text("/morra", reply_to=h._message("io", user=ALICE))
+    assert "sfida chiunque" in h.api.last("sendMessage").params["text"]
+
+
+async def test_morra_annullata(h):
+    await h.click("menu:morra")
+    accept, cancel = morra_buttons(h)
+    await h.click(cancel, user=BOB)
+    assert last_answer(h) == "Solo chi ha lanciato la sfida può annullarla"
+    await h.click(cancel, user=ALICE)
+    assert "Sfida annullata da Alice." in h.api.last("editMessageText").params["text"]
+    await h.click(accept, user=BOB)
+    assert last_answer(h) == "Sfida annullata"
+
+
+async def test_morra_scaduta(h):
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+
+    old = datetime.now(ZoneInfo("Europe/Rome")) - timedelta(minutes=11)
+    game = await h.storage.create_morra(CHAT, 1, "Alice", None, None, old)
+    await h.click(f"morra:{game.id}:a", user=BOB)
+    assert "scaduta" in last_answer(h)
+    assert "⌛ Sfida scaduta." in h.api.last("editMessageText").params["text"]
+
+
+async def test_morra_in_chat_privata(h):
+    private = h._message("/morra")
+    private["chat"] = {"id": 1, "type": "private"}
+    await h.feed({"message": private})
+    assert "si gioca in due" in h.api.last("sendMessage").params["text"]
+
+
+async def test_bravitutti_solo_morra(h):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    from abreveilverdetto import morra
+
+    now = datetime.now(ZoneInfo("Europe/Rome"))
+    g = await h.storage.create_morra(CHAT, 1, "Alice", None, None, now)
+    await h.storage.apply_morra(g.id, lambda x: (morra.accept(x, 2, "Bob", now), None))
+    for _ in range(2):
+        await h.storage.apply_morra(g.id, lambda x: morra.choose(x, 1, "r", now))
+        await h.storage.apply_morra(g.id, lambda x: morra.choose(x, 2, "s", now))
+    await h.text("/bravitutti")
+    board = h.api.last("sendMessage").params["text"]
+    assert "HIGHSCORES" not in board  # nessuna vittoria a 💯💯💯
+    assert "<pre>          V   S\nAlice:    1   0\nBob:      0   1</pre>" in board

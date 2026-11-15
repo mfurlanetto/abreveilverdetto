@@ -8,13 +8,18 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from datetime import date, datetime, timedelta
 from importlib import resources
-from typing import Protocol
+from typing import Any, Protocol
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
+from .morra import FINISHED, OPEN, MorraError, MorraGame, RoundResult
+
 logger = logging.getLogger(__name__)
+
+MorraAction = Callable[[MorraGame], tuple[MorraGame, RoundResult | None]]
 
 
 @dataclass(frozen=True)
@@ -74,6 +79,19 @@ class Storage(Protocol):
     async def set_file_id(self, key: str, file_id: str) -> None: ...
     async def delete_file_id(self, key: str) -> None: ...
 
+    async def create_morra(
+        self,
+        chat_id: int,
+        challenger_id: int,
+        challenger_name: str,
+        target_id: int | None,
+        target_name: str | None,
+        now: datetime,
+    ) -> MorraGame: ...
+    async def get_morra(self, game_id: int) -> MorraGame | None: ...
+    async def apply_morra(self, game_id: int, action: MorraAction) -> tuple[MorraGame, RoundResult | None]: ...
+    async def morra_leaderboard(self, chat_id: int, limit: int = 20) -> list[tuple[str, int, int]]: ...
+
 
 # --------------------------------------------------------------------------------------
 # Implementazione in memoria
@@ -92,6 +110,10 @@ class MemoryStorage:
         self._daily: dict[tuple[int, date], DailyBest] = {}
         self._wins: dict[tuple[int, int], tuple[str, int, datetime]] = {}
         self._file_ids: dict[str, str] = {}
+        self._morra: dict[int, MorraGame] = {}
+        self._morra_created: dict[int, datetime] = {}
+        self._next_morra = 1
+        self._morra_stats: dict[tuple[int, int], tuple[str, int, int]] = {}
 
     async def setup(self) -> None:
         logger.warning("DATABASE_URL non impostato: uso storage in memoria (dati persi al riavvio)")
@@ -157,7 +179,62 @@ class MemoryStorage:
             for gid in old:
                 self._games.pop(gid, None)
                 self._game_created.pop(gid, None)
-            return len(old)
+            old_morra = [gid for gid, created in self._morra_created.items() if created < older_than]
+            for gid in old_morra:
+                self._morra.pop(gid, None)
+                self._morra_created.pop(gid, None)
+            return len(old) + len(old_morra)
+
+    async def create_morra(
+        self,
+        chat_id: int,
+        challenger_id: int,
+        challenger_name: str,
+        target_id: int | None,
+        target_name: str | None,
+        now: datetime,
+    ) -> MorraGame:
+        async with self._lock:
+            game = MorraGame(
+                id=self._next_morra,
+                chat_id=chat_id,
+                challenger_id=challenger_id,
+                challenger_name=challenger_name,
+                status=OPEN,
+                updated_at=now,
+                target_id=target_id,
+                target_name=target_name,
+            )
+            self._next_morra += 1
+            self._morra[game.id] = game
+            self._morra_created[game.id] = now
+            return game
+
+    async def get_morra(self, game_id: int) -> MorraGame | None:
+        return self._morra.get(game_id)
+
+    async def apply_morra(self, game_id: int, action: MorraAction) -> tuple[MorraGame, RoundResult | None]:
+        async with self._lock:
+            game = self._morra.get(game_id)
+            if game is None:
+                raise MorraError("Partita non trovata")
+            new, result = action(game)
+            self._morra[game_id] = new
+            if game.status != FINISHED and new.status == FINISHED:
+                self._record_morra(new)
+            return new, result
+
+    def _record_morra(self, game: MorraGame) -> None:
+        (wid, wname), (lid, lname) = game.winner, game.loser
+        _, w, l_ = self._morra_stats.get((game.chat_id, wid), (wname, 0, 0))
+        self._morra_stats[(game.chat_id, wid)] = (wname, w + 1, l_)
+        _, w, l_ = self._morra_stats.get((game.chat_id, lid), (lname, 0, 0))
+        self._morra_stats[(game.chat_id, lid)] = (lname, w, l_ + 1)
+
+    async def morra_leaderboard(self, chat_id: int, limit: int = 20) -> list[tuple[str, int, int]]:
+        rows = [v for (cid, _), v in self._morra_stats.items() if cid == chat_id]
+        rows.sort(key=lambda r: (-r[1], r[2], r[0]))
+        return rows[:limit]
 
     async def get_file_id(self, key: str) -> str | None:
         return self._file_ids.get(key)
@@ -330,7 +407,96 @@ class PostgresStorage:
 
     async def purge_games(self, older_than: datetime) -> int:
         status = await self.pool.execute("DELETE FROM c100_games WHERE created_at < $1", older_than)
-        return int(status.split()[-1])
+        morra = await self.pool.execute("DELETE FROM morra_games WHERE created_at < $1", older_than)
+        return int(status.split()[-1]) + int(morra.split()[-1])
+
+    async def create_morra(
+        self,
+        chat_id: int,
+        challenger_id: int,
+        challenger_name: str,
+        target_id: int | None,
+        target_name: str | None,
+        now: datetime,
+    ) -> MorraGame:
+        row = await self.pool.fetchrow(
+            """
+            INSERT INTO morra_games
+                (chat_id, challenger_id, challenger_name, target_id, target_name, status, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+            RETURNING *
+            """,
+            chat_id,
+            challenger_id,
+            challenger_name,
+            target_id,
+            target_name,
+            OPEN,
+            now,
+        )
+        return _morra_from_row(row)
+
+    async def get_morra(self, game_id: int) -> MorraGame | None:
+        row = await self.pool.fetchrow("SELECT * FROM morra_games WHERE id = $1", game_id)
+        return _morra_from_row(row) if row else None
+
+    async def apply_morra(self, game_id: int, action: MorraAction) -> tuple[MorraGame, RoundResult | None]:
+        # FOR UPDATE: due click contemporanei vengono serializzati sulla stessa partita.
+        async with self.pool.acquire() as conn, conn.transaction():
+            row = await conn.fetchrow("SELECT * FROM morra_games WHERE id = $1 FOR UPDATE", game_id)
+            if row is None:
+                raise MorraError("Partita non trovata")
+            game = _morra_from_row(row)
+            new, result = action(game)  # MorraError -> rollback
+            await conn.execute(
+                """
+                UPDATE morra_games SET
+                    status = $2, opponent_id = $3, opponent_name = $4,
+                    challenger_choice = $5, opponent_choice = $6,
+                    challenger_score = $7, opponent_score = $8, history = $9, updated_at = $10
+                WHERE id = $1
+                """,
+                game_id,
+                new.status,
+                new.opponent_id,
+                new.opponent_name,
+                new.challenger_choice,
+                new.opponent_choice,
+                new.challenger_score,
+                new.opponent_score,
+                new.history,
+                new.updated_at,
+            )
+            if game.status != FINISHED and new.status == FINISHED:
+                (wid, wname), (lid, lname) = new.winner, new.loser
+                for uid, name, win, loss in ((wid, wname, 1, 0), (lid, lname, 0, 1)):
+                    await conn.execute(
+                        """
+                        INSERT INTO morra_stats AS m (chat_id, user_id, user_name, wins, losses)
+                        VALUES ($1, $2, $3, $4, $5)
+                        ON CONFLICT (chat_id, user_id) DO UPDATE SET
+                            user_name = EXCLUDED.user_name,
+                            wins = m.wins + EXCLUDED.wins,
+                            losses = m.losses + EXCLUDED.losses
+                        """,
+                        new.chat_id,
+                        uid,
+                        name,
+                        win,
+                        loss,
+                    )
+            return new, result
+
+    async def morra_leaderboard(self, chat_id: int, limit: int = 20) -> list[tuple[str, int, int]]:
+        rows = await self.pool.fetch(
+            """
+            SELECT user_name, wins, losses FROM morra_stats
+            WHERE chat_id = $1 ORDER BY wins DESC, losses, user_name LIMIT $2
+            """,
+            chat_id,
+            limit,
+        )
+        return [(r["user_name"], r["wins"], r["losses"]) for r in rows]
 
     async def get_file_id(self, key: str) -> str | None:
         return await self.pool.fetchval("SELECT file_id FROM media_file_ids WHERE media_key = $1", key)
@@ -347,6 +513,12 @@ class PostgresStorage:
 
     async def delete_file_id(self, key: str) -> None:
         await self.pool.execute("DELETE FROM media_file_ids WHERE media_key = $1", key)
+
+
+def _morra_from_row(row: Any) -> MorraGame:
+    data = dict(row)
+    data.pop("created_at", None)
+    return MorraGame(**data)
 
 
 def create_storage(database_url: str | None) -> Storage:
