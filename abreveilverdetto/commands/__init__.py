@@ -13,6 +13,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from ..registry import MenuCommand, Registry, SlashCommand
+from .accadde import accadde_oggi
 from .centocento import C100_ANSWER, bravitutti, c100_menu
 from .dizionario import parola, parola_command
 from .external import cocktail, comune, covid, nazione, pokemon
@@ -73,6 +74,7 @@ COMMANDS = Registry(
         MenuCommand("magic", "🃏 MAGIC", magic, row=5, callbacks=(MAGIC_PICK,)),
         MenuCommand("lercio", "📰 LERCIO.IT", lercio, row=6),
         MenuCommand("parola", "📖 PAROLA", parola, row=6),
+        MenuCommand("accaddeoggi", "📅 ACCADDE OGGI", accadde_oggi, row=6),
     ),
     slash=(
         SlashCommand(("start", "menu"), start, "Apri il menu dei comandi"),

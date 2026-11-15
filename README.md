@@ -9,7 +9,7 @@ Pensato per girare gratis su **Render** (web service Docker, webhook) con databa
 
 `/start` (o `/menu`) apre il menu a bottoni: saluti, CTS, DPCM, Conte, bimbe, comune (con meteo),
 COVID, giurato, torta, Fibonacci, 💯💯💯, ghesboro, Pokémon, nazione, cocktail, santi, Magic, Lercio,
-parola (parola a caso dal Wikizionario con la sua definizione).
+parola (parola a caso dal Wikizionario con la sua definizione), accadde oggi (eventi in evidenza del giorno su Wikipedia).
 
 | Comando | |
 |---|---|
@@ -39,14 +39,16 @@ abreveilverdetto/
     fibonacci.py    Fibonacci (menu e /fibonacci)
     chat.py         messaggi liberi (15 e 18, risposte a Fibonacci)
     dizionario.py   parola a caso dal Wikizionario
+    accadde.py      eventi in evidenza del giorno da Wikipedia
     trombin.py      /trombin: indici di borsa e materie prime
   registry.py   dichiarazione e validazione dei comandi
   telegram_io.py dipendenze condivise e invio di media con cache dei file_id
   errors.py     gestione degli errori
   game.py       regole pure di 💯💯💯 e Fibonacci
   wiktionary.py estrazione delle definizioni italiane dal wikitext del Wikizionario
+  onthisday.py  feed "accadde oggi" di Wikipedia: lettura e nome/URL della pagina del giorno
   markets.py    strumenti di /trombin e lettura delle quotazioni di Yahoo Finance
-  services.py   API esterne con timeout e cache (comuni, COVID, Pokédex, meteo, cocktail, Wikizionario, Yahoo Finance)
+  services.py   API esterne con timeout e cache (comuni, COVID, Pokédex, meteo, cocktail, Wikizionario, Wikipedia, Yahoo Finance)
   storage.py    Postgres (produzione) / memoria (sviluppo), stessa interfaccia e stessi test
   schema.sql    schema del DB, applicato in modo idempotente a ogni avvio
   content.py    frasi (data/*.json) e immagini (media/), validate all'avvio
@@ -173,6 +175,7 @@ TEST_DATABASE_URL=postgresql://… pytest -q           # anche contro un Postgre
 | nazione | [mledoze/countries](https://github.com/mledoze/countries), IANA tz database, [samayo/country-json](https://github.com/samayo/country-json) (popolazione, **non ufficiale**, ~2018) | snapshot statico in `data/countries.json`, rigenerabile con `scripts/build_countries.py` |
 | cocktail | [TheCocktailDB](https://www.thecocktaildb.com/api.php) | chiave pubblica di test `1` |
 | parola | [Wikizionario](https://it.wiktionary.org) (API MediaWiki) | in tempo reale; contenuti **CC BY-SA 4.0**: ogni risposta cita la voce e la licenza |
+| accadde oggi | [Wikipedia](https://it.wikipedia.org) (REST API, feed `onthisday/selected`) | eventi in evidenza del giorno (in italiano nascite e morti sono vuote); cache 6 h per data; **CC BY-SA 4.0**: ogni risposta cita la pagina del giorno e la licenza |
 | trombin | Yahoo Finance (endpoint `v7/finance/spark`, **non ufficiale**) | una richiesta per tutti i 13 strumenti, cache 60 s; dati per uso personale, possibili ritardi |
 
 ### Wikizionario
@@ -184,6 +187,8 @@ TEST_DATABASE_URL=postgresql://… pytest -q           # anche contro un Postgre
   ([limiti](https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits)). Se risponde 429 il bot
   avvisa di riprovare dopo un minuto. Su un host con IP di uscita condivisi il limite può
   scattare anche per traffico di altri.
+- `tests/data/onthisday_selected_11_13.json` contiene gli eventi in evidenza reali del 13 novembre
+  (Wikipedia, CC BY-SA 4.0), ridotti ai campi usati.
 - `tests/data/wiktionary_samples.json` contiene voci reali del Wikizionario (CC BY-SA 4.0,
   autori: contributori del Wikizionario) usate per testare il parser.
 

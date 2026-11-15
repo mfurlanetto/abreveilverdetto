@@ -1,0 +1,107 @@
+{
+ "selected": [
+  {
+   "text": "Una serie di attacchi terroristici a Parigi provocano oltre cento morti, la maggior parte al Bataclan",
+   "year": 2015,
+   "pages": [
+    {
+     "titles": {
+      "normalized": "Attentati di Parigi del 13 novembre 2015"
+     }
+    },
+    {
+     "titles": {
+      "normalized": "Parigi"
+     }
+    },
+    {
+     "titles": {
+      "normalized": "Bataclan"
+     }
+    }
+   ]
+  },
+  {
+   "text": "L'Iraq accetta i termini della risoluzione ONU 1441.",
+   "year": 2002,
+   "pages": [
+    {
+     "titles": {
+      "normalized": "Iraq"
+     }
+    },
+    {
+     "titles": {
+      "normalized": "Risoluzione 1441 del Consiglio di sicurezza delle Nazioni Unite"
+     }
+    }
+   ]
+  },
+  {
+   "text": "La Svezia decide, con un referendum, di entrare nell'Unione europea.",
+   "year": 1994,
+   "pages": [
+    {
+     "titles": {
+      "normalized": "Svezia"
+     }
+    },
+    {
+     "titles": {
+      "normalized": "Unione europea"
+     }
+    }
+   ]
+  },
+  {
+   "text": "Viene scritta la prima pagina conosciuta del World Wide Web.",
+   "year": 1990,
+   "pages": [
+    {
+     "titles": {
+      "normalized": "World Wide Web"
+     }
+    }
+   ]
+  },
+  {
+   "text": "L'artista di colore Sammy Davis Jr. sposa l'attrice bianca May Britt destando notevole scalpore, in quanto le unioni interrazziali erano vietate in 31 stati su 50 negli Stati Uniti d'America.",
+   "year": 1960,
+   "pages": [
+    {
+     "titles": {
+      "normalized": "Sammy Davis Jr."
+     }
+    },
+    {
+     "titles": {
+      "normalized": "May Britt"
+     }
+    },
+    {
+     "titles": {
+      "normalized": "Stati Uniti d'America"
+     }
+    }
+   ]
+  },
+  {
+   "text": "Viene pubblicato il film d'animazione Fantasia.",
+   "year": 1940,
+   "pages": [
+    {
+     "titles": {
+      "normalized": "Cinema d'animazione"
+     }
+    },
+    {
+     "titles": {
+      "normalized": "Fantasia (film)"
+     }
+    }
+   ]
+  }
+ ],
+ "_fonte": "it.wikipedia.org REST API feed/onthisday/selected/11/13, scaricato il 13/11/2026 (ridotto ai campi usati)",
+ "_licenza": "CC BY-SA 4.0 - contributori di Wikipedia"
+}

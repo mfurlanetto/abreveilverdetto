@@ -16,9 +16,9 @@ def menu(key, row=0, callbacks=(), label=None):
 
 def test_registro_reale_valido_e_completo():
     reg = COMMANDS
-    assert len(reg.keys()) == 19
+    assert len(reg.keys()) == 20
     assert {cb.prefix for cb in reg.callbacks()} == {"cts", "magic", "c100"}
-    assert [len(r) for r in reg.layout()] == [3, 3, 3, 3, 2, 3, 2]
+    assert [len(r) for r in reg.layout()] == [3, 3, 3, 3, 2, 3, 3]
 
 
 def test_callback_data_validati():

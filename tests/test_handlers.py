@@ -109,7 +109,7 @@ async def test_start_mostra_il_menu(h):
     await h.text("/start")
     call = h.api.last("sendMessage")
     data = [b["callback_data"] for b in buttons(call)]
-    assert len(data) == 19
+    assert len(data) == 20
     assert set(d.removeprefix("menu:") for d in data) == set(COMMANDS.keys())
 
 
@@ -322,7 +322,7 @@ async def test_layout_del_menu_invariato(h):
         ["🔢 FIBONACCI", "💯 💯 💯", "🦁 GHESBORO"],
         ["🦕 POKEMON", "🌍 NAZIONE"],
         ["🍸 COCKTAIL", "👼 SANTI", "🃏 MAGIC"],
-        ["📰 LERCIO.IT", "📖 PAROLA"],
+        ["📰 LERCIO.IT", "📖 PAROLA", "📅 ACCADDE OGGI"],
     ]
 
 
@@ -386,7 +386,7 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
         for row in c.params["reply_markup"].get("inline_keyboard", [])
         for b in row
     ]
-    assert len(labels) == 19 + 2 + 6 + 2
+    assert len(labels) == 20 + 2 + 6 + 2
     assert all(label == label.upper() for label in labels), [x for x in labels if x != x.upper()]
 
 
@@ -408,3 +408,26 @@ async def test_trombin_errore_generico(h):
     h.services.fail.add("markets")
     await h.text("/trombin")
     assert h.api.last("sendMessage").params["text"] == GENERIC_ERROR
+
+
+async def test_accadde_oggi_mostra_tutti_gli_eventi_in_evidenza(h):
+    await h.click("menu:accaddeoggi")
+    call = h.api.last("editMessageText")
+    text = call.params["text"]
+    assert text.startswith("📅 <b>ACCADDE OGGI</b> · ")
+    assert text.count("</b> – ") == 6  # i 6 eventi in evidenza del campione
+    assert "<b>1990</b> – Viene scritta la prima pagina conosciuta del World Wide Web." in text
+    assert "Wikipedia</a> · " in text and "CC BY-SA 4.0" in text
+    assert call.params["link_preview_options"]["is_disabled"] is True
+    # data del giorno nel fuso del bot
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    oggi = datetime.now(ZoneInfo("Europe/Rome"))
+    assert h.services.on_this_day_calls == [(oggi.month, oggi.day)]
+
+
+async def test_accadde_oggi_con_limite_di_wikimedia(h):
+    h.services.fail.add("onthisday_rate_limited")
+    await h.click("menu:accaddeoggi")
+    assert "rallentare" in h.api.last("editMessageText").params["text"]

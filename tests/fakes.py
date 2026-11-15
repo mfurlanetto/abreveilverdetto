@@ -158,6 +158,7 @@ class FakeServices:
     weather_result: Weather | None = None
     fail: set[str] = field(default_factory=set)
     weather_enabled: bool = True
+    on_this_day_calls: list = field(default_factory=list)
 
     def _check(self, name: str) -> None:
         if name in self.fail:
@@ -198,6 +199,17 @@ class FakeServices:
         from abreveilverdetto.markets import parse_spark
 
         return parse_spark(json.loads((Path(__file__).parent / "data" / "yahoo_spark_sample.json").read_text()))
+
+    async def on_this_day(self, month, day):
+        self._check("onthisday")
+        if "onthisday_rate_limited" in self.fail:
+            raise RateLimitedError("it.wikipedia.org chiede di rallentare (HTTP 429)", 20)
+        from abreveilverdetto.onthisday import parse_selected
+
+        self.on_this_day_calls.append((month, day))
+        return parse_selected(
+            json.loads((Path(__file__).parent / "data" / "onthisday_selected_11_13.json").read_text())
+        )
 
     async def random_cocktail(self):
         self._check("cocktail")
