@@ -17,7 +17,7 @@ from typing import Any, TypeVar
 
 import httpx
 
-from . import __version__, markets, wiktionary
+from . import __version__, markets, onthisday, wiktionary
 
 logger = logging.getLogger(__name__)
 
@@ -324,3 +324,18 @@ class Services:
             return quotes
 
         return await self._cache.get("market_quotes", 60, load)
+
+    # --- Wikipedia: accadde oggi --------------------------------------------------
+
+    async def on_this_day(self, month: int, day: int) -> list[onthisday.Event]:
+        """Eventi in evidenza del giorno su Wikipedia in italiano.
+
+        Il contenuto cambia al massimo una volta al giorno: in cache 6 ore per data,
+        così più click non generano richieste (Wikimedia limita per IP, HTTP 429).
+        """
+
+        async def load() -> list[onthisday.Event]:
+            data = await self._get_json(onthisday.FEED_URL.format(month=month, day=day), headers=WIKIMEDIA_HEADERS)
+            return onthisday.parse_selected(data)
+
+        return await self._cache.get(f"onthisday:{month:02d}-{day:02d}", 6 * HOUR, load)
