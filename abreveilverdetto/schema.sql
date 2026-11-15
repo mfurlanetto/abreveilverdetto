@@ -43,3 +43,34 @@ CREATE TABLE IF NOT EXISTS media_file_ids (
     media_key TEXT PRIMARY KEY,
     file_id   TEXT NOT NULL
 );
+
+-- Morra cinese: partite in corso e concluse (eliminate dopo 7 giorni).
+CREATE TABLE IF NOT EXISTS morra_games (
+    id                BIGSERIAL PRIMARY KEY,
+    chat_id           BIGINT      NOT NULL,
+    challenger_id     BIGINT      NOT NULL,
+    challenger_name   TEXT        NOT NULL,
+    target_id         BIGINT,
+    target_name       TEXT,
+    opponent_id       BIGINT,
+    opponent_name     TEXT,
+    status            TEXT        NOT NULL,
+    challenger_choice TEXT,
+    opponent_choice   TEXT,
+    challenger_score  INTEGER     NOT NULL DEFAULT 0,
+    opponent_score    INTEGER     NOT NULL DEFAULT 0,
+    history           TEXT        NOT NULL DEFAULT '',
+    created_at        TIMESTAMPTZ NOT NULL,
+    updated_at        TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS morra_games_created_at_idx ON morra_games (created_at);
+
+-- Morra cinese: vittorie e sconfitte per utente e chat (per /bravitutti).
+CREATE TABLE IF NOT EXISTS morra_stats (
+    chat_id   BIGINT  NOT NULL,
+    user_id   BIGINT  NOT NULL,
+    user_name TEXT    NOT NULL,
+    wins      INTEGER NOT NULL DEFAULT 0,
+    losses    INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (chat_id, user_id)
+);
