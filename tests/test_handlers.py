@@ -503,7 +503,7 @@ async def test_morra_sfida_diretta_con_risposta(h):
 
 async def test_morra_risposta_a_se_stessi_o_al_bot_e_sfida_aperta(h):
     await h.text("/morra", reply_to=h._message("io", user=ALICE))
-    assert "sfida chiunque" in h.api.last("sendMessage").params["text"]
+    assert "A breve qualcuno accetterà la sfida." in h.api.last("sendMessage").params["text"]
 
 
 async def test_morra_annullata(h):
