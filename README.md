@@ -184,7 +184,7 @@ TEST_DATABASE_URL=postgresql://… pytest -q           # anche contro un Postgre
 | comune (meteo) | [OpenWeatherMap Current Weather](https://openweathermap.org/current) | facoltativo |
 | covid | [pcm-dpc/COVID-19](https://github.com/pcm-dpc/COVID-19) | ultimo dato: 8 gennaio 2025; il bot mostra un avviso |
 | pokemon | [HybridShivam/Pokemon](https://github.com/HybridShivam/Pokemon) (nomi/tipi), [PokeAPI/sprites](https://github.com/PokeAPI/sprites) (immagini) | cache 24 h |
-| nazione | [mledoze/countries](https://github.com/mledoze/countries), IANA tz database, [samayo/country-json](https://github.com/samayo/country-json) (popolazione, **non ufficiale**, ~2018) | snapshot statico in `data/countries.json`, rigenerabile con `scripts/build_countries.py` |
+| nazione | [mledoze/countries](https://github.com/mledoze/countries), IANA tz database (offset UTC calcolati al momento, ora legale inclusa, via `zoneinfo` + `tzdata`), [samayo/country-json](https://github.com/samayo/country-json) (popolazione, **non ufficiale**, ~2018) | snapshot statico in `data/countries.json`, rigenerabile con `scripts/build_countries.py` |
 | cocktail | [TheCocktailDB](https://www.thecocktaildb.com/api.php) | chiave pubblica di test `1` |
 | parola | [Wikizionario](https://it.wiktionary.org) (API MediaWiki) | in tempo reale; contenuti **CC BY-SA 4.0**: ogni risposta cita la voce e la licenza |
 | accadde oggi | [Wikipedia](https://it.wikipedia.org) (REST API, feed `onthisday/selected`) | eventi in evidenza del giorno (in italiano nascite e morti sono vuote); cache 6 h per data; **CC BY-SA 4.0**: ogni risposta cita la pagina del giorno e la licenza |

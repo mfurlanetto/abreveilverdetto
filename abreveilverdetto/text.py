@@ -5,7 +5,8 @@ from __future__ import annotations
 import html
 import re
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from . import emoji
 
@@ -38,6 +39,20 @@ def number_emoji(value: int) -> str:
 def spaced_upper(name: str) -> str:
     """'Roma' -> 'R O M A' (stile titolo usato da /comune e /nazione)."""
     return " ".join(name.upper())
+
+
+def utc_offset(offset: timedelta) -> str:
+    """timedelta(hours=1) -> 'UTC+1'; 5h30 -> 'UTC+5:30'; -3h30 -> 'UTC-3:30'."""
+    minutes = round(offset.total_seconds() / 60)
+    sign = "-" if minutes < 0 else "+"
+    hours, mins = divmod(abs(minutes), 60)
+    return f"UTC{sign}{hours}" + (f":{mins:02d}" if mins else "")
+
+
+def utc_offsets(zones: Iterable[str], now: datetime) -> list[str]:
+    """Offset distinti (ora legale inclusa) dei fusi IANA all'istante ``now``, ordinati."""
+    offsets = {now.astimezone(ZoneInfo(zone)).utcoffset() for zone in zones}
+    return [utc_offset(o) for o in sorted(offsets)]
 
 
 def table(rows: Iterable[tuple[str, str]], pad: int = 16) -> str:
