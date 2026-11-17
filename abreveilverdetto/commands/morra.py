@@ -47,8 +47,8 @@ def _why(result: RoundResult) -> str:
 def render(game: MorraGame, result: RoundResult | None, rng: random.Random, battute: list[str]) -> str:
     c, o = esc(game.challenger_name), esc(game.opponent_name or "")
     if game.status == morra.OPEN:
-        who = f"sfida {esc(game.target_name)}" if game.target_name else "sfida chiunque abbia il coraggio"
-        return f"{TITLE}\n{c} {who}!\n\n<i>Al meglio di 3 · la sfida scade dopo 10 minuti senza mosse.</i>"
+        who = f"{c} sfida {esc(game.target_name)}!" if game.target_name else "A breve qualcuno accetterà la sfida."
+        return f"{TITLE}\n{who}\n\n<i>Al meglio di 3 · la sfida scade dopo 10 minuti senza mosse.</i>"
     if game.status == morra.CANCELLED:
         return f"{TITLE}\nSfida annullata da {c}."
     if game.status == morra.EXPIRED:
