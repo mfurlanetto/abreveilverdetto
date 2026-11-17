@@ -1,8 +1,18 @@
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from abreveilverdetto.text import esc, greeting, number_emoji, signed, spaced_upper, table, translate_measure
+from abreveilverdetto.text import (
+    esc,
+    greeting,
+    number_emoji,
+    signed,
+    spaced_upper,
+    table,
+    translate_measure,
+    utc_offset,
+    utc_offsets,
+)
 
 
 def test_esc_neutralizza_html():
@@ -54,3 +64,28 @@ def test_table_allinea_valori_multilinea_ed_esegue_escape():
 )
 def test_translate_measure(raw, expected):
     assert translate_measure(raw) == expected
+
+
+@pytest.mark.parametrize(
+    ("offset", "expected"),
+    [
+        (timedelta(0), "UTC+0"),
+        (timedelta(hours=1), "UTC+1"),
+        (timedelta(hours=5, minutes=30), "UTC+5:30"),
+        (timedelta(hours=5, minutes=45), "UTC+5:45"),
+        (timedelta(hours=-3, minutes=-30), "UTC-3:30"),
+        (timedelta(hours=-10), "UTC-10"),
+    ],
+)
+def test_utc_offset(offset, expected):
+    assert utc_offset(offset) == expected
+
+
+def test_utc_offsets_ora_legale_doppioni_e_ordine():
+    inverno = datetime(2026, 1, 15, 12, tzinfo=UTC)
+    estate = datetime(2026, 7, 15, 12, tzinfo=UTC)
+    assert utc_offsets(["Europe/Rome"], inverno) == ["UTC+1"]
+    assert utc_offsets(["Europe/Rome"], estate) == ["UTC+2"]
+    zones = ["America/Los_Angeles", "America/New_York", "America/Detroit", "Pacific/Honolulu"]
+    assert utc_offsets(zones, inverno) == ["UTC-10", "UTC-8", "UTC-5"]
+    assert utc_offsets(["Asia/Kathmandu", "Asia/Kolkata"], inverno) == ["UTC+5:30", "UTC+5:45"]

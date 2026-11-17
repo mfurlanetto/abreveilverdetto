@@ -10,7 +10,7 @@ from telegram.ext import ContextTypes
 from .. import emoji
 from ..services import ServiceError
 from ..telegram_io import HTML, deps, replace_with_media, replace_with_remote_photo
-from ..text import esc, signed, spaced_upper, table, translate_measure
+from ..text import esc, signed, spaced_upper, table, translate_measure, utc_offsets
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ async def nazione(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -> N
     if country["languages"]:
         rows.append(("Lingua", "\n".join(country["languages"])))
     if country["timezones"]:
-        rows.append(("Fuso orario", "\n".join(country["timezones"])))
+        rows.append(("Fuso orario", "\n".join(utc_offsets(country["timezones"], d.now()))))
     borders = [d.content.country_by_code(code) for code in country["borders"]]
     if borders:
         rows.append(("Confini", "\n".join(_country_name(b) for b in borders if b)))
