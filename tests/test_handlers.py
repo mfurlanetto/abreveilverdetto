@@ -447,7 +447,8 @@ def last_answer(h):
 async def test_morra_partita_completa_e_classifica(h):
     await h.click("menu:morra")  # Alice sfida chiunque
     text = h.api.last("editMessageText").params["text"]
-    assert "Alice sfida chiunque abbia il coraggio!" in text
+    assert "A breve qualcuno accetterà la sfida." in text
+    assert "Alice" not in text
     accept, cancel = morra_buttons(h)
     game_id = accept.split(":")[1]
     assert (accept, cancel) == (f"morra:{game_id}:a", f"morra:{game_id}:x")
@@ -502,7 +503,7 @@ async def test_morra_sfida_diretta_con_risposta(h):
 
 async def test_morra_risposta_a_se_stessi_o_al_bot_e_sfida_aperta(h):
     await h.text("/morra", reply_to=h._message("io", user=ALICE))
-    assert "sfida chiunque" in h.api.last("sendMessage").params["text"]
+    assert "A breve qualcuno accetterà la sfida." in h.api.last("sendMessage").params["text"]
 
 
 async def test_morra_annullata(h):
