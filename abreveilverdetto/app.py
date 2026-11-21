@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import logging
 import random
 from datetime import timedelta
@@ -20,7 +22,9 @@ from telegram.request import BaseRequest
 
 from .commands import COMMANDS, on_menu, on_stale_button
 from .commands.chat import on_text
+from .commands.morra import expire_due_games
 from .content import Content
+from .deadlines import DeadlineTimer
 from .errors import on_error
 from .registry import Registry
 from .services import Services
@@ -64,18 +68,29 @@ def build_application(
     storage = storage or create_storage(settings.database_url)
     services = services or Services.create(settings.http_timeout, settings.openweathermap_api_key)
     deps = Deps(settings, content, storage, services, rng or random.SystemRandom())
+    background: list[asyncio.Task] = []
 
     async def post_init(app: Application) -> None:
         await storage.setup()
         purged = await storage.purge_games(deps.now() - timedelta(days=7))
         if purged:
             logger.info("Eliminate %d partite vecchie", purged)
+        # Scadenze della morra: anche quelle maturate mentre il bot era spento (riavvio,
+        # deploy, scale-to-zero di Render) vengono gestite subito alla ripartenza.
+        timer = DeadlineTimer(lambda: expire_due_games(app.bot, deps, deps.now()), deps.now)
+        deps.morra_timer = timer
+        timer.schedule(await storage.next_morra_deadline())
+        background.append(asyncio.create_task(timer.run(), name="morra-deadlines"))
         try:
             await app.bot.set_my_commands(bot_commands())
         except TelegramError:  # non indispensabile: il bot funziona anche senza
             logger.warning("Impossibile aggiornare l'elenco dei comandi su Telegram", exc_info=True)
 
     async def post_shutdown(app: Application) -> None:
+        for task in background:
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await task
         await services.close()
         await storage.close()
 

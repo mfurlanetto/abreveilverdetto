@@ -26,8 +26,14 @@ Si gioca in gruppo tra due persone (pulsante ✊ MORRA o `/morra`). La sfida dal
 accetta il primo che preme ACCETTO; `/morra` in risposta al messaggio di qualcuno sfida solo lui.
 Al meglio di 3: vince chi arriva a 2 round vinti, i round pari si ripetono e non contano.
 Le mosse restano segrete: chi sceglie lo vede solo nella notifica del bottone, il messaggio
-pubblico dice soltanto chi ha già scelto. La sfida scade dopo 10 minuti senza mosse
-(il messaggio si aggiorna al primo click successivo). Le battute finali sono in
+pubblico dice soltanto chi ha già scelto.
+
+Scadenze: la sfida va accettata entro 5 minuti, poi ogni round va giocato entro 60 secondi.
+Allo scadere la partita è annullata (non conta in `/bravitutti`) e il bot cancella il proprio
+messaggio; il `/morra` di chi sfida resta. Se Telegram non consente la cancellazione, il messaggio
+diventa un avviso "⌛". Le scadenze sono salvate nel DB: un timer (`deadlines.py`) si sveglia solo
+all'ora della prossima scadenza, senza interrogare il DB a intervalli (Neon resta sospeso quando
+non serve), e alla ripartenza del bot gestisce quelle maturate mentre era spento. Le battute finali sono in
 `data/morra_battute.json` (segnaposto `{vincitore}` e `{perdente}`).
 
 ### 💯💯💯
@@ -58,7 +64,8 @@ abreveilverdetto/
   telegram_io.py dipendenze condivise e invio di media con cache dei file_id
   errors.py     gestione degli errori
   game.py       regole pure di 💯💯💯 e Fibonacci
-  morra.py      regole pure della morra cinese (al meglio di 3, scadenza)
+  morra.py      regole pure della morra cinese (al meglio di 3, scadenze)
+  deadlines.py  timer che si sveglia alla prossima scadenza (morra)
   wiktionary.py estrazione delle definizioni italiane dal wikitext del Wikizionario
   onthisday.py  feed "accadde oggi" di Wikipedia: lettura e nome/URL della pagina del giorno
   mountains.py  montagne: dati da data/mountains.json, descrizione e foto (con licenza) da Wikipedia

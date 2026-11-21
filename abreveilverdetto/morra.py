@@ -4,6 +4,10 @@ Una partita va "al meglio di 3": vince chi arriva per primo a 2 round vinti.
 Un round pari si ripete e non conta, quindi la partita non finisce mai in parità.
 Le transizioni di stato sono funzioni pure: lo storage le applica dentro un lock
 (memoria) o una transazione con SELECT ... FOR UPDATE (Postgres).
+
+Scadenze: una sfida aperta va accettata entro ACCEPT_TIMEOUT; a partita iniziata
+ogni round va giocato entro MOVE_TIMEOUT. Allo scadere la partita è annullata
+(EXPIRED, non conta in classifica) e il bot cancella il messaggio.
 """
 
 from __future__ import annotations
@@ -12,7 +16,8 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 
 WINS_NEEDED = 2
-TIMEOUT = timedelta(minutes=10)
+ACCEPT_TIMEOUT = timedelta(minutes=5)
+MOVE_TIMEOUT = timedelta(seconds=60)
 
 ROCK, PAPER, SCISSORS = "r", "p", "s"
 MOVES = {ROCK: ("✊", "SASSO"), PAPER: ("✋", "CARTA"), SCISSORS: ("✌️", "FORBICE")}
@@ -47,6 +52,8 @@ class MorraGame:
     challenger_score: int = 0
     opponent_score: int = 0
     history: str = ""  # round giocati (pari esclusi): "rs,pr" = sfidante,avversario
+    deadline: datetime | None = None  # entro quando serve la prossima azione (accettare o muovere)
+    message_id: int | None = None  # messaggio del bot con la partita, da cancellare alla scadenza
 
     @property
     def rounds(self) -> list[tuple[str, str]]:
@@ -68,8 +75,13 @@ class MorraGame:
             return self.opponent_id, self.opponent_name or ""
         return self.challenger_id, self.challenger_name
 
+    @property
+    def is_active(self) -> bool:
+        return self.status in (OPEN, PLAYING)
+
     def is_expired(self, now: datetime) -> bool:
-        return self.status in (OPEN, PLAYING) and now - self.updated_at >= TIMEOUT
+        deadline = self.deadline or self.updated_at + ACCEPT_TIMEOUT
+        return self.is_active and now >= deadline
 
     def has_chosen(self, user_id: int) -> bool:
         if user_id == self.challenger_id:
@@ -92,9 +104,15 @@ def round_winner(challenger: str, opponent: str) -> int:
     return 1 if BEATS[challenger] == opponent else 2
 
 
+def expired_notice(game: MorraGame) -> str:
+    if game.opponent_id is None:
+        return "Sfida scaduta: nessuno ha accettato in tempo"
+    return "Partita annullata: tempo scaduto per la mossa"
+
+
 def _check_alive(game: MorraGame, now: datetime) -> None:
-    if game.is_expired(now):
-        raise MorraError("Sfida scaduta (10 minuti senza mosse)")
+    if game.status == EXPIRED or game.is_expired(now):
+        raise MorraError(expired_notice(game))
     if game.status == CANCELLED:
         raise MorraError("Sfida annullata")
     if game.status == FINISHED:
@@ -109,7 +127,14 @@ def accept(game: MorraGame, user_id: int, user_name: str, now: datetime) -> Morr
         raise MorraError("Non puoi sfidare te stesso")
     if game.target_id is not None and user_id != game.target_id:
         raise MorraError(f"La sfida è per {game.target_name or 'un altro'}")
-    return replace(game, status=PLAYING, opponent_id=user_id, opponent_name=user_name, updated_at=now)
+    return replace(
+        game,
+        status=PLAYING,
+        opponent_id=user_id,
+        opponent_name=user_name,
+        updated_at=now,
+        deadline=now + MOVE_TIMEOUT,
+    )
 
 
 def cancel(game: MorraGame, user_id: int, now: datetime) -> MorraGame:
@@ -118,7 +143,7 @@ def cancel(game: MorraGame, user_id: int, now: datetime) -> MorraGame:
         raise MorraError("Solo chi ha lanciato la sfida può annullarla")
     if game.status != OPEN:
         raise MorraError("La partita è già iniziata")
-    return replace(game, status=CANCELLED, updated_at=now)
+    return replace(game, status=CANCELLED, updated_at=now, deadline=None)
 
 
 def choose(game: MorraGame, user_id: int, move: str, now: datetime) -> tuple[MorraGame, RoundResult | None]:
@@ -142,11 +167,21 @@ def choose(game: MorraGame, user_id: int, move: str, now: datetime) -> tuple[Mor
 
     c, o = game.challenger_choice, game.opponent_choice
     result = RoundResult(c, o, round_winner(c, o))
-    game = replace(game, challenger_choice=None, opponent_choice=None)
+    # Round risolto (anche pari): il prossimo ha di nuovo MOVE_TIMEOUT a disposizione.
+    game = replace(game, challenger_choice=None, opponent_choice=None, deadline=now + MOVE_TIMEOUT)
     if result.winner == 0:
         return game, result
     history = ",".join(filter(None, [game.history, c + o]))
     cs = game.challenger_score + (result.winner == 1)
     os_ = game.opponent_score + (result.winner == 2)
     status = FINISHED if max(cs, os_) >= WINS_NEEDED else PLAYING
-    return replace(game, challenger_score=cs, opponent_score=os_, history=history, status=status), result
+    deadline = game.deadline if status == PLAYING else None
+    new = replace(game, challenger_score=cs, opponent_score=os_, history=history, status=status, deadline=deadline)
+    return new, result
+
+
+def expire(game: MorraGame, now: datetime) -> MorraGame:
+    """Annulla una partita scaduta (sfida non accettata o mossa non arrivata in tempo)."""
+    if not game.is_expired(now):
+        raise MorraError("La partita non è scaduta")
+    return replace(game, status=EXPIRED, updated_at=now, deadline=None)
