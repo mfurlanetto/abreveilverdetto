@@ -7,10 +7,12 @@ Pensato per girare gratis su **Render** (web service Docker, webhook) con databa
 
 ## Comandi
 
-`/start` (o `/menu`) apre il menu a bottoni: saluti, CTS, DPCM, Conte, bimbe, comune (con meteo),
-COVID, giurato, torta, Fibonacci, 🎮 giochi (sottomenu con morra, duello e 💯💯💯), ghesboro, Pokémon, nazione, cocktail, santi, Magic, Lercio,
-parola (parola a caso dal Wikizionario con la sua definizione), accadde oggi (eventi in evidenza del giorno su Wikipedia),
-montagna (una vetta a caso nel mondo con foto, altitudine, nazione, catena e descrizione),
+`/start` (o `/menu`) apre il menu a bottoni: saluti, CTS, DPCM, Conte, bimbe, COVID, giurato, torta,
+Fibonacci, ghesboro, Pokémon, cocktail, santi, Magic, Lercio, parola (parola a caso dal Wikizionario con
+la sua definizione), accadde oggi (eventi in evidenza del giorno su Wikipedia),
+🎮 giochi (sottomenu con morra, duello e 💯💯💯),
+🗺 geografia (sottomenu con nazione, comune con meteo, e montagna: una vetta a caso nel mondo con foto,
+altitudine, nazione, catena e descrizione),
 trombin (indici di borsa e materie prime: ultimo valore e variazione % sulla chiusura precedente).
 
 Regola: ogni funzione è un pulsante; i comandi slash restano solo dove un pulsante non basta.

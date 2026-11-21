@@ -110,7 +110,7 @@ async def test_start_mostra_il_menu(h):
     await h.text("/start")
     call = h.api.last("sendMessage")
     data = [b["callback_data"] for b in buttons(call)]
-    assert len(data) == 22
+    assert len(data) == 20
     main = {c.key for row in COMMANDS.layout() for c in row}
     assert set(d.removeprefix("menu:") for d in data) == main
 
@@ -124,7 +124,7 @@ async def test_sottomenu_giochi_e_indietro(h):
     assert buttons(call)[-1]["callback_data"] == "menu:main"
     await h.click("menu:main")
     back = h.api.last("editMessageText")
-    assert back.params["text"] == "Seleziona comando:" and len(buttons(back)) == 22
+    assert back.params["text"] == "Seleziona comando:" and len(buttons(back)) == 20
 
 
 @pytest.mark.parametrize("key", sorted(COMMANDS.keys()))
@@ -325,14 +325,21 @@ async def test_layout_del_menu_invariato(h):
     rows = [[b["text"] for b in row] for row in h.api.last("sendMessage").params["reply_markup"]["inline_keyboard"]]
     assert rows == [
         ["👋 SALUTI", "🔬 CTS", "📜 DPCM"],
-        ["🙇 CONTE", "😻 BIMBE", "🏙 COMUNE"],
-        ["🧪 COVID", "🤦 GIURATO", "🥧 TORTA"],
-        ["🔢 FIBONACCI", "🎮 GIOCHI", "🦁 GHESBORO"],
-        ["🦕 POKEMON", "🌍 NAZIONE", "⛰ MONTAGNA"],
-        ["🍸 COCKTAIL", "👼 SANTI", "🃏 MAGIC"],
-        ["📰 LERCIO.IT", "📖 PAROLA", "📅 ACCADDE OGGI"],
-        ["📈 TROMBIN"],
+        ["🙇 CONTE", "😻 BIMBE", "🧪 COVID"],
+        ["🤦 GIURATO", "🥧 TORTA", "🔢 FIBONACCI"],
+        ["🦁 GHESBORO", "🦕 POKEMON", "🍸 COCKTAIL"],
+        ["👼 SANTI", "🃏 MAGIC", "📰 LERCIO.IT"],
+        ["📖 PAROLA", "📅 ACCADDE OGGI", "📈 TROMBIN"],
+        ["🎮 GIOCHI", "🗺 GEOGRAFIA"],
     ]
+
+
+async def test_sottomenu_geografia(h):
+    await h.click("menu:geografia")
+    call = h.api.last("editMessageText")
+    assert call.params["text"] == "🗺 Scegli cosa scoprire:"
+    rows = [[b["text"] for b in row] for row in call.params["reply_markup"]["inline_keyboard"]]
+    assert rows == [["🌍 NAZIONE", "🏙 COMUNE", "⛰ MONTAGNA"], ["⬅ INDIETRO"]]
 
 
 async def test_alias_menu(h):
@@ -374,6 +381,7 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
     await h.click("menu:magic")
     await h.click("menu:c100")
     await h.click("menu:giochi")
+    await h.click("menu:geografia")
     labels = [
         b["text"]
         for c in h.api.calls
@@ -381,7 +389,7 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
         for row in c.params["reply_markup"].get("inline_keyboard", [])
         for b in row
     ]
-    assert len(labels) == 22 + 2 + 6 + 2 + 4
+    assert len(labels) == 20 + 2 + 6 + 2 + 4 + 4
     assert all(label == label.upper() for label in labels), [x for x in labels if x != x.upper()]
 
 
