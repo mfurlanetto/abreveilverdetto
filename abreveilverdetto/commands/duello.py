@@ -28,7 +28,7 @@ from ..text import esc
 logger = logging.getLogger(__name__)
 
 TITLE = "🔫 <b>DUELLO</b>"
-PRIVATE_TEXT = "🔫 Il duello si fa in due: aggiungimi a un gruppo e sfida qualcuno con /duello."
+PRIVATE_TEXT = "🔫 Il duello si fa in due: aggiungimi a un gruppo e lancia la sfida da 🎮 GIOCHI."
 ACCEPT, CANCEL = "a", "x"
 
 
@@ -115,30 +115,6 @@ async def duello_menu(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) 
     battute = d.content.texts["duello_battute"]
     await query.edit_message_text(render(game, d.rng, battute), parse_mode=HTML, reply_markup=keyboard(game))
     await _track(d, game, query.message.message_id)
-
-
-async def duello_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """/duello: sfida aperta, oppure diretta se è una risposta al messaggio di qualcuno."""
-    d = deps(context)
-    message = update.effective_message
-    if _is_private(message):
-        await message.reply_text(PRIVATE_TEXT)
-        return
-    user = update.effective_user
-    target = message.reply_to_message.from_user if message.reply_to_message else None
-    if target is not None and (target.is_bot or target.id == user.id):
-        target = None
-    game = await d.storage.create_duel(
-        message.chat.id,
-        user.id,
-        display_name(user),
-        target.id if target else None,
-        display_name(target) if target else None,
-        d.now(),
-    )
-    battute = d.content.texts["duello_battute"]
-    sent = await message.reply_text(render(game, d.rng, battute), parse_mode=HTML, reply_markup=keyboard(game))
-    await _track(d, game, sent.message_id)
 
 
 async def _show(bot: Bot, game: DuelGame, text: str) -> None:

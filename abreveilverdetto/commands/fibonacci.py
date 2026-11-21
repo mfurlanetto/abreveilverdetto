@@ -1,4 +1,4 @@
-"""Fibonacci: dal menu (con ForceReply) e come /fibonacci N."""
+"""Fibonacci: dal menu, con ForceReply per chiedere il numero massimo."""
 
 from __future__ import annotations
 
@@ -22,12 +22,6 @@ async def fibonacci_menu(query: CallbackQuery, context: ContextTypes.DEFAULT_TYP
         parse_mode=HTML,
         reply_markup=ForceReply(selective=True, input_field_placeholder="1-10"),
     )
-
-
-async def fibonacci_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    d = deps(context)
-    raw = " ".join(context.args) if context.args else str(game.MAX_FIBONACCI)
-    await update.effective_message.reply_text(esc(game.fibonacci_reply(raw, d.rng)), parse_mode=HTML)
 
 
 async def fibonacci_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

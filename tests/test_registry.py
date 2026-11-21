@@ -16,9 +16,10 @@ def menu(key, row=0, callbacks=(), label=None):
 
 def test_registro_reale_valido_e_completo():
     reg = COMMANDS
-    assert len(reg.keys()) == 24
+    assert len(reg.keys()) == 25
     assert {cb.prefix for cb in reg.callbacks()} == {"cts", "magic", "c100", "morra", "duel"}
-    assert [len(r) for r in reg.layout()] == [3, 3, 3, 3, 3, 3, 3]
+    assert [len(r) for r in reg.layout()] == [3, 3, 3, 3, 3, 3, 3, 1]
+    assert [s.names for s in reg.slash] == [("start", "menu"), ("bravitutti",)]
     assert reg.groups() == ["main", "giochi"]
     assert [[c.key for c in r] for r in reg.layout("giochi")] == [["morra", "duello", "c100"]]
 

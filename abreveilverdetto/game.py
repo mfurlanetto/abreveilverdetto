@@ -1,4 +1,4 @@
-"""Regole pure di /centocentocento e /fibonacci (nessuna dipendenza da Telegram)."""
+"""Regole pure di 💯💯💯 e Fibonacci (nessuna dipendenza da Telegram)."""
 
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ def fibonacci(count: int) -> list[int]:
 
 
 def fibonacci_reply(raw: str, rng: random.Random) -> str:
-    """Risposta a /fibonacci: lunghezza casuale tra 1 e il massimo richiesto (≤10)."""
+    """Risposta a Fibonacci: lunghezza casuale tra 1 e il massimo richiesto (≤10)."""
     notes = []
     try:
         requested = int(raw.strip())

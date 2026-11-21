@@ -15,13 +15,13 @@ from telegram.ext import ContextTypes
 from ..registry import MAIN, MenuCommand, Registry, SlashCommand
 from .accadde import accadde_oggi
 from .centocento import C100_ANSWER, bravitutti, c100_menu
-from .dizionario import parola, parola_command
-from .duello import DUEL_ACTION, duello_command, duello_menu
+from .dizionario import parola
+from .duello import DUEL_ACTION, duello_menu
 from .external import cocktail, comune, covid, nazione, pokemon
-from .fibonacci import fibonacci_command, fibonacci_menu
+from .fibonacci import fibonacci_menu
 from .images import MAGIC_PICK, bimbe, conte, magic, santi, torta
 from .montagna import montagna
-from .morra import MORRA_ACTION, morra_command, morra_menu
+from .morra import MORRA_ACTION, morra_menu
 from .quotes import CTS_SIZE, cts, lercio, quote_action, saluti
 from .trombin import trombin
 
@@ -97,21 +97,16 @@ COMMANDS = Registry(
         MenuCommand("lercio", "📰 LERCIO.IT", lercio, row=6),
         MenuCommand("parola", "📖 PAROLA", parola, row=6),
         MenuCommand("accaddeoggi", "📅 ACCADDE OGGI", accadde_oggi, row=6),
+        MenuCommand("trombin", "📈 TROMBIN", trombin, row=7),
         MenuCommand("montagna", "⛰ MONTAGNA", montagna, row=4),
         # Sottomenu 🎮 GIOCHI
         MenuCommand("morra", "✊ MORRA", morra_menu, row=0, callbacks=(MORRA_ACTION,), group="giochi"),
         MenuCommand("duello", "🔫 DUELLO", duello_menu, row=0, callbacks=(DUEL_ACTION,), group="giochi"),
         MenuCommand("c100", "💯 💯 💯", c100_menu, row=0, callbacks=(C100_ANSWER,), group="giochi"),
     ),
+    # Solo i comandi senza pulsante: /start apre il menu, /bravitutti è solo slash per scelta.
     slash=(
         SlashCommand(("start", "menu"), start, "Apri il menu dei comandi"),
-        SlashCommand(("fibonacci",), fibonacci_command, "Sequenza di Fibonacci casuale (max 10)"),
         SlashCommand(("bravitutti",), bravitutti, "Classifiche di 💯💯💯, morra e duello in questa chat"),
-        SlashCommand(("morra",), morra_command, "Sfida a morra cinese (rispondi a un messaggio per sfidare qualcuno)"),
-        SlashCommand(
-            ("duello",), duello_command, "Duello: spara per primo (rispondi a un messaggio per sfidare qualcuno)"
-        ),
-        SlashCommand(("parola",), parola_command, "Parola a caso dal Wikizionario con definizione"),
-        SlashCommand(("trombin",), trombin, "Indici di borsa e materie prime"),
     ),
 )
