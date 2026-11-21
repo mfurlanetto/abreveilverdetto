@@ -82,3 +82,37 @@ CREATE TABLE IF NOT EXISTS morra_stats (
     losses    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (chat_id, user_id)
 );
+
+-- Duello: partite in corso e concluse (eliminate dopo 7 giorni).
+CREATE TABLE IF NOT EXISTS duel_games (
+    id               BIGSERIAL PRIMARY KEY,
+    chat_id          BIGINT      NOT NULL,
+    challenger_id    BIGINT      NOT NULL,
+    challenger_name  TEXT        NOT NULL,
+    target_id        BIGINT,
+    target_name      TEXT,
+    opponent_id      BIGINT,
+    opponent_name    TEXT,
+    status           TEXT        NOT NULL,
+    round            INTEGER     NOT NULL DEFAULT 1,
+    challenger_score INTEGER     NOT NULL DEFAULT 0,
+    opponent_score   INTEGER     NOT NULL DEFAULT 0,
+    history          TEXT        NOT NULL DEFAULT '',
+    deadline         TIMESTAMPTZ,
+    message_id       BIGINT,
+    created_at       TIMESTAMPTZ NOT NULL,
+    updated_at       TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS duel_games_created_at_idx ON duel_games (created_at);
+CREATE INDEX IF NOT EXISTS duel_games_deadline_idx ON duel_games (deadline)
+    WHERE status IN ('open', 'armed', 'fire');
+
+-- Duello: vittorie e sconfitte per utente e chat (per /bravitutti).
+CREATE TABLE IF NOT EXISTS duel_stats (
+    chat_id   BIGINT  NOT NULL,
+    user_id   BIGINT  NOT NULL,
+    user_name TEXT    NOT NULL,
+    wins      INTEGER NOT NULL DEFAULT 0,
+    losses    INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (chat_id, user_id)
+);

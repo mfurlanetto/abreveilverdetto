@@ -34,8 +34,8 @@ class Deps:
     storage: Storage
     services: Services
     rng: random.Random
-    # Svegliato a ogni nuova scadenza della morra (vedi deadlines.py); None nei contesti senza timer.
-    morra_timer: DeadlineTimer | None = None
+    # Svegliato a ogni nuova scadenza di morra e duello (vedi deadlines.py); None senza timer.
+    game_timer: DeadlineTimer | None = None
 
     def now(self) -> datetime:
         return datetime.now(self.settings.timezone)

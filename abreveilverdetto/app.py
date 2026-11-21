@@ -22,7 +22,7 @@ from telegram.request import BaseRequest
 
 from .commands import COMMANDS, on_menu, on_stale_button
 from .commands.chat import on_text
-from .commands.morra import expire_due_games
+from .commands.giochi import next_deadline, process_deadlines
 from .content import Content
 from .deadlines import DeadlineTimer
 from .errors import on_error
@@ -75,12 +75,12 @@ def build_application(
         purged = await storage.purge_games(deps.now() - timedelta(days=7))
         if purged:
             logger.info("Eliminate %d partite vecchie", purged)
-        # Scadenze della morra: anche quelle maturate mentre il bot era spento (riavvio,
+        # Scadenze di morra e duello: anche quelle maturate mentre il bot era spento (riavvio,
         # deploy, scale-to-zero di Render) vengono gestite subito alla ripartenza.
-        timer = DeadlineTimer(lambda: expire_due_games(app.bot, deps, deps.now()), deps.now)
-        deps.morra_timer = timer
-        timer.schedule(await storage.next_morra_deadline())
-        background.append(asyncio.create_task(timer.run(), name="morra-deadlines"))
+        timer = DeadlineTimer(lambda: process_deadlines(app.bot, deps, deps.now()), deps.now)
+        deps.game_timer = timer
+        timer.schedule(await next_deadline(deps))
+        background.append(asyncio.create_task(timer.run(), name="game-deadlines"))
         try:
             await app.bot.set_my_commands(bot_commands())
         except TelegramError:  # non indispensabile: il bot funziona anche senza

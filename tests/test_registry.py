@@ -16,9 +16,11 @@ def menu(key, row=0, callbacks=(), label=None):
 
 def test_registro_reale_valido_e_completo():
     reg = COMMANDS
-    assert len(reg.keys()) == 22
-    assert {cb.prefix for cb in reg.callbacks()} == {"cts", "magic", "c100", "morra"}
-    assert [len(r) for r in reg.layout()] == [3, 3, 3, 3, 3, 3, 3, 1]
+    assert len(reg.keys()) == 24
+    assert {cb.prefix for cb in reg.callbacks()} == {"cts", "magic", "c100", "morra", "duel"}
+    assert [len(r) for r in reg.layout()] == [3, 3, 3, 3, 3, 3, 3]
+    assert reg.groups() == ["main", "giochi"]
+    assert [[c.key for c in r] for r in reg.layout("giochi")] == [["morra", "duello", "c100"]]
 
 
 def test_callback_data_validati():
@@ -61,6 +63,18 @@ def test_regex_ancorata():
         ),
         ({"menu": (menu("a", callbacks=(Callback("p", "(", noop),)),)}, "regex"),
         ({"menu": (menu("a" * 70),)}, "64 byte"),
+        ({"menu": (menu("main"),)}, "riservata"),
+        ({"menu": (menu("a"), MenuCommand("b", "b", noop, row=0, group="g"))}, "nessun bottone lo apre"),
+        ({"menu": (MenuCommand("a", "a", noop, row=0, opens="g"),)}, "vuoto o non valido"),
+        (
+            {
+                "menu": (
+                    MenuCommand("a", "a", noop, row=0, opens="g"),
+                    MenuCommand("b", "b", noop, row=1, group="g"),
+                )
+            },
+            "sottomenu g: righe non consecutive",
+        ),
         ({"menu": (), "slash": (SlashCommand(("Start",), noop, "x"),)}, "nome non valido"),
         ({"menu": (), "slash": (SlashCommand(("a",), noop, "x"), SlashCommand(("a",), noop, "y"))}, "duplicato"),
         ({"menu": (), "slash": (SlashCommand(("a",), noop, ""),)}, "descrizione"),

@@ -12,10 +12,11 @@ import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from ..registry import MenuCommand, Registry, SlashCommand
+from ..registry import MAIN, MenuCommand, Registry, SlashCommand
 from .accadde import accadde_oggi
 from .centocento import C100_ANSWER, bravitutti, c100_menu
 from .dizionario import parola, parola_command
+from .duello import DUEL_ACTION, duello_command, duello_menu
 from .external import cocktail, comune, covid, nazione, pokemon
 from .fibonacci import fibonacci_command, fibonacci_menu
 from .images import MAGIC_PICK, bimbe, conte, magic, santi, torta
@@ -27,20 +28,39 @@ from .trombin import trombin
 logger = logging.getLogger(__name__)
 
 
-def menu_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        [[InlineKeyboardButton(c.label, callback_data=c.callback_data) for c in row] for row in COMMANDS.layout()]
-    )
+BACK_LABEL = "⬅ INDIETRO"
+MENU_TEXT = "Seleziona comando:"
+
+
+def menu_keyboard(group: str = MAIN) -> InlineKeyboardMarkup:
+    rows = [
+        [InlineKeyboardButton(c.label, callback_data=c.callback_data) for c in row] for row in COMMANDS.layout(group)
+    ]
+    if group != MAIN:
+        rows.append([InlineKeyboardButton(BACK_LABEL, callback_data=f"menu:{MAIN}")])
+    return InlineKeyboardMarkup(rows)
+
+
+def submenu(group: str, text: str):
+    """Azione di un bottone che apre un sottomenu nello stesso messaggio."""
+
+    async def action(query, context: ContextTypes.DEFAULT_TYPE) -> None:
+        await query.edit_message_text(text, reply_markup=menu_keyboard(group))
+
+    return action
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.effective_message.reply_text("Seleziona comando:", reply_markup=menu_keyboard())
+    await update.effective_message.reply_text(MENU_TEXT, reply_markup=menu_keyboard())
 
 
 async def on_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
     key = query.data.split(":", 1)[1]
+    if key == MAIN:  # bottone "indietro" di un sottomenu
+        await query.edit_message_text(MENU_TEXT, reply_markup=menu_keyboard())
+        return
     command = COMMANDS.get(key)
     if command is None:  # bottone di un menu precedente a una modifica del registro
         await query.edit_message_text("Comando sconosciuto. Usa /start.")
@@ -67,24 +87,30 @@ COMMANDS = Registry(
         MenuCommand("giurato", "🤦 GIURATO", quote_action("giurato"), row=2),
         MenuCommand("torta", "🥧 TORTA", torta, row=2),
         MenuCommand("fibonacci", "🔢 FIBONACCI", fibonacci_menu, row=3),
-        MenuCommand("c100", "💯 💯 💯", c100_menu, row=3, callbacks=(C100_ANSWER,)),
+        MenuCommand("giochi", "🎮 GIOCHI", submenu("giochi", "🎮 Scegli un gioco:"), row=3, opens="giochi"),
         MenuCommand("ghesboro", "🦁 GHESBORO", quote_action("ghesboro"), row=3),
         MenuCommand("pokemon", "🦕 POKEMON", pokemon, row=4),
         MenuCommand("nazione", "🌍 NAZIONE", nazione, row=4),
-        MenuCommand("morra", "✊ MORRA", morra_menu, row=4, callbacks=(MORRA_ACTION,)),
         MenuCommand("cocktail", "🍸 COCKTAIL", cocktail, row=5),
         MenuCommand("santi", "👼 SANTI", santi, row=5),
         MenuCommand("magic", "🃏 MAGIC", magic, row=5, callbacks=(MAGIC_PICK,)),
         MenuCommand("lercio", "📰 LERCIO.IT", lercio, row=6),
         MenuCommand("parola", "📖 PAROLA", parola, row=6),
         MenuCommand("accaddeoggi", "📅 ACCADDE OGGI", accadde_oggi, row=6),
-        MenuCommand("montagna", "⛰ MONTAGNA", montagna, row=7),
+        MenuCommand("montagna", "⛰ MONTAGNA", montagna, row=4),
+        # Sottomenu 🎮 GIOCHI
+        MenuCommand("morra", "✊ MORRA", morra_menu, row=0, callbacks=(MORRA_ACTION,), group="giochi"),
+        MenuCommand("duello", "🔫 DUELLO", duello_menu, row=0, callbacks=(DUEL_ACTION,), group="giochi"),
+        MenuCommand("c100", "💯 💯 💯", c100_menu, row=0, callbacks=(C100_ANSWER,), group="giochi"),
     ),
     slash=(
         SlashCommand(("start", "menu"), start, "Apri il menu dei comandi"),
         SlashCommand(("fibonacci",), fibonacci_command, "Sequenza di Fibonacci casuale (max 10)"),
-        SlashCommand(("bravitutti",), bravitutti, "Classifiche di 💯💯💯 e morra in questa chat"),
+        SlashCommand(("bravitutti",), bravitutti, "Classifiche di 💯💯💯, morra e duello in questa chat"),
         SlashCommand(("morra",), morra_command, "Sfida a morra cinese (rispondi a un messaggio per sfidare qualcuno)"),
+        SlashCommand(
+            ("duello",), duello_command, "Duello: spara per primo (rispondi a un messaggio per sfidare qualcuno)"
+        ),
         SlashCommand(("parola",), parola_command, "Parola a caso dal Wikizionario con definizione"),
         SlashCommand(("trombin",), trombin, "Indici di borsa e materie prime"),
     ),
