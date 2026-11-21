@@ -8,15 +8,16 @@ Pensato per girare gratis su **Render** (web service Docker, webhook) con databa
 ## Comandi
 
 `/start` (o `/menu`) apre il menu a bottoni: saluti, CTS, DPCM, Conte, bimbe, comune (con meteo),
-COVID, giurato, torta, Fibonacci, 💯💯💯, ghesboro, Pokémon, nazione, cocktail, santi, Magic, Lercio,
+COVID, giurato, torta, Fibonacci, 🎮 giochi (sottomenu con morra, duello e 💯💯💯), ghesboro, Pokémon, nazione, cocktail, santi, Magic, Lercio,
 parola (parola a caso dal Wikizionario con la sua definizione), accadde oggi (eventi in evidenza del giorno su Wikipedia),
 montagna (una vetta a caso nel mondo con foto, altitudine, nazione, catena e descrizione).
 
 | Comando | |
 |---|---|
 | `/fibonacci N` | Sequenza di Fibonacci di lunghezza casuale fino a N (max 10) |
-| `/bravitutti` | Classifiche della chat: vittorie a 💯💯💯 e vittorie/sconfitte alla morra cinese |
+| `/bravitutti` | Classifiche della chat: vittorie a 💯💯💯, vittorie/sconfitte a morra cinese e duello |
 | `/morra` | Sfida a morra cinese; in risposta al messaggio di qualcuno sfida solo quella persona |
+| `/duello` | Sfida a duello; in risposta al messaggio di qualcuno sfida solo quella persona |
 | `/parola` | Parola a caso dal Wikizionario con definizione (come il pulsante 📖 PAROLA) |
 | `/trombin` | Indici di borsa e materie prime: ultimo valore e variazione % sulla chiusura precedente |
 | (testo con "15" e "18") | Risposta sulla briscola |
@@ -36,6 +37,16 @@ all'ora della prossima scadenza, senza interrogare il DB a intervalli (Neon rest
 non serve), e alla ripartenza del bot gestisce quelle maturate mentre era spento. Le battute finali sono in
 `data/morra_battute.json` (segnaposto `{vincitore}` e `{perdente}`).
 
+### 🔫 Duello
+Come la morra si gioca in gruppo tra due persone (🎮 GIOCHI → 🔫 DUELLO o `/duello`), al meglio di 3,
+e la sfida va accettata entro 5 minuti. In ogni round il bot scrive "pronti…" e, dopo un ritardo
+casuale tra 3 e 10 secondi, "🔥 FUOCO!": il primo che preme 🔫 SPARA prende il punto (con il tempo di
+reazione), chi spara prima del via regala il punto all'altro. Se nessuno spara entro 10 secondi dal via
+il duello è annullato e il messaggio cancellato. Il "FUOCO!" lo dà il timer delle scadenze: un colpo vale
+solo dopo che il via è stato registrato, e il bottone porta il numero del round, così un click tardivo
+non conta come falsa partenza nel round successivo. Conta l'ordine di arrivo dei click al server, quindi
+anche la rete di ognuno. Battute finali in `data/duello_battute.json`.
+
 ### 💯💯💯
 Ogni tiro vale un multiplo di 5 tra 5 e 100. Dopo il primo tiro si può tentare un secondo giro:
 vince chi fa **esattamente 100**. Un tentativo al minuto per utente; record giornaliero per chat
@@ -54,18 +65,21 @@ abreveilverdetto/
     external.py     COVID, comune, nazione, Pokémon, cocktail
     centocento.py   💯💯💯 e /bravitutti
     morra.py        morra cinese: sfida, mosse segrete, risultato
+    duello.py       duello: sfida, "FUOCO!" dal timer, colpi
+    giochi.py       scadenze comuni dei giochi per il timer
     fibonacci.py    Fibonacci (menu e /fibonacci)
     chat.py         messaggi liberi (15 e 18, risposte a Fibonacci)
     dizionario.py   parola a caso dal Wikizionario
     accadde.py      eventi in evidenza del giorno da Wikipedia
     montagna.py     montagna a caso: foto, dati e attribuzioni
     trombin.py      /trombin: indici di borsa e materie prime
-  registry.py   dichiarazione e validazione dei comandi
+  registry.py   dichiarazione e validazione dei comandi (con sottomenu)
   telegram_io.py dipendenze condivise e invio di media con cache dei file_id
   errors.py     gestione degli errori
   game.py       regole pure di 💯💯💯 e Fibonacci
   morra.py      regole pure della morra cinese (al meglio di 3, scadenze)
-  deadlines.py  timer che si sveglia alla prossima scadenza (morra)
+  duel.py       regole pure del duello (al meglio di 3, falsa partenza, scadenze)
+  deadlines.py  timer che si sveglia alla prossima scadenza (morra e duello)
   wiktionary.py estrazione delle definizioni italiane dal wikitext del Wikizionario
   onthisday.py  feed "accadde oggi" di Wikipedia: lettura e nome/URL della pagina del giorno
   mountains.py  montagne: dati da data/mountains.json, descrizione e foto (con licenza) da Wikipedia

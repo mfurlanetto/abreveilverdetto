@@ -107,12 +107,13 @@ def _short(name: str) -> str:
 
 
 async def bravitutti(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Classifiche della chat: vittorie a 💯💯💯 e vittorie/sconfitte alla morra cinese."""
+    """Classifiche della chat: vittorie a 💯💯💯, vittorie/sconfitte a morra cinese e duello."""
     d = deps(context)
     chat_id = update.effective_chat.id
     c100 = await d.storage.leaderboard(chat_id)
     morra = await d.storage.morra_leaderboard(chat_id)
-    if not c100 and not morra:
+    duels = await d.storage.duel_leaderboard(chat_id)
+    if not c100 and not morra and not duels:
         await update.effective_message.reply_text("Nessuna vittoria registrata in questa chat. Ancora.")
         return
 
@@ -123,14 +124,18 @@ async def bravitutti(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         body = "\n".join(f"{n + ':':<{width}}{wins:>4}" for n, (_, wins) in zip(names, c100, strict=True))
         sections.append(f"<b>HIGHSCORES 💯💯💯</b>\n<pre>{esc(body)}</pre>")
     if morra:
-        names = [_short(name) for name, _, _ in morra]
-        width = max(len(n) for n in names) + 2
-        header = f"{'':<{width}}{'V':>4}{'S':>4}"
-        rows = [f"{n + ':':<{width}}{w:>4}{lo:>4}" for n, (_, w, lo) in zip(names, morra, strict=True)]
-        sections.append(
-            f"<b>MORRA CINESE ✊✋✌️</b> (V vinte, S perse)\n<pre>{esc(chr(10).join([header, *rows]))}</pre>"
-        )
+        sections.append(_wins_losses("MORRA CINESE ✊✋✌️", morra))
+    if duels:
+        sections.append(_wins_losses("DUELLO 🔫", duels))
     await update.effective_message.reply_text("\n\n".join(sections), parse_mode=HTML)
+
+
+def _wins_losses(title: str, rows: list[tuple[str, int, int]]) -> str:
+    names = [_short(name) for name, _, _ in rows]
+    width = max(len(n) for n in names) + 2
+    header = f"{'':<{width}}{'V':>4}{'S':>4}"
+    lines = [f"{n + ':':<{width}}{w:>4}{lo:>4}" for n, (_, w, lo) in zip(names, rows, strict=True)]
+    return f"<b>{title}</b> (V vinte, S perse)\n<pre>{esc(chr(10).join([header, *lines]))}</pre>"
 
 
 C100_ANSWER = Callback("c100", r"\d+:[yn]", on_c100)

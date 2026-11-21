@@ -27,7 +27,10 @@ TEXT_LISTS = (
     "lercio",
     "santi_frasi",
     "morra_battute",
+    "duello_battute",
 )
+# Liste con i segnaposto {vincitore} e {perdente}
+FINALE_LISTS = ("morra_battute", "duello_battute")
 
 MAGIC_DECKS = {
     "special": ("⭐", "Special", "magic_cards/special"),
@@ -66,11 +69,12 @@ class Content:
         for name, items in texts.items():
             if not items or not all(isinstance(i, str) for i in items):
                 raise ValueError(f"data/{name}.json deve essere una lista non vuota di stringhe")
-        for battuta in texts["morra_battute"]:
-            try:
-                battuta.format(vincitore="", perdente="")
-            except (KeyError, IndexError, ValueError) as exc:
-                raise ValueError(f"data/morra_battute.json: segnaposto non valido in {battuta!r}") from exc
+        for name in FINALE_LISTS:
+            for battuta in texts[name]:
+                try:
+                    battuta.format(vincitore="", perdente="")
+                except (KeyError, IndexError, ValueError) as exc:
+                    raise ValueError(f"data/{name}.json: segnaposto non valido in {battuta!r}") from exc
 
         santi = _load_json("santi", data_dir)
         for santo in santi:

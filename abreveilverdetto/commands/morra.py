@@ -153,8 +153,8 @@ async def morra_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 async def _track(d: Deps, game: MorraGame, message_id: int) -> None:
     """Salva il messaggio da cancellare alla scadenza e sveglia il timer."""
     await d.storage.set_morra_message(game.id, message_id)
-    if d.morra_timer is not None:
-        d.morra_timer.schedule(game.deadline)
+    if d.game_timer is not None:
+        d.game_timer.schedule(game.deadline)
 
 
 async def remove_expired(bot: Bot, game: MorraGame, battute: list[str]) -> None:
@@ -236,8 +236,8 @@ async def on_morra(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await query.answer(notice)
     await _edit(query, render(new, result, d.rng, battute), keyboard(new))
-    if d.morra_timer is not None:
-        d.morra_timer.schedule(new.deadline)
+    if d.game_timer is not None:
+        d.game_timer.schedule(new.deadline)
 
 
 MORRA_ACTION = Callback("morra", r"\d+:[axrps]", on_morra)

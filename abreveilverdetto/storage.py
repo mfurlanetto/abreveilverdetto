@@ -15,11 +15,14 @@ from importlib import resources
 from typing import Any, Protocol
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
+from . import duel
+from .duel import DuelError, DuelGame
 from .morra import ACCEPT_TIMEOUT, EXPIRED, FINISHED, OPEN, MorraError, MorraGame, RoundResult
 
 logger = logging.getLogger(__name__)
 
 MorraAction = Callable[[MorraGame], tuple[MorraGame, RoundResult | None]]
+DuelAction = Callable[[DuelGame], tuple[DuelGame, duel.Round | None]]
 
 
 @dataclass(frozen=True)
@@ -95,6 +98,22 @@ class Storage(Protocol):
     async def expire_morra(self, now: datetime) -> list[MorraGame]: ...
     async def next_morra_deadline(self) -> datetime | None: ...
 
+    async def create_duel(
+        self,
+        chat_id: int,
+        challenger_id: int,
+        challenger_name: str,
+        target_id: int | None,
+        target_name: str | None,
+        now: datetime,
+    ) -> DuelGame: ...
+    async def get_duel(self, game_id: int) -> DuelGame | None: ...
+    async def apply_duel(self, game_id: int, action: DuelAction) -> tuple[DuelGame, duel.Round | None]: ...
+    async def set_duel_message(self, game_id: int, message_id: int) -> None: ...
+    async def due_duels(self, now: datetime) -> list[DuelGame]: ...
+    async def next_duel_deadline(self) -> datetime | None: ...
+    async def duel_leaderboard(self, chat_id: int, limit: int = 20) -> list[tuple[str, int, int]]: ...
+
 
 # --------------------------------------------------------------------------------------
 # Implementazione in memoria
@@ -117,6 +136,10 @@ class MemoryStorage:
         self._morra_created: dict[int, datetime] = {}
         self._next_morra = 1
         self._morra_stats: dict[tuple[int, int], tuple[str, int, int]] = {}
+        self._duels: dict[int, DuelGame] = {}
+        self._duel_created: dict[int, datetime] = {}
+        self._next_duel = 1
+        self._duel_stats: dict[tuple[int, int], tuple[str, int, int]] = {}
 
     async def setup(self) -> None:
         logger.warning("DATABASE_URL non impostato: uso storage in memoria (dati persi al riavvio)")
@@ -186,7 +209,11 @@ class MemoryStorage:
             for gid in old_morra:
                 self._morra.pop(gid, None)
                 self._morra_created.pop(gid, None)
-            return len(old) + len(old_morra)
+            old_duels = [gid for gid, created in self._duel_created.items() if created < older_than]
+            for gid in old_duels:
+                self._duels.pop(gid, None)
+                self._duel_created.pop(gid, None)
+            return len(old) + len(old_morra) + len(old_duels)
 
     async def create_morra(
         self,
@@ -257,6 +284,67 @@ class MemoryStorage:
     async def next_morra_deadline(self) -> datetime | None:
         deadlines = [g.deadline for g in self._morra.values() if g.is_active and g.deadline is not None]
         return min(deadlines, default=None)
+
+    async def create_duel(
+        self,
+        chat_id: int,
+        challenger_id: int,
+        challenger_name: str,
+        target_id: int | None,
+        target_name: str | None,
+        now: datetime,
+    ) -> DuelGame:
+        async with self._lock:
+            game = DuelGame(
+                id=self._next_duel,
+                chat_id=chat_id,
+                challenger_id=challenger_id,
+                challenger_name=challenger_name,
+                status=duel.OPEN,
+                updated_at=now,
+                target_id=target_id,
+                target_name=target_name,
+                deadline=now + duel.ACCEPT_TIMEOUT,
+            )
+            self._next_duel += 1
+            self._duels[game.id] = game
+            self._duel_created[game.id] = now
+            return game
+
+    async def get_duel(self, game_id: int) -> DuelGame | None:
+        return self._duels.get(game_id)
+
+    async def apply_duel(self, game_id: int, action: DuelAction) -> tuple[DuelGame, duel.Round | None]:
+        async with self._lock:
+            game = self._duels.get(game_id)
+            if game is None:
+                raise DuelError("Duello non trovato")
+            new, result = action(game)
+            self._duels[game_id] = new
+            if game.status != duel.FINISHED and new.status == duel.FINISHED:
+                (wid, wname), (lid, lname) = new.winner, new.loser
+                _, w, l_ = self._duel_stats.get((new.chat_id, wid), (wname, 0, 0))
+                self._duel_stats[(new.chat_id, wid)] = (wname, w + 1, l_)
+                _, w, l_ = self._duel_stats.get((new.chat_id, lid), (lname, 0, 0))
+                self._duel_stats[(new.chat_id, lid)] = (lname, w, l_ + 1)
+            return new, result
+
+    async def set_duel_message(self, game_id: int, message_id: int) -> None:
+        async with self._lock:
+            if game_id in self._duels:
+                self._duels[game_id] = replace(self._duels[game_id], message_id=message_id)
+
+    async def due_duels(self, now: datetime) -> list[DuelGame]:
+        return [g for g in self._duels.values() if g.is_due(now)]
+
+    async def next_duel_deadline(self) -> datetime | None:
+        deadlines = [g.deadline for g in self._duels.values() if g.is_active and g.deadline is not None]
+        return min(deadlines, default=None)
+
+    async def duel_leaderboard(self, chat_id: int, limit: int = 20) -> list[tuple[str, int, int]]:
+        rows = [v for (cid, _), v in self._duel_stats.items() if cid == chat_id]
+        rows.sort(key=lambda r: (-r[1], r[2], r[0]))
+        return rows[:limit]
 
     async def get_file_id(self, key: str) -> str | None:
         return self._file_ids.get(key)
@@ -430,7 +518,8 @@ class PostgresStorage:
     async def purge_games(self, older_than: datetime) -> int:
         status = await self.pool.execute("DELETE FROM c100_games WHERE created_at < $1", older_than)
         morra = await self.pool.execute("DELETE FROM morra_games WHERE created_at < $1", older_than)
-        return int(status.split()[-1]) + int(morra.split()[-1])
+        duels = await self.pool.execute("DELETE FROM duel_games WHERE created_at < $1", older_than)
+        return sum(int(r.split()[-1]) for r in (status, morra, duels))
 
     async def create_morra(
         self,
@@ -543,6 +632,112 @@ class PostgresStorage:
     async def next_morra_deadline(self) -> datetime | None:
         return await self.pool.fetchval("SELECT min(deadline) FROM morra_games WHERE status IN ('open', 'playing')")
 
+    async def create_duel(
+        self,
+        chat_id: int,
+        challenger_id: int,
+        challenger_name: str,
+        target_id: int | None,
+        target_name: str | None,
+        now: datetime,
+    ) -> DuelGame:
+        row = await self.pool.fetchrow(
+            """
+            INSERT INTO duel_games
+                (chat_id, challenger_id, challenger_name, target_id, target_name, status,
+                 created_at, updated_at, deadline)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $7, $8)
+            RETURNING *
+            """,
+            chat_id,
+            challenger_id,
+            challenger_name,
+            target_id,
+            target_name,
+            duel.OPEN,
+            now,
+            now + duel.ACCEPT_TIMEOUT,
+        )
+        return _duel_from_row(row)
+
+    async def get_duel(self, game_id: int) -> DuelGame | None:
+        row = await self.pool.fetchrow("SELECT * FROM duel_games WHERE id = $1", game_id)
+        return _duel_from_row(row) if row else None
+
+    async def apply_duel(self, game_id: int, action: DuelAction) -> tuple[DuelGame, duel.Round | None]:
+        # FOR UPDATE: i due colpi (e il "FUOCO!" del timer) vengono serializzati sulla stessa partita.
+        async with self.pool.acquire() as conn, conn.transaction():
+            row = await conn.fetchrow("SELECT * FROM duel_games WHERE id = $1 FOR UPDATE", game_id)
+            if row is None:
+                raise DuelError("Duello non trovato")
+            game = _duel_from_row(row)
+            new, result = action(game)  # DuelError -> rollback
+            await conn.execute(
+                """
+                UPDATE duel_games SET
+                    status = $2, opponent_id = $3, opponent_name = $4, round = $5,
+                    challenger_score = $6, opponent_score = $7, history = $8,
+                    deadline = $9, updated_at = $10
+                WHERE id = $1
+                """,
+                game_id,
+                new.status,
+                new.opponent_id,
+                new.opponent_name,
+                new.round,
+                new.challenger_score,
+                new.opponent_score,
+                new.history,
+                new.deadline,
+                new.updated_at,
+            )
+            if game.status != duel.FINISHED and new.status == duel.FINISHED:
+                (wid, wname), (lid, lname) = new.winner, new.loser
+                for uid, name, win, loss in ((wid, wname, 1, 0), (lid, lname, 0, 1)):
+                    await conn.execute(
+                        """
+                        INSERT INTO duel_stats AS d (chat_id, user_id, user_name, wins, losses)
+                        VALUES ($1, $2, $3, $4, $5)
+                        ON CONFLICT (chat_id, user_id) DO UPDATE SET
+                            user_name = EXCLUDED.user_name,
+                            wins = d.wins + EXCLUDED.wins,
+                            losses = d.losses + EXCLUDED.losses
+                        """,
+                        new.chat_id,
+                        uid,
+                        name,
+                        win,
+                        loss,
+                    )
+            return new, result
+
+    async def set_duel_message(self, game_id: int, message_id: int) -> None:
+        await self.pool.execute("UPDATE duel_games SET message_id = $2 WHERE id = $1", game_id, message_id)
+
+    async def due_duels(self, now: datetime) -> list[DuelGame]:
+        rows = await self.pool.fetch(
+            "SELECT * FROM duel_games WHERE status = ANY($2::text[]) AND deadline <= $1 ORDER BY deadline",
+            now,
+            list(duel.ACTIVE),
+        )
+        return [_duel_from_row(r) for r in rows]
+
+    async def next_duel_deadline(self) -> datetime | None:
+        return await self.pool.fetchval(
+            "SELECT min(deadline) FROM duel_games WHERE status = ANY($1::text[])", list(duel.ACTIVE)
+        )
+
+    async def duel_leaderboard(self, chat_id: int, limit: int = 20) -> list[tuple[str, int, int]]:
+        rows = await self.pool.fetch(
+            """
+            SELECT user_name, wins, losses FROM duel_stats
+            WHERE chat_id = $1 ORDER BY wins DESC, losses, user_name LIMIT $2
+            """,
+            chat_id,
+            limit,
+        )
+        return [(r["user_name"], r["wins"], r["losses"]) for r in rows]
+
     async def get_file_id(self, key: str) -> str | None:
         return await self.pool.fetchval("SELECT file_id FROM media_file_ids WHERE media_key = $1", key)
 
@@ -564,6 +759,12 @@ def _morra_from_row(row: Any) -> MorraGame:
     data = dict(row)
     data.pop("created_at", None)
     return MorraGame(**data)
+
+
+def _duel_from_row(row: Any) -> DuelGame:
+    data = dict(row)
+    data.pop("created_at", None)
+    return DuelGame(**data)
 
 
 def create_storage(database_url: str | None) -> Storage:

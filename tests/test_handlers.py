@@ -1,5 +1,6 @@
 import itertools
 import logging
+from datetime import timedelta
 
 import pytest
 from telegram import Update
@@ -109,8 +110,21 @@ async def test_start_mostra_il_menu(h):
     await h.text("/start")
     call = h.api.last("sendMessage")
     data = [b["callback_data"] for b in buttons(call)]
-    assert len(data) == 22
-    assert set(d.removeprefix("menu:") for d in data) == set(COMMANDS.keys())
+    assert len(data) == 21
+    main = {c.key for row in COMMANDS.layout() for c in row}
+    assert set(d.removeprefix("menu:") for d in data) == main
+
+
+async def test_sottomenu_giochi_e_indietro(h):
+    await h.click("menu:giochi")
+    call = h.api.last("editMessageText")
+    assert call.params["text"] == "🎮 Scegli un gioco:"
+    rows = [[b["text"] for b in row] for row in call.params["reply_markup"]["inline_keyboard"]]
+    assert rows == [["✊ MORRA", "🔫 DUELLO", "💯 💯 💯"], ["⬅ INDIETRO"]]
+    assert buttons(call)[-1]["callback_data"] == "menu:main"
+    await h.click("menu:main")
+    back = h.api.last("editMessageText")
+    assert back.params["text"] == "Seleziona comando:" and len(buttons(back)) == 21
 
 
 @pytest.mark.parametrize("key", sorted(COMMANDS.keys()))
@@ -319,11 +333,10 @@ async def test_layout_del_menu_invariato(h):
         ["👋 SALUTI", "🔬 CTS", "📜 DPCM"],
         ["🙇 CONTE", "😻 BIMBE", "🏙 COMUNE"],
         ["🧪 COVID", "🤦 GIURATO", "🥧 TORTA"],
-        ["🔢 FIBONACCI", "💯 💯 💯", "🦁 GHESBORO"],
-        ["🦕 POKEMON", "🌍 NAZIONE", "✊ MORRA"],
+        ["🔢 FIBONACCI", "🎮 GIOCHI", "🦁 GHESBORO"],
+        ["🦕 POKEMON", "🌍 NAZIONE", "⛰ MONTAGNA"],
         ["🍸 COCKTAIL", "👼 SANTI", "🃏 MAGIC"],
         ["📰 LERCIO.IT", "📖 PAROLA", "📅 ACCADDE OGGI"],
-        ["⛰ MONTAGNA"],
     ]
 
 
@@ -335,7 +348,15 @@ async def test_alias_menu(h):
 async def test_avvio_pubblica_i_comandi_slash(h):
     await h.app.post_init(h.app)
     commands = h.api.last("setMyCommands").params["commands"]
-    assert [c["command"] for c in commands] == ["start", "fibonacci", "bravitutti", "morra", "parola", "trombin"]
+    assert [c["command"] for c in commands] == [
+        "start",
+        "fibonacci",
+        "bravitutti",
+        "morra",
+        "duello",
+        "parola",
+        "trombin",
+    ]
 
 
 async def test_avvio_prosegue_se_set_my_commands_fallisce(h):
@@ -380,6 +401,7 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
     await h.click("menu:cts")
     await h.click("menu:magic")
     await h.click("menu:c100")
+    await h.click("menu:giochi")
     labels = [
         b["text"]
         for c in h.api.calls
@@ -387,7 +409,7 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
         for row in c.params["reply_markup"].get("inline_keyboard", [])
         for b in row
     ]
-    assert len(labels) == 22 + 2 + 6 + 2
+    assert len(labels) == 21 + 2 + 6 + 2 + 4
     assert all(label == label.upper() for label in labels), [x for x in labels if x != x.upper()]
 
 
@@ -613,6 +635,80 @@ async def test_morra_messaggio_non_cancellabile_diventa_avviso(h):
     edited = h.api.last("editMessageText").params
     assert edited["message_id"] == 77
     assert "⌛ Partita annullata: tempo scaduto per la mossa." in edited["text"]
+
+
+def duel_buttons(h):
+    return [b["callback_data"] for b in buttons(h.api.last("editMessageText"))]
+
+
+async def test_duello_partita_completa_falsa_partenza_e_classifica(h):
+    from abreveilverdetto.commands.duello import on_duel_deadline
+
+    d = h.app.bot_data["deps"]
+    await h.click("menu:duello")
+    text = h.api.last("editMessageText").params["text"]
+    assert text.startswith("🔫 <b>DUELLO</b>\nA breve qualcuno accetterà la sfida.")
+    accept, cancel = duel_buttons(h)
+    game_id = accept.split(":")[1]
+    assert (accept, cancel) == (f"duel:{game_id}:a", f"duel:{game_id}:x")
+
+    await h.click(accept, user=BOB)
+    assert last_answer(h) == "Sfida accettata: aspetta il 🔥 FUOCO!"
+    assert "pronti… non sparate prima del via!" in h.api.last("editMessageText").params["text"]
+    assert duel_buttons(h) == [f"duel:{game_id}:1"]
+
+    await h.click(f"duel:{game_id}:1", user=ALICE)  # prima del via
+    assert last_answer(h) == "💥 Troppo presto! Il round va all'avversario"
+    text = h.api.last("editMessageText").params["text"]
+    assert "<b>Alice 0 – 1 Bob &lt;3</b>" in text
+    assert "Round 1: 💥 Alice spara prima del via → Bob &lt;3" in text
+    assert duel_buttons(h) == [f"duel:{game_id}:2"]
+    await h.click(f"duel:{game_id}:1", user=BOB)  # bottone del round già chiuso
+    assert last_answer(h) == "Troppo tardi: round già finito"
+    await h.click(f"duel:{game_id}:2", user=CARL)
+    assert last_answer(h) == "Non stai partecipando a questo duello"
+
+    game = await h.storage.get_duel(int(game_id))
+    await on_duel_deadline(h.app.bot, d, game.deadline)  # il timer dà il via
+    fire = h.api.last("editMessageText").params
+    assert fire["message_id"] == 77 and "🔥 <b>FUOCO!</b>" in fire["text"]
+
+    await h.click(f"duel:{game_id}:2", user=BOB)
+    assert last_answer(h).startswith("🎯 Centro in ")
+    final = h.api.last("editMessageText").params
+    assert "🏆 <b>Vince Bob &lt;3!</b>" in final["text"] and "A breve Alice vincerà." in final["text"]
+    assert "reply_markup" not in final or not final["reply_markup"]
+
+    await h.text("/bravitutti")
+    board = h.api.last("sendMessage").params["text"]
+    assert "<b>DUELLO 🔫</b> (V vinte, S perse)" in board and "Bob &lt;3:" in board
+
+
+async def test_duello_nessuno_spara_cancella_il_messaggio(h):
+    from abreveilverdetto import duel
+    from abreveilverdetto.commands.duello import on_duel_deadline
+
+    d = h.app.bot_data["deps"]
+    await h.click("menu:duello")
+    await h.click(duel_buttons(h)[0], user=BOB)
+    game = (await h.storage.due_duels(d.now() + timedelta(minutes=1)))[0]
+    assert await on_duel_deadline(h.app.bot, d, game.deadline) == game.deadline + duel.SHOOT_TIMEOUT
+    assert await on_duel_deadline(h.app.bot, d, game.deadline + duel.SHOOT_TIMEOUT) is None
+    assert h.api.last("deleteMessage").params == {"chat_id": CHAT, "message_id": 77}
+    assert (await h.storage.get_duel(game.id)).status == duel.EXPIRED
+
+
+async def test_duello_sfida_diretta_e_chat_privata(h):
+    await h.text("/duello", reply_to=h._message("ciao", user=BOB))
+    sent = h.api.last("sendMessage").params
+    assert "Alice sfida Bob &lt;3!" in sent["text"]
+    accept = sent["reply_markup"]["inline_keyboard"][0][0]["callback_data"]
+    await h.click(accept, user=CARL)
+    assert last_answer(h) == "La sfida è per Bob <3"
+    private = h._message("/duello")
+    private["chat"] = {"id": 1, "type": "private"}
+    await h.feed({"message": private})
+    assert "si fa in due" in h.api.last("sendMessage").params["text"]
 
 
 async def test_morra_in_chat_privata(h):

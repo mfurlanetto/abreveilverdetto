@@ -169,3 +169,38 @@ async def test_morra_scadenze_e_messaggio(storage):
     expired = await storage.expire_morra(NOW + morra_rules.ACCEPT_TIMEOUT)
     assert [(e.id, e.message_id) for e in expired] == [(g.id, 4242)]
     assert await storage.next_morra_deadline() is None
+
+
+async def test_duello_ciclo_completo_scadenze_e_statistiche(storage):
+    from abreveilverdetto import duel
+
+    delay = timedelta(seconds=5)
+    g = await storage.create_duel(CHAT, 1, "Ada", None, None, NOW)
+    assert (g.status, g.deadline) == (duel.OPEN, NOW + duel.ACCEPT_TIMEOUT)
+    await storage.set_duel_message(g.id, 99)
+    assert (await storage.get_duel(g.id)).message_id == 99
+
+    g, _ = await storage.apply_duel(g.id, lambda x: (duel.accept(x, 2, "Bob", NOW, delay), None))
+    assert await storage.next_duel_deadline() == NOW + delay
+    assert await storage.due_duels(NOW) == []
+    now = NOW
+    for shooter in (1, 1):
+        now += delay
+        assert [d.id for d in await storage.due_duels(now)] == [g.id]
+        g, _ = await storage.apply_duel(g.id, lambda x, n=now: (duel.tick(x, n), None))
+        assert g.status == duel.FIRE
+        g, _ = await storage.apply_duel(g.id, lambda x, s=shooter, n=now: duel.shoot(x, s, x.round, n, delay))
+    assert g.status == duel.FINISHED and (await storage.get_duel(g.id)).history == g.history
+    assert await storage.duel_leaderboard(CHAT) == [("Ada", 1, 0), ("Bob", 0, 1)]
+    assert await storage.next_duel_deadline() is None
+
+    with pytest.raises(duel.DuelError):
+        await storage.apply_duel(g.id, lambda x: (duel.cancel(x, 1, NOW), None))
+    with pytest.raises(duel.DuelError):
+        await storage.apply_duel(999_999, lambda x: (x, None))
+
+
+async def test_duello_purge(storage):
+    old = await storage.create_duel(CHAT, 1, "Ada", None, None, NOW - timedelta(days=10))
+    await storage.purge_games(NOW - timedelta(days=7))
+    assert await storage.get_duel(old.id) is None
