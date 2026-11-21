@@ -35,7 +35,12 @@ Allo scadere la partita è annullata (non conta in `/bravitutti`) e il bot cance
 messaggio. Se Telegram non consente la cancellazione, il messaggio
 diventa un avviso "⌛". Le scadenze sono salvate nel DB: un timer (`deadlines.py`) si sveglia solo
 all'ora della prossima scadenza, senza interrogare il DB a intervalli (Neon resta sospeso quando
-non serve), e alla ripartenza del bot gestisce quelle maturate mentre era spento. Le battute finali sono in
+non serve), e alla ripartenza del bot gestisce quelle maturate mentre era spento. Le partite in
+scadenza sono gestite in parallelo e ognuna per conto suo: un errore su una non ritarda le altre.
+
+Limiti di Telegram (circa 20 messaggi al minuto per gruppo): le chiamate passano da `AIORateLimiter`
+di python-telegram-bot, che le accoda invece di farle fallire e ritenta fino a 3 volte dopo un
+`RetryAfter`. Le battute finali sono in
 `data/morra_battute.json` (segnaposto `{vincitore}` e `{perdente}`).
 
 ### 🔫 Duello
@@ -45,7 +50,8 @@ casuale tra 3 e 10 secondi, "🔥 FUOCO!": il primo che preme 🔫 SPARA prende 
 reazione), chi spara prima del via regala il punto all'altro. Se nessuno spara entro 10 secondi dal via
 il duello è annullato e il messaggio cancellato. Il "FUOCO!" lo dà il timer delle scadenze: un colpo vale
 solo dopo che il via è stato registrato, e il bottone porta il numero del round, così un click tardivo
-non conta come falsa partenza nel round successivo. Conta l'ordine di arrivo dei click al server, quindi
+non conta come falsa partenza nel round successivo. Il "FUOCO!" vale solo dopo essere stato mostrato:
+se il messaggio non si può modificare il round non parte e il timer riprova dopo 2 secondi. Conta l'ordine di arrivo dei click al server, quindi
 anche la rete di ognuno. Battute finali in `data/duello_battute.json`.
 
 ### 💯💯💯

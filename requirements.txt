@@ -1,5 +1,6 @@
 # Dipendenze di runtime (versioni bloccate per build riproducibili)
-python-telegram-bot[webhooks]==22.8
+python-telegram-bot[webhooks,rate-limiter]==22.8
+aiolimiter==1.2.1
 asyncpg==0.32.0
 httpx==0.28.1
 tzdata==2026.6

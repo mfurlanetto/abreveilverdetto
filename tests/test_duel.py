@@ -61,6 +61,13 @@ def test_fuoco_solo_all_ora_prevista():
     assert not g.is_expired(T0 + DELAY)  # ARMED -> FIRE non è una scadenza
 
 
+def test_fuoco_solo_per_il_round_previsto():
+    g, _ = duel.shoot(armed(), A, 1, T0 + timedelta(seconds=1), DELAY)  # falsa partenza: ora round 2
+    with pytest.raises(DuelError, match="Round cambiato"):
+        duel.fire(g, T0 + timedelta(minutes=1), round_no=1)
+    assert duel.fire(g, T0 + timedelta(minutes=1), round_no=2).status == duel.FIRE
+
+
 def test_colpo_valido_con_tempo_di_reazione():
     g, r = duel.shoot(fired(), B, 1, T0 + DELAY + timedelta(milliseconds=420), DELAY)
     assert r == Round(2, duel.SHOT, 420)

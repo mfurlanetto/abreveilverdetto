@@ -10,6 +10,7 @@ stati premuti: la rete di ognuno conta. È un gioco goliardico, va bene così.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
 from datetime import datetime, timedelta
@@ -20,6 +21,7 @@ from telegram.error import BadRequest, TelegramError
 from telegram.ext import ContextTypes
 
 from .. import duel
+from ..deadlines import retry_floor
 from ..duel import DuelError, DuelGame, Round
 from ..registry import Callback
 from ..telegram_io import HTML, Deps, deps, display_name
@@ -140,22 +142,57 @@ async def remove_expired(bot: Bot, game: DuelGame, battute: list[str]) -> None:
         logger.info("Messaggio del duello %d non modificabile", game.id)
 
 
-async def on_duel_deadline(bot: Bot, d: Deps, now: datetime) -> datetime | None:
-    """Dal timer: "FUOCO!" per i round pronti, annullamento per sfide e colpi mai arrivati."""
-    battute = d.content.texts["duello_battute"]
-    for due in await d.storage.due_duels(now):
+async def _fire(bot: Bot, d: Deps, due: DuelGame, now: datetime, battute: list[str]) -> None:
+    """Il via di un round: prima si mostra "FUOCO!", solo dopo il colpo diventa valido.
+
+    Nell'ordine inverso, con un messaggio lento a comparire (rete, limiti di Telegram) chi
+    preme alla cieca avrebbe un colpo valido prima che l'avversario veda il via. Così il
+    rischio è all'opposto e trascurabile: un click arrivato tra la comparsa del messaggio e
+    il salvataggio (pochi millisecondi, meno di qualunque tempo di reazione umano) conta
+    come falsa partenza. Se il messaggio non si può modificare il round non parte e il
+    timer riprova.
+    """
+    if due.message_id is not None:
+        preview = duel.fire(due, now)
+        await _show(bot, preview, render(preview, d.rng, battute))
+    fired_at = max(now, d.now())  # il tempo di reazione parte da quando il via è mostrato
+    try:
+        await d.storage.apply_duel(due.id, lambda g: (duel.fire(g, fired_at, due.round), None))
+    except DuelError:
+        # Nel frattempo un click (falsa partenza) ha chiuso il round: il messaggio torna allo stato vero.
+        current = await d.storage.get_duel(due.id)
+        if current is not None and current.message_id is not None:
+            await _show(bot, current, render(current, d.rng, battute))
+
+
+async def _handle_due(bot: Bot, d: Deps, due: DuelGame, now: datetime, battute: list[str]) -> bool:
+    """Gestisce un duello in scadenza; False se è fallito e va ritentato a breve."""
+    try:
+        if due.status == duel.ARMED:
+            await _fire(bot, d, due, now, battute)
+            return True
         try:
-            game, _ = await d.storage.apply_duel(due.id, lambda g: (duel.tick(g, now), None))
+            game, _ = await d.storage.apply_duel(due.id, lambda g: (duel.expire(g, now), None))
         except DuelError:  # un click è arrivato prima del timer e ha già cambiato lo stato
-            continue
-        if game.status == duel.FIRE and game.message_id is not None:
-            try:
-                await _show(bot, game, render(game, d.rng, battute))
-            except TelegramError:
-                logger.warning("FUOCO! non mostrato per il duello %d", game.id, exc_info=True)
-        elif game.status == duel.EXPIRED:
-            await remove_expired(bot, game, battute)
-    return await d.storage.next_duel_deadline()
+            return True
+        await remove_expired(bot, game, battute)
+        return True
+    except Exception:
+        logger.exception("Scadenza del duello %d non gestita, riprovo a breve", due.id)
+        return False
+
+
+async def on_duel_deadline(bot: Bot, d: Deps, now: datetime) -> datetime | None:
+    """Dal timer: "FUOCO!" per i round pronti, annullamento per sfide e colpi mai arrivati.
+
+    I duelli in scadenza sono gestiti in parallelo (il via di uno non aspetta gli altri) e
+    ognuno per conto suo: un errore su uno non ritarda gli altri.
+    """
+    battute = d.content.texts["duello_battute"]
+    due = await d.storage.due_duels(now)
+    results = await asyncio.gather(*(_handle_due(bot, d, g, now, battute) for g in due))
+    following = await d.storage.next_duel_deadline()
+    return retry_floor(following, now, failed=not all(results))
 
 
 async def on_duel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

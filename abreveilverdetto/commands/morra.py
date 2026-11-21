@@ -12,6 +12,7 @@ viene invece modificato in "⌛ …".
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
 from dataclasses import replace
@@ -23,6 +24,7 @@ from telegram.error import BadRequest, TelegramError
 from telegram.ext import ContextTypes
 
 from .. import morra
+from ..deadlines import retry_floor
 from ..morra import MOVES, MorraError, MorraGame, RoundResult
 from ..registry import Callback
 from ..telegram_io import HTML, Deps, deps, display_name
@@ -155,12 +157,21 @@ async def remove_expired(bot: Bot, game: MorraGame, battute: list[str]) -> None:
         logger.info("Messaggio della morra %d non modificabile", game.id)
 
 
-async def expire_due_games(bot: Bot, d: Deps, now: datetime) -> datetime | None:
-    """Annulla le partite scadute, ne cancella i messaggi; restituisce la scadenza successiva."""
-    battute = d.content.texts["morra_battute"]
-    for game in await d.storage.expire_morra(now):
+async def _remove_safely(bot: Bot, game: MorraGame, battute: list[str]) -> bool:
+    try:
         await remove_expired(bot, game, battute)
-    return await d.storage.next_morra_deadline()
+        return True
+    except Exception:  # la partita è già annullata nel DB: resta solo il messaggio
+        logger.exception("Messaggio della morra %d non rimosso", game.id)
+        return False
+
+
+async def expire_due_games(bot: Bot, d: Deps, now: datetime) -> datetime | None:
+    """Annulla le partite scadute, ne cancella i messaggi (in parallelo); restituisce la scadenza successiva."""
+    battute = d.content.texts["morra_battute"]
+    expired = await d.storage.expire_morra(now)  # un solo UPDATE atomico per tutte
+    await asyncio.gather(*(_remove_safely(bot, g, battute) for g in expired))
+    return retry_floor(await d.storage.next_morra_deadline(), now)
 
 
 async def _edit(query: CallbackQuery, text: str, markup: InlineKeyboardMarkup | None) -> None:

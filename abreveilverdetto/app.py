@@ -11,6 +11,7 @@ from datetime import timedelta
 from telegram import BotCommand, Update
 from telegram.error import TelegramError
 from telegram.ext import (
+    AIORateLimiter,
     Application,
     ApplicationBuilder,
     CallbackQueryHandler,
@@ -35,6 +36,7 @@ from .telegram_io import Deps
 logger = logging.getLogger(__name__)
 
 ALLOWED_UPDATES = [Update.MESSAGE, Update.CALLBACK_QUERY]
+RATE_LIMIT_RETRIES = 3
 
 
 def register_handlers(app: Application, registry: Registry = COMMANDS) -> None:
@@ -63,6 +65,7 @@ def build_application(
     services: Services | None = None,
     rng: random.Random | None = None,
     bot_request: BaseRequest | None = None,
+    rate_limit: bool = True,
 ) -> Application:
     content = content or Content.load()
     storage = storage or create_storage(settings.database_url)
@@ -100,6 +103,12 @@ def build_application(
         builder = builder.base_url(f"{base}/bot").base_file_url(f"{base}/file/bot")
     if bot_request is not None:  # usato dai test per intercettare le chiamate alla Bot API
         builder = builder.request(bot_request)
+    if rate_limit:
+        # Limiti di Telegram (circa 20 messaggi al minuto per gruppo, 30 al secondo in totale):
+        # le chiamate oltre il limite vengono accodate invece di fallire, e dopo un RetryAfter
+        # si ritenta fino a RATE_LIMIT_RETRIES volte. Morra e duello modificano un messaggio
+        # a ogni click, quindi due partite nello stesso gruppo possono arrivare al limite.
+        builder = builder.rate_limiter(AIORateLimiter(max_retries=RATE_LIMIT_RETRIES))
     app = (
         builder
         # Lo stato vive nello storage, quindi gli update possono essere gestiti in parallelo

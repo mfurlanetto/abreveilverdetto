@@ -40,6 +40,7 @@ class Harness:
             services=self.services,
             rng=self.rng,
             bot_request=self.api,
+            rate_limit=False,  # i test inviano decine di messaggi nello stesso gruppo in pochi ms
         )
 
     async def __aenter__(self):
@@ -658,6 +659,101 @@ async def test_duello_nessuno_spara_cancella_il_messaggio(h):
     assert await on_duel_deadline(h.app.bot, d, game.deadline + duel.SHOOT_TIMEOUT) is None
     assert h.api.last("deleteMessage").params == {"chat_id": CHAT, "message_id": 77}
     assert (await h.storage.get_duel(game.id)).status == duel.EXPIRED
+
+
+async def _armed_duel(h):
+    await h.click("menu:duello")
+    await h.click(duel_buttons(h)[0], user=BOB)
+    d = h.app.bot_data["deps"]
+    return d, (await h.storage.due_duels(d.now() + timedelta(minutes=1)))[-1]
+
+
+async def test_duello_fuoco_mostrato_prima_di_valere(h):
+    from abreveilverdetto import duel
+    from abreveilverdetto.commands.duello import on_duel_deadline
+    from abreveilverdetto.deadlines import RETRY_SOON
+
+    d, game = await _armed_duel(h)
+    h.api.fail["editMessageText"] = "Bad Request: boom"  # il FUOCO! non arriva sul telefono
+    assert await on_duel_deadline(h.app.bot, d, game.deadline) == game.deadline + RETRY_SOON
+    assert (await h.storage.get_duel(game.id)).status == duel.ARMED  # quindi il colpo non vale ancora
+    await on_duel_deadline(h.app.bot, d, game.deadline + RETRY_SOON)
+    assert (await h.storage.get_duel(game.id)).status == duel.FIRE
+    assert "🔥 <b>FUOCO!</b>" in h.api.last("editMessageText").params["text"]
+
+
+async def test_duello_falsa_partenza_mentre_il_fuoco_compare(h, monkeypatch):
+    from abreveilverdetto import duel
+    from abreveilverdetto.commands import duello
+
+    d, game = await _armed_duel(h)
+    original = duello._show
+
+    async def show_with_click(bot, g, text):
+        if g.status == duel.FIRE:  # Alice preme mentre il FUOCO! è in viaggio verso Telegram
+            await h.click(f"duel:{game.id}:1", user=ALICE)
+        await original(bot, g, text)
+
+    monkeypatch.setattr(duello, "_show", show_with_click)
+    await duello.on_duel_deadline(h.app.bot, d, game.deadline)
+    current = await h.storage.get_duel(game.id)
+    assert (current.status, current.round, current.opponent_score) == (duel.ARMED, 2, 1)
+    assert "Round 2: 🤠 pronti" in h.api.last("editMessageText").params["text"]  # messaggio riallineato
+
+
+async def test_duelli_in_scadenza_indipendenti(h):
+    from abreveilverdetto import duel
+    from abreveilverdetto.commands.duello import on_duel_deadline
+    from abreveilverdetto.deadlines import RETRY_SOON
+
+    d, first = await _armed_duel(h)
+    _, second = await _armed_duel(h)
+    now = max(first.deadline, second.deadline)
+    h.api.fail["editMessageText"] = "Bad Request: boom"  # fallisce il via di uno solo dei due
+    assert await on_duel_deadline(h.app.bot, d, now) == now + RETRY_SOON
+    statuses = sorted([(await h.storage.get_duel(g.id)).status for g in (first, second)])
+    assert statuses == [duel.ARMED, duel.FIRE]
+
+
+async def test_morra_un_messaggio_che_fallisce_non_blocca_gli_altri(h, monkeypatch):
+    from abreveilverdetto import morra
+    from abreveilverdetto.commands import morra as morra_cmd
+
+    d = h.app.bot_data["deps"]
+    for _ in range(3):
+        await h.click("menu:morra")
+    original = morra_cmd.remove_expired
+    calls = []
+
+    async def flaky(bot, game, battute):
+        calls.append(game.id)
+        if len(calls) == 1:
+            raise RuntimeError("rete giù")
+        await original(bot, game, battute)
+
+    monkeypatch.setattr(morra_cmd, "remove_expired", flaky)
+    later = d.now() + morra.ACCEPT_TIMEOUT + timedelta(seconds=1)
+    assert await morra_cmd.expire_due_games(h.app.bot, d, later) is None
+    assert len(calls) == 3
+    assert len([c for c in h.api.calls if c.method == "deleteMessage"]) == 2
+    h.expect_errors = True  # l'errore è registrato nel log
+
+
+def test_limiti_di_telegram_gestiti_dal_rate_limiter(content):
+    from telegram.ext import AIORateLimiter
+
+    from abreveilverdetto.app import RATE_LIMIT_RETRIES
+
+    app = build_application(
+        Settings.from_env({"TELEGRAM_TOKEN": "123:TEST"}),
+        content=content,
+        storage=MemoryStorage(),
+        services=FakeServices(),
+        bot_request=FakeBotAPI(),
+    )
+    limiter = app.bot.rate_limiter
+    assert isinstance(limiter, AIORateLimiter) and RATE_LIMIT_RETRIES == 3
+    assert limiter._max_retries == RATE_LIMIT_RETRIES
 
 
 @pytest.mark.parametrize(("key", "text"), [("duello", "si fa in due"), ("morra", "si gioca in due")])

@@ -146,8 +146,14 @@ def cancel(game: DuelGame, user_id: int, now: datetime) -> DuelGame:
     return replace(game, status=CANCELLED, updated_at=now, deadline=None)
 
 
-def fire(game: DuelGame, now: datetime) -> DuelGame:
-    """Il via: da qui in poi un colpo è valido. Lo chiama il timer all'ora prevista."""
+def fire(game: DuelGame, now: datetime, round_no: int | None = None) -> DuelGame:
+    """Il via: da qui in poi un colpo è valido. Lo chiama il timer all'ora prevista.
+
+    ``round_no``: il round per cui il "FUOCO!" è stato mostrato; se nel frattempo il round
+    è cambiato (falsa partenza), il via non vale per quello nuovo.
+    """
+    if round_no is not None and game.round != round_no:
+        raise DuelError("Round cambiato prima del via")
     if game.status != ARMED or not game.is_due(now):
         raise DuelError("Non è ancora il momento del via")
     return replace(game, status=FIRE, updated_at=now, deadline=now + SHOOT_TIMEOUT)
