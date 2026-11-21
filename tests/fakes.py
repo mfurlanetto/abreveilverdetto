@@ -211,6 +211,24 @@ class FakeServices:
             json.loads((Path(__file__).parent / "data" / "onthisday_selected_11_13.json").read_text())
         )
 
+    async def mountain_details(self, mountain):
+        self._check("mountain")
+        if "mountain_rate_limited" in self.fail:
+            raise RateLimitedError("it.wikipedia.org chiede di rallentare (HTTP 429)", 20)
+        from abreveilverdetto.mountains import Details, Photo
+
+        photo = (
+            None
+            if "mountain_no_photo" in self.fail
+            else Photo(
+                url="https://upload.wikimedia.org/thumb/1280px-Cervino.jpg",
+                page_url="https://commons.wikimedia.org/wiki/File:Cervino_cloud.jpg",
+                artist="Mario <Rossi> & co",
+                license="CC BY-SA 3.0",
+            )
+        )
+        return Details(f"Il {mountain.name} è una montagna.", photo)
+
     async def random_cocktail(self):
         self._check("cocktail")
         drink = {

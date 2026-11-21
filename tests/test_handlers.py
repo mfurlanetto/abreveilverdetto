@@ -12,7 +12,7 @@ from abreveilverdetto.errors import GENERIC_ERROR
 from abreveilverdetto.services import Weather
 from abreveilverdetto.settings import Settings
 from abreveilverdetto.storage import MemoryStorage
-from tests.fakes import BOT_ID, FakeBotAPI, FakeServices, ScriptedRandom
+from tests.fakes import BOT_ID, FakeBotAPI, FakeServices, ScriptedRandom, assert_valid_telegram_html
 
 CHAT = -100500
 ALICE = {"id": 1, "is_bot": False, "first_name": "Alice", "username": "alice_x"}
@@ -109,7 +109,7 @@ async def test_start_mostra_il_menu(h):
     await h.text("/start")
     call = h.api.last("sendMessage")
     data = [b["callback_data"] for b in buttons(call)]
-    assert len(data) == 21
+    assert len(data) == 22
     assert set(d.removeprefix("menu:") for d in data) == set(COMMANDS.keys())
 
 
@@ -323,6 +323,7 @@ async def test_layout_del_menu_invariato(h):
         ["🦕 POKEMON", "🌍 NAZIONE", "✊ MORRA"],
         ["🍸 COCKTAIL", "👼 SANTI", "🃏 MAGIC"],
         ["📰 LERCIO.IT", "📖 PAROLA", "📅 ACCADDE OGGI"],
+        ["⛰ MONTAGNA"],
     ]
 
 
@@ -386,7 +387,7 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
         for row in c.params["reply_markup"].get("inline_keyboard", [])
         for b in row
     ]
-    assert len(labels) == 21 + 2 + 6 + 2
+    assert len(labels) == 22 + 2 + 6 + 2
     assert all(label == label.upper() for label in labels), [x for x in labels if x != x.upper()]
 
 
@@ -431,6 +432,55 @@ async def test_accadde_oggi_con_limite_di_wikimedia(h):
     h.services.fail.add("onthisday_rate_limited")
     await h.click("menu:accaddeoggi")
     assert "rallentare" in h.api.last("editMessageText").params["text"]
+
+
+# --- Montagna -------------------------------------------------------------------------
+
+
+def cervino(content):
+    return next(m for m in content.mountains if m.title == "Cervino")
+
+
+async def test_montagna_con_foto_dati_e_attribuzioni(h, content):
+    h.rng.choices = [cervino(content)]
+    await h.click("menu:montagna")
+    photo = h.api.last("sendPhoto").params
+    assert photo["photo"] == "https://upload.wikimedia.org/thumb/1280px-Cervino.jpg"
+    caption = photo["caption"]
+    assert caption.startswith("⛰ <b>CERVINO</b>\n<pre>Altitudine: 4.478 m\nNazione:    Italia\n")
+    assert "Catena:     Alpi Pennine" in caption
+    assert "Il Cervino è una montagna." in caption
+    assert '<a href="https://it.wikipedia.org/wiki/Cervino">Wikipedia</a>' in caption
+    assert "Mario &lt;Rossi&gt; &amp; co</a>, CC BY-SA 3.0, via Wikimedia Commons" in caption
+    assert len(caption) <= 1024
+
+
+async def test_montagna_senza_foto_solo_testo(h, content):
+    h.services.fail.add("mountain_no_photo")
+    h.rng.choices = [cervino(content)]
+    await h.click("menu:montagna")
+    text = h.api.last("editMessageText").params["text"]
+    assert "CERVINO" in text and "Foto:" not in text and "Testo:" in text
+
+
+@pytest.mark.parametrize("failure", ["mountain", "mountain_rate_limited"])
+async def test_montagna_wikipedia_giu_mostra_i_dati_di_wikidata(h, content, failure):
+    h.services.fail.add(failure)
+    h.rng.choices = [cervino(content)]
+    await h.click("menu:montagna")
+    text = h.api.last("editMessageText").params["text"]
+    assert "Altitudine: 4.478 m" in text and "è una montagna" not in text
+
+
+async def test_montagna_ogni_vetta_ha_una_didascalia_valida(h, content):
+    from abreveilverdetto.commands.montagna import caption
+    from abreveilverdetto.mountains import Details, Photo
+
+    photo = Photo("https://x/y.jpg", "https://x", "A" * 60, "CC BY-SA 4.0")
+    for m in content.mountains:
+        text = caption(m, Details("Parola " * 200, photo))
+        assert_valid_telegram_html(text)
+        assert len(text) <= 1024, m.title
 
 
 # --- Morra cinese ---------------------------------------------------------------------
