@@ -17,7 +17,7 @@ from typing import Any, TypeVar
 
 import httpx
 
-from . import __version__, markets, onthisday, wiktionary
+from . import __version__, markets, mountains, onthisday, wiktionary
 
 logger = logging.getLogger(__name__)
 
@@ -339,3 +339,17 @@ class Services:
             return onthisday.parse_selected(data)
 
         return await self._cache.get(f"onthisday:{month:02d}-{day:02d}", 6 * HOUR, load)
+
+    # --- Wikipedia: montagne --------------------------------------------------------
+
+    async def mountain_details(self, mountain: mountains.Mountain) -> mountains.Details:
+        """Introduzione della voce e foto (con autore e licenza) in una sola richiesta.
+
+        In cache un giorno per montagna: le voci cambiano di rado e Wikimedia limita per IP.
+        """
+
+        async def load() -> mountains.Details:
+            data = await self._get_json(mountains.API_URL, headers=WIKIMEDIA_HEADERS, **mountains.api_params(mountain))
+            return mountains.parse_details(data)
+
+        return await self._cache.get(f"mountain:{mountain.id}", DAY, load)

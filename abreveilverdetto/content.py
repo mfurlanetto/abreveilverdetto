@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .mountains import Mountain
 from .settings import DATA_DIR, MEDIA_DIR
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
@@ -57,6 +58,7 @@ class Content:
     countries: list[dict[str, Any]]
     images: dict[str, list[Path]]
     media_dir: Path
+    mountains: list[Mountain]
 
     @classmethod
     def load(cls, data_dir: Path = DATA_DIR, media_dir: Path = MEDIA_DIR) -> Content:
@@ -76,6 +78,10 @@ class Content:
             if not photo.is_file():
                 raise FileNotFoundError(photo)
 
+        mountains = [Mountain.from_json(m) for m in _load_json("mountains", data_dir)]
+        if not mountains:
+            raise ValueError("data/mountains.json è vuoto")
+
         image_dirs = ["tortamele", "conte", "bimbe"] + [d for _, _, d in MAGIC_DECKS.values()]
         images = {d: _list_images(media_dir / d) for d in image_dirs}
 
@@ -86,6 +92,7 @@ class Content:
             countries=_load_json("countries", data_dir),
             images=images,
             media_dir=media_dir,
+            mountains=mountains,
         )
 
     def pick_text(self, name: str, rng: random.Random) -> str:

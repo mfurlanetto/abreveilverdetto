@@ -1,0 +1,61 @@
+{
+    "batchcomplete": true,
+    "query": {
+        "pages": [
+            {
+                "ns": 6,
+                "title": "File:Cervino cloud.jpg",
+                "missing": true,
+                "known": true,
+                "imagerepository": "shared",
+                "imageinfo": [
+                    {
+                        "thumburl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Cervino_cloud.jpg/1280px-Cervino_cloud.jpg?utm_source=it.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+                        "thumbwidth": 1280,
+                        "thumbheight": 1707,
+                        "responsiveUrls": {
+                            "2": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Cervino_cloud.jpg?utm_source=it.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
+                        },
+                        "thumbattribs": {
+                            "src": "//thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Cervino_cloud.jpg/1280px-Cervino_cloud.jpg?utm_source=it.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+                            "decoding": "async",
+                            "loading": "lazy",
+                            "width": 1280,
+                            "height": 1707,
+                            "srcset": "//upload.wikimedia.org/wikipedia/commons/b/b7/Cervino_cloud.jpg?utm_source=it.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled 2x"
+                        },
+                        "url": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Cervino_cloud.jpg?utm_source=it.wikipedia.org&utm_campaign=imageinfo&utm_content=original",
+                        "descriptionurl": "https://commons.wikimedia.org/wiki/File:Cervino_cloud.jpg",
+                        "descriptionshorturl": "https://commons.wikimedia.org/wiki/Special:Redirect/page/118055643",
+                        "extmetadata": {
+                            "Artist": {
+                                "value": "Gianluca Miscione",
+                                "source": "commons-desc-page"
+                            },
+                            "LicenseShortName": {
+                                "value": "CC BY-SA 4.0",
+                                "source": "commons-desc-page",
+                                "hidden": ""
+                            },
+                            "AttributionRequired": {
+                                "value": "true",
+                                "source": "commons-desc-page",
+                                "hidden": ""
+                            },
+                            "LicenseUrl": {
+                                "value": "https://creativecommons.org/licenses/by-sa/4.0",
+                                "source": "commons-desc-page"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "pageid": 19889,
+                "ns": 0,
+                "title": "Cervino",
+                "extract": "Il Cervino (Cervin in francese, pron. AFI: [s\u025b\u0281v\u025b\u0303]; Matterhorn in tedesco; Gran Becca in patois valdostano; Matterh\u00f2re in Gresch\u00f2neytitsch) \u00e8 una montagna delle Alpi alta 4478 m s.l.m., settima vetta e terza montagna italiana per altitudine, situata nelle Alpi Centrali (Alpi Pennine - Alpi del Weisshorn e del Cervino - catena Catena Bouquetins-Cervino) lungo il confine tra Italia e Svizzera (a ovest del massiccio del Monte Rosa, a est del Grand Combin e a sud-ovest del Massiccio del Mischabel).\nCon una prominenza di 1031 m (\u00e8 necessario scendere fino al Col Durand, posto a 3451 m, per salire su vette pi\u00f9 alte) e un isolamento di 13,7 km (la montagna pi\u00f9 alta di esso pi\u00f9 vicina \u00e8 il Lyskamm Occidentale, 4481 m, nel massiccio del Monte Rosa), si erge separato dalle altre vette circostanti e sovrasta i paesi di Valtournenche, in particolare la nota localit\u00e0 turistica Breuil-Cervinia, in Italia e di Zermatt a nord in Svizzera."
+            }
+        ]
+    }
+}

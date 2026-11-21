@@ -19,6 +19,7 @@ from .dizionario import parola, parola_command
 from .external import cocktail, comune, covid, nazione, pokemon
 from .fibonacci import fibonacci_command, fibonacci_menu
 from .images import MAGIC_PICK, bimbe, conte, magic, santi, torta
+from .montagna import montagna
 from .morra import MORRA_ACTION, morra_command, morra_menu
 from .quotes import CTS_SIZE, cts, lercio, quote_action, saluti
 from .trombin import trombin
@@ -77,6 +78,7 @@ COMMANDS = Registry(
         MenuCommand("lercio", "📰 LERCIO.IT", lercio, row=6),
         MenuCommand("parola", "📖 PAROLA", parola, row=6),
         MenuCommand("accaddeoggi", "📅 ACCADDE OGGI", accadde_oggi, row=6),
+        MenuCommand("montagna", "⛰ MONTAGNA", montagna, row=7),
     ),
     slash=(
         SlashCommand(("start", "menu"), start, "Apri il menu dei comandi"),

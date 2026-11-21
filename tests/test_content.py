@@ -51,3 +51,12 @@ def test_media_speciali_esistono(content):
         "centocentocento/Mr_Bean_Middle_Finger.gif",
     ]:
         assert content.media(name).is_file()
+
+
+def test_montagne(content):
+    ids = [m.id for m in content.mountains]
+    assert len(ids) == len(set(ids)) > 4000
+    for m in content.mountains:
+        assert m.title and m.image and 0 < m.elevation <= 8849, m.id
+    everest = content.mountains[0]
+    assert (everest.title, everest.elevation) == ("Everest", 8849)

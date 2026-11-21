@@ -9,7 +9,8 @@ Pensato per girare gratis su **Render** (web service Docker, webhook) con databa
 
 `/start` (o `/menu`) apre il menu a bottoni: saluti, CTS, DPCM, Conte, bimbe, comune (con meteo),
 COVID, giurato, torta, Fibonacci, 💯💯💯, ghesboro, Pokémon, nazione, cocktail, santi, Magic, Lercio,
-parola (parola a caso dal Wikizionario con la sua definizione), accadde oggi (eventi in evidenza del giorno su Wikipedia).
+parola (parola a caso dal Wikizionario con la sua definizione), accadde oggi (eventi in evidenza del giorno su Wikipedia),
+montagna (una vetta a caso nel mondo con foto, altitudine, nazione, catena e descrizione).
 
 | Comando | |
 |---|---|
@@ -51,6 +52,7 @@ abreveilverdetto/
     chat.py         messaggi liberi (15 e 18, risposte a Fibonacci)
     dizionario.py   parola a caso dal Wikizionario
     accadde.py      eventi in evidenza del giorno da Wikipedia
+    montagna.py     montagna a caso: foto, dati e attribuzioni
     trombin.py      /trombin: indici di borsa e materie prime
   registry.py   dichiarazione e validazione dei comandi
   telegram_io.py dipendenze condivise e invio di media con cache dei file_id
@@ -59,6 +61,7 @@ abreveilverdetto/
   morra.py      regole pure della morra cinese (al meglio di 3, scadenza)
   wiktionary.py estrazione delle definizioni italiane dal wikitext del Wikizionario
   onthisday.py  feed "accadde oggi" di Wikipedia: lettura e nome/URL della pagina del giorno
+  mountains.py  montagne: dati da data/mountains.json, descrizione e foto (con licenza) da Wikipedia
   markets.py    strumenti di /trombin e lettura delle quotazioni di Yahoo Finance
   services.py   API esterne con timeout e cache (comuni, COVID, Pokédex, meteo, cocktail, Wikizionario, Wikipedia, Yahoo Finance)
   storage.py    Postgres (produzione) / memoria (sviluppo), stessa interfaccia e stessi test
@@ -188,6 +191,7 @@ TEST_DATABASE_URL=postgresql://… pytest -q           # anche contro un Postgre
 | cocktail | [TheCocktailDB](https://www.thecocktaildb.com/api.php) | chiave pubblica di test `1` |
 | parola | [Wikizionario](https://it.wiktionary.org) (API MediaWiki) | in tempo reale; contenuti **CC BY-SA 4.0**: ogni risposta cita la voce e la licenza |
 | accadde oggi | [Wikipedia](https://it.wikipedia.org) (REST API, feed `onthisday/selected`) | eventi in evidenza del giorno (in italiano nascite e morti sono vuote); cache 6 h per data; **CC BY-SA 4.0**: ogni risposta cita la pagina del giorno e la licenza |
+| montagna | [Wikidata](https://www.wikidata.org) (altitudine, nazioni, catena, foto; **CC0**), [Wikipedia](https://it.wikipedia.org) (introduzione della voce, **CC BY-SA 4.0**), [Wikimedia Commons](https://commons.wikimedia.org) (foto, licenza per file) | snapshot di ~4500 vette con voce italiana e foto in `data/mountains.json`, rigenerabile con `scripts/build_mountains.py`; a runtime una richiesta a it.wikipedia per testo e metadati della foto, cache 24 h per vetta; ogni didascalia cita voce, licenza del testo, autore e licenza della foto; se Wikipedia non risponde restano i dati di Wikidata |
 | trombin | Yahoo Finance (endpoint `v7/finance/spark`, **non ufficiale**) | una richiesta per tutti i 13 strumenti, cache 60 s; dati per uso personale, possibili ritardi |
 
 ### Wikizionario
