@@ -307,7 +307,7 @@ class Services:
     async def market_quotes(self) -> dict[str, markets.Quote]:
         """Quotazioni di tutti gli strumenti di markets.INSTRUMENTS, con una sola richiesta.
 
-        In cache per 60 secondi: più /trombin ravvicinati (es. in un gruppo) non
+        In cache per 60 secondi: più click su TROMBIN ravvicinati (es. in un gruppo) non
         moltiplicano le richieste a Yahoo, che limita molto presto (HTTP 429).
         """
 

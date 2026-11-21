@@ -1,10 +1,10 @@
-"""/trombin: riepilogo di indici di borsa e materie prime (Yahoo Finance)."""
+"""📈 TROMBIN: riepilogo di indici di borsa e materie prime (Yahoo Finance)."""
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from telegram import Update
+from telegram import CallbackQuery
 from telegram.ext import ContextTypes
 
 from ..markets import INSTRUMENTS, Quote
@@ -70,12 +70,12 @@ def format_report(quotes: dict[str, Quote], now: datetime, local_tz) -> str:
     return "\n".join(parts)
 
 
-async def trombin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def trombin(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -> None:
     d = deps(context)
     try:
         quotes = await d.services.market_quotes()
     except RateLimitedError:
-        await update.effective_message.reply_text(RATE_LIMITED_TEXT)
+        await query.edit_message_text(RATE_LIMITED_TEXT)
         return
     text = format_report(quotes, datetime.now(UTC), d.settings.timezone)
-    await update.effective_message.reply_text(text, parse_mode=HTML)
+    await query.edit_message_text(text, parse_mode=HTML)

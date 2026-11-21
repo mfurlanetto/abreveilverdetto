@@ -12,6 +12,7 @@ viene invece modificato in "⌛ …".
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
 from dataclasses import replace
@@ -23,6 +24,7 @@ from telegram.error import BadRequest, TelegramError
 from telegram.ext import ContextTypes
 
 from .. import morra
+from ..deadlines import retry_floor
 from ..morra import MOVES, MorraError, MorraGame, RoundResult
 from ..registry import Callback
 from ..telegram_io import HTML, Deps, deps, display_name
@@ -31,7 +33,7 @@ from ..text import esc
 logger = logging.getLogger(__name__)
 
 TITLE = "✊✋✌️ <b>MORRA CINESE</b>"
-PRIVATE_TEXT = "✊✋✌️ La morra si gioca in due: aggiungimi a un gruppo e sfida qualcuno con /morra."
+PRIVATE_TEXT = "✊✋✌️ La morra si gioca in due: aggiungimi a un gruppo e lancia la sfida da 🎮 GIOCHI."
 ACCEPT, CANCEL = "a", "x"
 
 
@@ -126,30 +128,6 @@ async def morra_menu(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -
     await _track(d, game, query.message.message_id)
 
 
-async def morra_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """/morra: sfida aperta, oppure diretta se è una risposta al messaggio di qualcuno."""
-    d = deps(context)
-    message = update.effective_message
-    if _is_private(message):
-        await message.reply_text(PRIVATE_TEXT)
-        return
-    user = update.effective_user
-    target = message.reply_to_message.from_user if message.reply_to_message else None
-    if target is not None and (target.is_bot or target.id == user.id):
-        target = None
-    game = await d.storage.create_morra(
-        message.chat.id,
-        user.id,
-        display_name(user),
-        target.id if target else None,
-        display_name(target) if target else None,
-        d.now(),
-    )
-    battute = d.content.texts["morra_battute"]
-    sent = await message.reply_text(render(game, None, d.rng, battute), parse_mode=HTML, reply_markup=keyboard(game))
-    await _track(d, game, sent.message_id)
-
-
 async def _track(d: Deps, game: MorraGame, message_id: int) -> None:
     """Salva il messaggio da cancellare alla scadenza e sveglia il timer."""
     await d.storage.set_morra_message(game.id, message_id)
@@ -179,12 +157,21 @@ async def remove_expired(bot: Bot, game: MorraGame, battute: list[str]) -> None:
         logger.info("Messaggio della morra %d non modificabile", game.id)
 
 
-async def expire_due_games(bot: Bot, d: Deps, now: datetime) -> datetime | None:
-    """Annulla le partite scadute, ne cancella i messaggi; restituisce la scadenza successiva."""
-    battute = d.content.texts["morra_battute"]
-    for game in await d.storage.expire_morra(now):
+async def _remove_safely(bot: Bot, game: MorraGame, battute: list[str]) -> bool:
+    try:
         await remove_expired(bot, game, battute)
-    return await d.storage.next_morra_deadline()
+        return True
+    except Exception:  # la partita è già annullata nel DB: resta solo il messaggio
+        logger.exception("Messaggio della morra %d non rimosso", game.id)
+        return False
+
+
+async def expire_due_games(bot: Bot, d: Deps, now: datetime) -> datetime | None:
+    """Annulla le partite scadute, ne cancella i messaggi (in parallelo); restituisce la scadenza successiva."""
+    battute = d.content.texts["morra_battute"]
+    expired = await d.storage.expire_morra(now)  # un solo UPDATE atomico per tutte
+    await asyncio.gather(*(_remove_safely(bot, g, battute) for g in expired))
+    return retry_floor(await d.storage.next_morra_deadline(), now)
 
 
 async def _edit(query: CallbackQuery, text: str, markup: InlineKeyboardMarkup | None) -> None:

@@ -40,6 +40,7 @@ class Harness:
             services=self.services,
             rng=self.rng,
             bot_request=self.api,
+            rate_limit=False,  # i test inviano decine di messaggi nello stesso gruppo in pochi ms
         )
 
     async def __aenter__(self):
@@ -71,11 +72,11 @@ class Harness:
     async def text(self, text, **kwargs):
         await self.feed({"message": self._message(text, **kwargs)})
 
-    async def click(self, data, user=ALICE):
+    async def click(self, data, user=ALICE, chat=None):
         menu = {
             "message_id": 77,
             "date": 0,
-            "chat": {"id": CHAT, "type": "supergroup"},
+            "chat": chat or {"id": CHAT, "type": "supergroup"},
             "from": {"id": BOT_ID, "is_bot": True, "first_name": "Bot"},
             "text": "Seleziona comando:",
         }
@@ -110,7 +111,7 @@ async def test_start_mostra_il_menu(h):
     await h.text("/start")
     call = h.api.last("sendMessage")
     data = [b["callback_data"] for b in buttons(call)]
-    assert len(data) == 21
+    assert len(data) == 20
     main = {c.key for row in COMMANDS.layout() for c in row}
     assert set(d.removeprefix("menu:") for d in data) == main
 
@@ -124,7 +125,7 @@ async def test_sottomenu_giochi_e_indietro(h):
     assert buttons(call)[-1]["callback_data"] == "menu:main"
     await h.click("menu:main")
     back = h.api.last("editMessageText")
-    assert back.params["text"] == "Seleziona comando:" and len(buttons(back)) == 21
+    assert back.params["text"] == "Seleziona comando:" and len(buttons(back)) == 20
 
 
 @pytest.mark.parametrize("key", sorted(COMMANDS.keys()))
@@ -242,12 +243,6 @@ async def test_fibonacci_dal_menu_con_force_reply(h):
     assert h.api.last("sendMessage").params["text"] == "1, 1, 2, 3, 5, 8"
 
 
-async def test_fibonacci_comando(h):
-    h.rng.randints = [3]
-    await h.text("/fibonacci 99")
-    assert h.api.last("sendMessage").params["text"] == "Il massimo consentito è 10.\n1, 1, 2"
-
-
 # --- Centocentocento --------------------------------------------------------------------
 
 
@@ -331,13 +326,21 @@ async def test_layout_del_menu_invariato(h):
     rows = [[b["text"] for b in row] for row in h.api.last("sendMessage").params["reply_markup"]["inline_keyboard"]]
     assert rows == [
         ["👋 SALUTI", "🔬 CTS", "📜 DPCM"],
-        ["🙇 CONTE", "😻 BIMBE", "🏙 COMUNE"],
-        ["🧪 COVID", "🤦 GIURATO", "🥧 TORTA"],
-        ["🔢 FIBONACCI", "🎮 GIOCHI", "🦁 GHESBORO"],
-        ["🦕 POKEMON", "🌍 NAZIONE", "⛰ MONTAGNA"],
-        ["🍸 COCKTAIL", "👼 SANTI", "🃏 MAGIC"],
-        ["📰 LERCIO.IT", "📖 PAROLA", "📅 ACCADDE OGGI"],
+        ["🙇 CONTE", "😻 BIMBE", "🧪 COVID"],
+        ["🤦 GIURATO", "🥧 TORTA", "🔢 FIBONACCI"],
+        ["🦁 GHESBORO", "🦕 POKEMON", "🍸 COCKTAIL"],
+        ["👼 SANTI", "🃏 MAGIC", "📰 LERCIO.IT"],
+        ["📖 PAROLA", "📅 ACCADDE OGGI", "📈 TROMBIN"],
+        ["🎮 GIOCHI", "🗺 GEOGRAFIA"],
     ]
+
+
+async def test_sottomenu_geografia(h):
+    await h.click("menu:geografia")
+    call = h.api.last("editMessageText")
+    assert call.params["text"] == "🗺 Scegli cosa scoprire:"
+    rows = [[b["text"] for b in row] for row in call.params["reply_markup"]["inline_keyboard"]]
+    assert rows == [["🌍 NAZIONE", "🏙 COMUNE", "⛰ MONTAGNA"], ["⬅ INDIETRO"]]
 
 
 async def test_alias_menu(h):
@@ -348,15 +351,7 @@ async def test_alias_menu(h):
 async def test_avvio_pubblica_i_comandi_slash(h):
     await h.app.post_init(h.app)
     commands = h.api.last("setMyCommands").params["commands"]
-    assert [c["command"] for c in commands] == [
-        "start",
-        "fibonacci",
-        "bravitutti",
-        "morra",
-        "duello",
-        "parola",
-        "trombin",
-    ]
+    assert [c["command"] for c in commands] == ["start", "bravitutti"]
 
 
 async def test_avvio_prosegue_se_set_my_commands_fallisce(h):
@@ -380,21 +375,6 @@ async def test_parola_con_limite_di_wikimedia(h):
     assert "rallentare" in h.api.last("editMessageText").params["text"]
 
 
-async def test_parola_come_slash_command_risponde_con_un_nuovo_messaggio(h):
-    await h.text("/parola")
-    call = h.api.last("sendMessage")
-    assert call.params["text"].startswith("📖 <b>")
-    assert "CC BY-SA 4.0" in call.params["text"]
-    assert call.params["link_preview_options"]["is_disabled"] is True
-    assert "editMessageText" not in h.api.methods()
-
-
-async def test_parola_slash_con_limite_di_wikimedia(h):
-    h.services.fail.add("words_rate_limited")
-    await h.text("/parola")
-    assert "rallentare" in h.api.last("sendMessage").params["text"]
-
-
 async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
     h.rng.randranges = draws(60)
     await h.text("/start")
@@ -402,6 +382,7 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
     await h.click("menu:magic")
     await h.click("menu:c100")
     await h.click("menu:giochi")
+    await h.click("menu:geografia")
     labels = [
         b["text"]
         for c in h.api.calls
@@ -409,28 +390,28 @@ async def test_tutte_le_etichette_dei_pulsanti_in_maiuscolo(h):
         for row in c.params["reply_markup"].get("inline_keyboard", [])
         for b in row
     ]
-    assert len(labels) == 21 + 2 + 6 + 2 + 4
+    assert len(labels) == 20 + 2 + 6 + 2 + 4 + 4
     assert all(label == label.upper() for label in labels), [x for x in labels if x != x.upper()]
 
 
 async def test_trombin(h):
-    await h.text("/trombin")
-    text = h.api.last("sendMessage").params["text"]
+    await h.click("menu:trombin")
+    text = h.api.last("editMessageText").params["text"]
     assert text.startswith("📈 <b>TROMBIN</b>")
     assert "FTSE MIB" in text and "Brent" in text and "Yahoo Finance" in text
 
 
 async def test_trombin_con_limite_di_yahoo(h):
     h.services.fail.add("markets_rate_limited")
-    await h.text("/trombin")
-    assert "rallentare" in h.api.last("sendMessage").params["text"]
+    await h.click("menu:trombin")
+    assert "rallentare" in h.api.last("editMessageText").params["text"]
 
 
 async def test_trombin_errore_generico(h):
     h.expect_errors = True
     h.services.fail.add("markets")
-    await h.text("/trombin")
-    assert h.api.last("sendMessage").params["text"] == GENERIC_ERROR
+    await h.click("menu:trombin")
+    assert GENERIC_ERROR in [c.params.get("text") for c in h.api.calls]
 
 
 async def test_accadde_oggi_mostra_tutti_gli_eventi_in_evidenza(h):
@@ -561,23 +542,6 @@ async def test_morra_partita_completa_e_classifica(h):
     assert "MORRA CINESE" in board and "Alice:" in board and "Bob &lt;3:" in board
 
 
-async def test_morra_sfida_diretta_con_risposta(h):
-    bob_message = h._message("ciao", user=BOB)
-    await h.text("/morra", reply_to=bob_message)
-    sent = h.api.last("sendMessage").params
-    assert "Alice sfida Bob &lt;3!" in sent["text"]
-    accept = sent["reply_markup"]["inline_keyboard"][0][0]["callback_data"]
-    await h.click(accept, user=CARL)
-    assert last_answer(h) == "La sfida è per Bob <3"
-    await h.click(accept, user=BOB)
-    assert last_answer(h).startswith("Sfida accettata")
-
-
-async def test_morra_risposta_a_se_stessi_o_al_bot_e_sfida_aperta(h):
-    await h.text("/morra", reply_to=h._message("io", user=ALICE))
-    assert "A breve qualcuno accetterà la sfida." in h.api.last("sendMessage").params["text"]
-
-
 async def test_morra_annullata(h):
     await h.click("menu:morra")
     accept, cancel = morra_buttons(h)
@@ -611,13 +575,12 @@ async def test_morra_timer_cancella_i_messaggi_scaduti(h):
 
     d = h.app.bot_data["deps"]
     await h.click("menu:morra")  # sfida aperta nel messaggio 77
-    await h.text("/morra")  # sfida aperta in un nuovo messaggio del bot
     assert await h.storage.expire_morra(d.now()) == []  # niente di scaduto ancora
 
     later = d.now() + morra.ACCEPT_TIMEOUT + timedelta(seconds=1)
     assert await expire_due_games(h.app.bot, d, later) is None
     deleted = [c.params["message_id"] for c in h.api.calls if c.method == "deleteMessage"]
-    assert len(deleted) == 2 and 77 in deleted
+    assert deleted == [77]
 
 
 async def test_morra_messaggio_non_cancellabile_diventa_avviso(h):
@@ -698,24 +661,106 @@ async def test_duello_nessuno_spara_cancella_il_messaggio(h):
     assert (await h.storage.get_duel(game.id)).status == duel.EXPIRED
 
 
-async def test_duello_sfida_diretta_e_chat_privata(h):
-    await h.text("/duello", reply_to=h._message("ciao", user=BOB))
-    sent = h.api.last("sendMessage").params
-    assert "Alice sfida Bob &lt;3!" in sent["text"]
-    accept = sent["reply_markup"]["inline_keyboard"][0][0]["callback_data"]
-    await h.click(accept, user=CARL)
-    assert last_answer(h) == "La sfida è per Bob <3"
-    private = h._message("/duello")
-    private["chat"] = {"id": 1, "type": "private"}
-    await h.feed({"message": private})
-    assert "si fa in due" in h.api.last("sendMessage").params["text"]
+async def _armed_duel(h):
+    await h.click("menu:duello")
+    await h.click(duel_buttons(h)[0], user=BOB)
+    d = h.app.bot_data["deps"]
+    return d, (await h.storage.due_duels(d.now() + timedelta(minutes=1)))[-1]
 
 
-async def test_morra_in_chat_privata(h):
-    private = h._message("/morra")
-    private["chat"] = {"id": 1, "type": "private"}
-    await h.feed({"message": private})
-    assert "si gioca in due" in h.api.last("sendMessage").params["text"]
+async def test_duello_fuoco_mostrato_prima_di_valere(h):
+    from abreveilverdetto import duel
+    from abreveilverdetto.commands.duello import on_duel_deadline
+    from abreveilverdetto.deadlines import RETRY_SOON
+
+    d, game = await _armed_duel(h)
+    h.api.fail["editMessageText"] = "Bad Request: boom"  # il FUOCO! non arriva sul telefono
+    assert await on_duel_deadline(h.app.bot, d, game.deadline) == game.deadline + RETRY_SOON
+    assert (await h.storage.get_duel(game.id)).status == duel.ARMED  # quindi il colpo non vale ancora
+    await on_duel_deadline(h.app.bot, d, game.deadline + RETRY_SOON)
+    assert (await h.storage.get_duel(game.id)).status == duel.FIRE
+    assert "🔥 <b>FUOCO!</b>" in h.api.last("editMessageText").params["text"]
+
+
+async def test_duello_falsa_partenza_mentre_il_fuoco_compare(h, monkeypatch):
+    from abreveilverdetto import duel
+    from abreveilverdetto.commands import duello
+
+    d, game = await _armed_duel(h)
+    original = duello._show
+
+    async def show_with_click(bot, g, text):
+        if g.status == duel.FIRE:  # Alice preme mentre il FUOCO! è in viaggio verso Telegram
+            await h.click(f"duel:{game.id}:1", user=ALICE)
+        await original(bot, g, text)
+
+    monkeypatch.setattr(duello, "_show", show_with_click)
+    await duello.on_duel_deadline(h.app.bot, d, game.deadline)
+    current = await h.storage.get_duel(game.id)
+    assert (current.status, current.round, current.opponent_score) == (duel.ARMED, 2, 1)
+    assert "Round 2: 🤠 pronti" in h.api.last("editMessageText").params["text"]  # messaggio riallineato
+
+
+async def test_duelli_in_scadenza_indipendenti(h):
+    from abreveilverdetto import duel
+    from abreveilverdetto.commands.duello import on_duel_deadline
+    from abreveilverdetto.deadlines import RETRY_SOON
+
+    d, first = await _armed_duel(h)
+    _, second = await _armed_duel(h)
+    now = max(first.deadline, second.deadline)
+    h.api.fail["editMessageText"] = "Bad Request: boom"  # fallisce il via di uno solo dei due
+    assert await on_duel_deadline(h.app.bot, d, now) == now + RETRY_SOON
+    statuses = sorted([(await h.storage.get_duel(g.id)).status for g in (first, second)])
+    assert statuses == [duel.ARMED, duel.FIRE]
+
+
+async def test_morra_un_messaggio_che_fallisce_non_blocca_gli_altri(h, monkeypatch):
+    from abreveilverdetto import morra
+    from abreveilverdetto.commands import morra as morra_cmd
+
+    d = h.app.bot_data["deps"]
+    for _ in range(3):
+        await h.click("menu:morra")
+    original = morra_cmd.remove_expired
+    calls = []
+
+    async def flaky(bot, game, battute):
+        calls.append(game.id)
+        if len(calls) == 1:
+            raise RuntimeError("rete giù")
+        await original(bot, game, battute)
+
+    monkeypatch.setattr(morra_cmd, "remove_expired", flaky)
+    later = d.now() + morra.ACCEPT_TIMEOUT + timedelta(seconds=1)
+    assert await morra_cmd.expire_due_games(h.app.bot, d, later) is None
+    assert len(calls) == 3
+    assert len([c for c in h.api.calls if c.method == "deleteMessage"]) == 2
+    h.expect_errors = True  # l'errore è registrato nel log
+
+
+def test_limiti_di_telegram_gestiti_dal_rate_limiter(content):
+    from telegram.ext import AIORateLimiter
+
+    from abreveilverdetto.app import RATE_LIMIT_RETRIES
+
+    app = build_application(
+        Settings.from_env({"TELEGRAM_TOKEN": "123:TEST"}),
+        content=content,
+        storage=MemoryStorage(),
+        services=FakeServices(),
+        bot_request=FakeBotAPI(),
+    )
+    limiter = app.bot.rate_limiter
+    assert isinstance(limiter, AIORateLimiter) and RATE_LIMIT_RETRIES == 3
+    assert limiter._max_retries == RATE_LIMIT_RETRIES
+
+
+@pytest.mark.parametrize(("key", "text"), [("duello", "si fa in due"), ("morra", "si gioca in due")])
+async def test_giochi_a_due_in_chat_privata(h, key, text):
+    await h.click(f"menu:{key}", chat={"id": 1, "type": "private"})
+    message = h.api.last("editMessageText").params["text"]
+    assert text in message and "🎮 GIOCHI" in message
 
 
 async def test_bravitutti_solo_morra(h):

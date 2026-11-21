@@ -20,7 +20,23 @@ from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
-RETRY_AFTER = timedelta(seconds=30)
+# Errore generale (es. DB irraggiungibile): nuovo tentativo dopo qualche secondo, senza martellare.
+RETRY_AFTER = timedelta(seconds=5)
+# Errore su una singola partita: nuovo tentativo quasi subito (per il duello è il "FUOCO!").
+RETRY_SOON = timedelta(seconds=2)
+
+
+def retry_floor(following: datetime | None, now: datetime, *, failed: bool = False) -> datetime | None:
+    """Prossima scadenza da programmare, senza mai ripartire subito su scadenze già passate.
+
+    Una scadenza passata ancora in sospeso (es. un "FUOCO!" non riuscito) o un errore
+    portano a un nuovo tentativo dopo RETRY_SOON, invece che a un ciclo continuo.
+    """
+    if failed and (following is None or following > now + RETRY_SOON):
+        return now + RETRY_SOON
+    if following is not None and following <= now:
+        return now + RETRY_SOON
+    return following
 
 
 class DeadlineTimer:

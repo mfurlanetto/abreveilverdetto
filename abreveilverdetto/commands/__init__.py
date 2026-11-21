@@ -15,13 +15,13 @@ from telegram.ext import ContextTypes
 from ..registry import MAIN, MenuCommand, Registry, SlashCommand
 from .accadde import accadde_oggi
 from .centocento import C100_ANSWER, bravitutti, c100_menu
-from .dizionario import parola, parola_command
-from .duello import DUEL_ACTION, duello_command, duello_menu
+from .dizionario import parola
+from .duello import DUEL_ACTION, duello_menu
 from .external import cocktail, comune, covid, nazione, pokemon
-from .fibonacci import fibonacci_command, fibonacci_menu
+from .fibonacci import fibonacci_menu
 from .images import MAGIC_PICK, bimbe, conte, magic, santi, torta
 from .montagna import montagna
-from .morra import MORRA_ACTION, morra_command, morra_menu
+from .morra import MORRA_ACTION, morra_menu
 from .quotes import CTS_SIZE, cts, lercio, quote_action, saluti
 from .trombin import trombin
 
@@ -82,36 +82,35 @@ COMMANDS = Registry(
         MenuCommand("dpcm", "📜 DPCM", quote_action("dpcm"), row=0),
         MenuCommand("conte", "🙇 CONTE", conte, row=1),
         MenuCommand("bimbe", "😻 BIMBE", bimbe, row=1),
-        MenuCommand("comune", "🏙 COMUNE", comune, row=1),
-        MenuCommand("covid", "🧪 COVID", covid, row=2),
+        MenuCommand("covid", "🧪 COVID", covid, row=1),
         MenuCommand("giurato", "🤦 GIURATO", quote_action("giurato"), row=2),
         MenuCommand("torta", "🥧 TORTA", torta, row=2),
-        MenuCommand("fibonacci", "🔢 FIBONACCI", fibonacci_menu, row=3),
-        MenuCommand("giochi", "🎮 GIOCHI", submenu("giochi", "🎮 Scegli un gioco:"), row=3, opens="giochi"),
+        MenuCommand("fibonacci", "🔢 FIBONACCI", fibonacci_menu, row=2),
         MenuCommand("ghesboro", "🦁 GHESBORO", quote_action("ghesboro"), row=3),
-        MenuCommand("pokemon", "🦕 POKEMON", pokemon, row=4),
-        MenuCommand("nazione", "🌍 NAZIONE", nazione, row=4),
-        MenuCommand("cocktail", "🍸 COCKTAIL", cocktail, row=5),
-        MenuCommand("santi", "👼 SANTI", santi, row=5),
-        MenuCommand("magic", "🃏 MAGIC", magic, row=5, callbacks=(MAGIC_PICK,)),
-        MenuCommand("lercio", "📰 LERCIO.IT", lercio, row=6),
-        MenuCommand("parola", "📖 PAROLA", parola, row=6),
-        MenuCommand("accaddeoggi", "📅 ACCADDE OGGI", accadde_oggi, row=6),
-        MenuCommand("montagna", "⛰ MONTAGNA", montagna, row=4),
+        MenuCommand("pokemon", "🦕 POKEMON", pokemon, row=3),
+        MenuCommand("cocktail", "🍸 COCKTAIL", cocktail, row=3),
+        MenuCommand("santi", "👼 SANTI", santi, row=4),
+        MenuCommand("magic", "🃏 MAGIC", magic, row=4, callbacks=(MAGIC_PICK,)),
+        MenuCommand("lercio", "📰 LERCIO.IT", lercio, row=4),
+        MenuCommand("parola", "📖 PAROLA", parola, row=5),
+        MenuCommand("accaddeoggi", "📅 ACCADDE OGGI", accadde_oggi, row=5),
+        MenuCommand("trombin", "📈 TROMBIN", trombin, row=5),
+        MenuCommand("giochi", "🎮 GIOCHI", submenu("giochi", "🎮 Scegli un gioco:"), row=6, opens="giochi"),
+        MenuCommand(
+            "geografia", "🗺 GEOGRAFIA", submenu("geografia", "🗺 Scegli cosa scoprire:"), row=6, opens="geografia"
+        ),
         # Sottomenu 🎮 GIOCHI
         MenuCommand("morra", "✊ MORRA", morra_menu, row=0, callbacks=(MORRA_ACTION,), group="giochi"),
         MenuCommand("duello", "🔫 DUELLO", duello_menu, row=0, callbacks=(DUEL_ACTION,), group="giochi"),
         MenuCommand("c100", "💯 💯 💯", c100_menu, row=0, callbacks=(C100_ANSWER,), group="giochi"),
+        # Sottomenu 🗺 GEOGRAFIA
+        MenuCommand("nazione", "🌍 NAZIONE", nazione, row=0, group="geografia"),
+        MenuCommand("comune", "🏙 COMUNE", comune, row=0, group="geografia"),
+        MenuCommand("montagna", "⛰ MONTAGNA", montagna, row=0, group="geografia"),
     ),
+    # Solo i comandi senza pulsante: /start apre il menu, /bravitutti è solo slash per scelta.
     slash=(
         SlashCommand(("start", "menu"), start, "Apri il menu dei comandi"),
-        SlashCommand(("fibonacci",), fibonacci_command, "Sequenza di Fibonacci casuale (max 10)"),
         SlashCommand(("bravitutti",), bravitutti, "Classifiche di 💯💯💯, morra e duello in questa chat"),
-        SlashCommand(("morra",), morra_command, "Sfida a morra cinese (rispondi a un messaggio per sfidare qualcuno)"),
-        SlashCommand(
-            ("duello",), duello_command, "Duello: spara per primo (rispondi a un messaggio per sfidare qualcuno)"
-        ),
-        SlashCommand(("parola",), parola_command, "Parola a caso dal Wikizionario con definizione"),
-        SlashCommand(("trombin",), trombin, "Indici di borsa e materie prime"),
     ),
 )

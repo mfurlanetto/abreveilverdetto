@@ -64,3 +64,16 @@ async def test_run_esegue_alla_scadenza_e_si_risveglia_per_una_scadenza_anticipa
         assert timer.next is None
     finally:
         task.cancel()
+
+
+def test_retry_floor():
+    from abreveilverdetto.deadlines import RETRY_SOON, retry_floor
+
+    later = T0 + timedelta(minutes=1)
+    assert retry_floor(None, T0) is None
+    assert retry_floor(later, T0) == later
+    assert retry_floor(T0 - timedelta(seconds=1), T0) == T0 + RETRY_SOON  # scadenza passata: niente ciclo continuo
+    assert retry_floor(later, T0, failed=True) == T0 + RETRY_SOON
+    assert retry_floor(None, T0, failed=True) == T0 + RETRY_SOON
+    soon = T0 + timedelta(seconds=1)
+    assert retry_floor(soon, T0, failed=True) == soon  # una scadenza ancora più vicina vince

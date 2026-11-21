@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from telegram import CallbackQuery, LinkPreviewOptions, Update
+from telegram import CallbackQuery, LinkPreviewOptions
 from telegram.ext import ContextTypes
 
 from ..services import RateLimitedError
@@ -41,7 +41,7 @@ def format_entry(entry: Entry) -> str:
 
 
 async def _random_word_message(context: ContextTypes.DEFAULT_TYPE) -> tuple[str, dict[str, Any]]:
-    """Testo e opzioni di invio, uguali per il pulsante del menu e per /parola."""
+    """Testo e opzioni di invio del messaggio con la parola."""
     d = deps(context)
     try:
         entries = await d.services.random_words()
@@ -55,9 +55,3 @@ async def parola(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -> No
     """Dal menu: il risultato sostituisce il messaggio del menu."""
     text, options = await _random_word_message(context)
     await query.edit_message_text(text, **options)
-
-
-async def parola_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """/parola: il risultato è un nuovo messaggio in risposta al comando."""
-    text, options = await _random_word_message(context)
-    await update.effective_message.reply_text(text, **options)

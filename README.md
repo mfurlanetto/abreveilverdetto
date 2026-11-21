@@ -7,44 +7,51 @@ Pensato per girare gratis su **Render** (web service Docker, webhook) con databa
 
 ## Comandi
 
-`/start` (o `/menu`) apre il menu a bottoni: saluti, CTS, DPCM, Conte, bimbe, comune (con meteo),
-COVID, giurato, torta, Fibonacci, 🎮 giochi (sottomenu con morra, duello e 💯💯💯), ghesboro, Pokémon, nazione, cocktail, santi, Magic, Lercio,
-parola (parola a caso dal Wikizionario con la sua definizione), accadde oggi (eventi in evidenza del giorno su Wikipedia),
-montagna (una vetta a caso nel mondo con foto, altitudine, nazione, catena e descrizione).
+`/start` (o `/menu`) apre il menu a bottoni: saluti, CTS, DPCM, Conte, bimbe, COVID, giurato, torta,
+Fibonacci, ghesboro, Pokémon, cocktail, santi, Magic, Lercio, parola (parola a caso dal Wikizionario con
+la sua definizione), accadde oggi (eventi in evidenza del giorno su Wikipedia),
+🎮 giochi (sottomenu con morra, duello e 💯💯💯),
+🗺 geografia (sottomenu con nazione, comune con meteo, e montagna: una vetta a caso nel mondo con foto,
+altitudine, nazione, catena e descrizione),
+trombin (indici di borsa e materie prime: ultimo valore e variazione % sulla chiusura precedente).
+
+Regola: ogni funzione è un pulsante; i comandi slash restano solo dove un pulsante non basta.
 
 | Comando | |
 |---|---|
-| `/fibonacci N` | Sequenza di Fibonacci di lunghezza casuale fino a N (max 10) |
-| `/bravitutti` | Classifiche della chat: vittorie a 💯💯💯, vittorie/sconfitte a morra cinese e duello |
-| `/morra` | Sfida a morra cinese; in risposta al messaggio di qualcuno sfida solo quella persona |
-| `/duello` | Sfida a duello; in risposta al messaggio di qualcuno sfida solo quella persona |
-| `/parola` | Parola a caso dal Wikizionario con definizione (come il pulsante 📖 PAROLA) |
-| `/trombin` | Indici di borsa e materie prime: ultimo valore e variazione % sulla chiusura precedente |
+| `/start`, `/menu` | Apre il menu a bottoni |
+| `/bravitutti` | Classifiche della chat: vittorie a 💯💯💯, vittorie/sconfitte a morra cinese e duello (solo slash, per scelta) |
 | (testo con "15" e "18") | Risposta sulla briscola |
 
 ### ✊ Morra cinese
-Si gioca in gruppo tra due persone (pulsante ✊ MORRA o `/morra`). La sfida dal pulsante è aperta:
-accetta il primo che preme ACCETTO; `/morra` in risposta al messaggio di qualcuno sfida solo lui.
+Si gioca in gruppo tra due persone (🎮 GIOCHI → ✊ MORRA). La sfida è aperta: accetta il primo che
+preme ACCETTO.
 Al meglio di 3: vince chi arriva a 2 round vinti, i round pari si ripetono e non contano.
 Le mosse restano segrete: chi sceglie lo vede solo nella notifica del bottone, il messaggio
 pubblico dice soltanto chi ha già scelto.
 
 Scadenze: la sfida va accettata entro 5 minuti, poi ogni round va giocato entro 60 secondi.
 Allo scadere la partita è annullata (non conta in `/bravitutti`) e il bot cancella il proprio
-messaggio; il `/morra` di chi sfida resta. Se Telegram non consente la cancellazione, il messaggio
+messaggio. Se Telegram non consente la cancellazione, il messaggio
 diventa un avviso "⌛". Le scadenze sono salvate nel DB: un timer (`deadlines.py`) si sveglia solo
 all'ora della prossima scadenza, senza interrogare il DB a intervalli (Neon resta sospeso quando
-non serve), e alla ripartenza del bot gestisce quelle maturate mentre era spento. Le battute finali sono in
+non serve), e alla ripartenza del bot gestisce quelle maturate mentre era spento. Le partite in
+scadenza sono gestite in parallelo e ognuna per conto suo: un errore su una non ritarda le altre.
+
+Limiti di Telegram (circa 20 messaggi al minuto per gruppo): le chiamate passano da `AIORateLimiter`
+di python-telegram-bot, che le accoda invece di farle fallire e ritenta fino a 3 volte dopo un
+`RetryAfter`. Le battute finali sono in
 `data/morra_battute.json` (segnaposto `{vincitore}` e `{perdente}`).
 
 ### 🔫 Duello
-Come la morra si gioca in gruppo tra due persone (🎮 GIOCHI → 🔫 DUELLO o `/duello`), al meglio di 3,
+Come la morra si gioca in gruppo tra due persone (🎮 GIOCHI → 🔫 DUELLO), al meglio di 3,
 e la sfida va accettata entro 5 minuti. In ogni round il bot scrive "pronti…" e, dopo un ritardo
 casuale tra 3 e 10 secondi, "🔥 FUOCO!": il primo che preme 🔫 SPARA prende il punto (con il tempo di
 reazione), chi spara prima del via regala il punto all'altro. Se nessuno spara entro 10 secondi dal via
 il duello è annullato e il messaggio cancellato. Il "FUOCO!" lo dà il timer delle scadenze: un colpo vale
 solo dopo che il via è stato registrato, e il bottone porta il numero del round, così un click tardivo
-non conta come falsa partenza nel round successivo. Conta l'ordine di arrivo dei click al server, quindi
+non conta come falsa partenza nel round successivo. Il "FUOCO!" vale solo dopo essere stato mostrato:
+se il messaggio non si può modificare il round non parte e il timer riprova dopo 2 secondi. Conta l'ordine di arrivo dei click al server, quindi
 anche la rete di ognuno. Battute finali in `data/duello_battute.json`.
 
 ### 💯💯💯
@@ -67,12 +74,12 @@ abreveilverdetto/
     morra.py        morra cinese: sfida, mosse segrete, risultato
     duello.py       duello: sfida, "FUOCO!" dal timer, colpi
     giochi.py       scadenze comuni dei giochi per il timer
-    fibonacci.py    Fibonacci (menu e /fibonacci)
+    fibonacci.py    Fibonacci (menu con richiesta del numero massimo)
     chat.py         messaggi liberi (15 e 18, risposte a Fibonacci)
     dizionario.py   parola a caso dal Wikizionario
     accadde.py      eventi in evidenza del giorno da Wikipedia
     montagna.py     montagna a caso: foto, dati e attribuzioni
-    trombin.py      /trombin: indici di borsa e materie prime
+    trombin.py      indici di borsa e materie prime
   registry.py   dichiarazione e validazione dei comandi (con sottomenu)
   telegram_io.py dipendenze condivise e invio di media con cache dei file_id
   errors.py     gestione degli errori
@@ -83,7 +90,7 @@ abreveilverdetto/
   wiktionary.py estrazione delle definizioni italiane dal wikitext del Wikizionario
   onthisday.py  feed "accadde oggi" di Wikipedia: lettura e nome/URL della pagina del giorno
   mountains.py  montagne: dati da data/mountains.json, descrizione e foto (con licenza) da Wikipedia
-  markets.py    strumenti di /trombin e lettura delle quotazioni di Yahoo Finance
+  markets.py    strumenti di TROMBIN e lettura delle quotazioni di Yahoo Finance
   services.py   API esterne con timeout e cache (comuni, COVID, Pokédex, meteo, cocktail, Wikizionario, Wikipedia, Yahoo Finance)
   storage.py    Postgres (produzione) / memoria (sviluppo), stessa interfaccia e stessi test
   schema.sql    schema del DB, applicato in modo idempotente a ogni avvio
