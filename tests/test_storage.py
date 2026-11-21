@@ -147,3 +147,25 @@ async def test_morra_purge(storage):
     assert await storage.purge_games(NOW - timedelta(days=7)) == 1
     assert await storage.get_morra(old.id) is None
     assert await storage.get_morra(new.id) is not None
+
+
+async def test_morra_scadenze_e_messaggio(storage):
+    g = await storage.create_morra(CHAT, 1, "Ada", None, None, NOW)
+    assert g.deadline == NOW + morra_rules.ACCEPT_TIMEOUT
+    await storage.set_morra_message(g.id, 4242)
+    assert (await storage.get_morra(g.id)).message_id == 4242
+
+    playing = await storage.create_morra(CHAT, 1, "Ada", None, None, NOW)
+    await storage.apply_morra(playing.id, lambda x: (morra_rules.accept(x, 2, "Bob", NOW), None))
+    assert (await storage.get_morra(playing.id)).deadline == NOW + morra_rules.MOVE_TIMEOUT
+    assert await storage.next_morra_deadline() == NOW + morra_rules.MOVE_TIMEOUT
+
+    assert await storage.expire_morra(NOW + timedelta(seconds=59)) == []
+    expired = await storage.expire_morra(NOW + timedelta(seconds=60))
+    assert [e.id for e in expired] == [playing.id] and expired[0].status == morra_rules.EXPIRED
+    assert await storage.expire_morra(NOW + timedelta(seconds=60)) == []  # una volta sola
+    assert await storage.next_morra_deadline() == NOW + morra_rules.ACCEPT_TIMEOUT
+
+    expired = await storage.expire_morra(NOW + morra_rules.ACCEPT_TIMEOUT)
+    assert [(e.id, e.message_id) for e in expired] == [(g.id, 4242)]
+    assert await storage.next_morra_deadline() is None

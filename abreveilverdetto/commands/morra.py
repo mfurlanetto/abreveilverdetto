@@ -3,6 +3,11 @@
 Le mosse restano segrete: chi preme un bottone vede la propria scelta solo nella
 notifica del bottone (answerCallbackQuery), il messaggio pubblico dice solo se
 ha già scelto. Lo stato vive nello storage (regge riavvii e scale-to-zero).
+
+Scadenze: 5 minuti per accettare, 60 secondi per ogni mossa. Allo scadere la
+partita è annullata e il bot cancella il proprio messaggio (expire_due_games,
+chiamata dal timer di deadlines.py); se Telegram non lo consente il messaggio
+viene invece modificato in "⌛ …".
 """
 
 from __future__ import annotations
@@ -10,16 +15,17 @@ from __future__ import annotations
 import logging
 import random
 from dataclasses import replace
+from datetime import datetime
 
-from telegram import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update
+from telegram import Bot, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update
 from telegram.constants import ChatType
-from telegram.error import BadRequest
+from telegram.error import BadRequest, TelegramError
 from telegram.ext import ContextTypes
 
 from .. import morra
 from ..morra import MOVES, MorraError, MorraGame, RoundResult
 from ..registry import Callback
-from ..telegram_io import HTML, deps, display_name
+from ..telegram_io import HTML, Deps, deps, display_name
 from ..text import esc
 
 logger = logging.getLogger(__name__)
@@ -48,11 +54,16 @@ def render(game: MorraGame, result: RoundResult | None, rng: random.Random, batt
     c, o = esc(game.challenger_name), esc(game.opponent_name or "")
     if game.status == morra.OPEN:
         who = f"{c} sfida {esc(game.target_name)}!" if game.target_name else "A breve qualcuno accetterà la sfida."
-        return f"{TITLE}\n{who}\n\n<i>Al meglio di 3 · la sfida scade dopo 10 minuti senza mosse.</i>"
+        accept = int(morra.ACCEPT_TIMEOUT.total_seconds() // 60)
+        move = int(morra.MOVE_TIMEOUT.total_seconds())
+        return (
+            f"{TITLE}\n{who}\n\n<i>Al meglio di 3 · la sfida scade tra {accept} minuti,"
+            f" poi {move} secondi per ogni mossa.</i>"
+        )
     if game.status == morra.CANCELLED:
         return f"{TITLE}\nSfida annullata da {c}."
     if game.status == morra.EXPIRED:
-        return f"{TITLE}\n⌛ Sfida scaduta."
+        return f"{TITLE}\n⌛ {esc(morra.expired_notice(game))}."
 
     lines = [f"{TITLE}\n<b>{c} {game.challenger_score} – {game.opponent_score} {o}</b>"]
     lines += [_round_line(i, rc, ro, game) for i, (rc, ro) in enumerate(game.rounds, start=1)]
@@ -70,7 +81,8 @@ def render(game: MorraGame, result: RoundResult | None, rng: random.Random, batt
     def mark(chosen: bool) -> str:
         return "✅" if chosen else "⏳"
 
-    lines.append(f"\nRound {len(game.rounds) + 1}: scegliete la vostra mossa (resta segreta).")
+    seconds = int(morra.MOVE_TIMEOUT.total_seconds())
+    lines.append(f"\nRound {len(game.rounds) + 1}: scegliete la vostra mossa entro {seconds} secondi (resta segreta).")
     lines.append(f"{c}: {mark(game.challenger_choice is not None)} · {o}: {mark(game.opponent_choice is not None)}")
     return "\n".join(lines)
 
@@ -111,6 +123,7 @@ async def morra_menu(query: CallbackQuery, context: ContextTypes.DEFAULT_TYPE) -
     game = await d.storage.create_morra(query.message.chat.id, user.id, display_name(user), None, None, d.now())
     battute = d.content.texts["morra_battute"]
     await query.edit_message_text(render(game, None, d.rng, battute), parse_mode=HTML, reply_markup=keyboard(game))
+    await _track(d, game, query.message.message_id)
 
 
 async def morra_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -133,7 +146,45 @@ async def morra_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         d.now(),
     )
     battute = d.content.texts["morra_battute"]
-    await message.reply_text(render(game, None, d.rng, battute), parse_mode=HTML, reply_markup=keyboard(game))
+    sent = await message.reply_text(render(game, None, d.rng, battute), parse_mode=HTML, reply_markup=keyboard(game))
+    await _track(d, game, sent.message_id)
+
+
+async def _track(d: Deps, game: MorraGame, message_id: int) -> None:
+    """Salva il messaggio da cancellare alla scadenza e sveglia il timer."""
+    await d.storage.set_morra_message(game.id, message_id)
+    if d.morra_timer is not None:
+        d.morra_timer.schedule(game.deadline)
+
+
+async def remove_expired(bot: Bot, game: MorraGame, battute: list[str]) -> None:
+    """Cancella il messaggio di una partita scaduta; se non si può, lo trasforma in "⌛ …".
+
+    Telegram consente ai bot di cancellare i propri messaggi nei gruppi entro 48 ore
+    (https://core.telegram.org/bots/api#deletemessage): qui si parla di minuti, ma il
+    messaggio potrebbe essere già stato cancellato a mano.
+    """
+    if game.message_id is None:
+        return
+    try:
+        await bot.delete_message(game.chat_id, game.message_id)
+        return
+    except TelegramError as exc:
+        logger.info("Messaggio della morra %d non cancellato: %s", game.id, exc)
+    try:
+        await bot.edit_message_text(
+            render(game, None, random.Random(), battute), game.chat_id, game.message_id, parse_mode=HTML
+        )
+    except TelegramError:
+        logger.info("Messaggio della morra %d non modificabile", game.id)
+
+
+async def expire_due_games(bot: Bot, d: Deps, now: datetime) -> datetime | None:
+    """Annulla le partite scadute, ne cancella i messaggi; restituisce la scadenza successiva."""
+    battute = d.content.texts["morra_battute"]
+    for game in await d.storage.expire_morra(now):
+        await remove_expired(bot, game, battute)
+    return await d.storage.next_morra_deadline()
 
 
 async def _edit(query: CallbackQuery, text: str, markup: InlineKeyboardMarkup | None) -> None:
@@ -157,10 +208,13 @@ async def on_morra(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if game is None:
         await query.answer("Partita non trovata")
         return
-    if game.is_expired(now):
-        await query.answer("Sfida scaduta (10 minuti senza mosse)")
-        expired = replace(game, status=morra.EXPIRED)
-        await _edit(query, render(expired, None, d.rng, battute), None)
+    if game.is_expired(now):  # il timer non è ancora passato: si annulla qui
+        await query.answer(morra.expired_notice(game))
+        try:
+            expired, _ = await d.storage.apply_morra(game_id, lambda g: (morra.expire(g, now), None))
+        except MorraError:  # nel frattempo il timer l'ha già annullata
+            return
+        await remove_expired(query.get_bot(), replace(expired, message_id=query.message.message_id), battute)
         return
 
     try:
@@ -182,6 +236,8 @@ async def on_morra(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await query.answer(notice)
     await _edit(query, render(new, result, d.rng, battute), keyboard(new))
+    if d.morra_timer is not None:
+        d.morra_timer.schedule(new.deadline)
 
 
 MORRA_ACTION = Callback("morra", r"\d+:[axrps]", on_morra)

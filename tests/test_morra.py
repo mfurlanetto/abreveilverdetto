@@ -96,14 +96,46 @@ def test_vince_l_avversario_due_a_zero():
     assert g.status == morra.FINISHED and g.winner == (B, "Bob")
 
 
-def test_scadenza_dieci_minuti_dall_ultima_azione():
+def test_sfida_aperta_scade_dopo_5_minuti():
+    g = open_game()
+    assert not g.is_expired(T0 + timedelta(minutes=4, seconds=59))
+    assert g.is_expired(T0 + timedelta(minutes=5))
+    with pytest.raises(MorraError, match="nessuno ha accettato"):
+        morra.accept(g, B, "Bob", T0 + timedelta(minutes=5))
+
+
+def test_mossa_entro_60_secondi_e_round_che_rinnova_il_tempo():
+    g = playing()  # accettata a T0
+    assert g.deadline == T0 + timedelta(seconds=60)
+    g, _ = morra.choose(g, A, ROCK, T0 + timedelta(seconds=30))
+    assert g.deadline == T0 + timedelta(seconds=60)  # una sola mossa non rinnova il tempo
+    with pytest.raises(MorraError, match="tempo scaduto"):
+        morra.choose(g, B, PAPER, T0 + timedelta(seconds=60))
+    g, result = morra.choose(g, B, ROCK, T0 + timedelta(seconds=50))  # pari: il round si ripete
+    assert result.winner == 0 and g.deadline == T0 + timedelta(seconds=110)
+    g, _ = morra.choose(g, A, ROCK, T0 + timedelta(seconds=100))
+    g, _ = morra.choose(g, B, SCISSORS, T0 + timedelta(seconds=105))
+    assert g.deadline == T0 + timedelta(seconds=165)
+
+
+def test_fine_partita_e_annullamento_tolgono_la_scadenza():
     g = playing()
-    assert not g.is_expired(T0 + timedelta(minutes=9, seconds=59))
-    assert g.is_expired(T0 + timedelta(minutes=10))
-    with pytest.raises(MorraError, match="scaduta"):
-        morra.choose(g, A, ROCK, T0 + timedelta(minutes=11))
-    g2, _ = morra.choose(g, A, ROCK, T0 + timedelta(minutes=5))
-    assert not g2.is_expired(T0 + timedelta(minutes=14))  # la mossa ha rinnovato il tempo
+    for t in (1, 2):
+        g, _ = morra.choose(g, A, ROCK, T0 + timedelta(seconds=t))
+        g, _ = morra.choose(g, B, SCISSORS, T0 + timedelta(seconds=t))
+    assert g.status == morra.FINISHED and g.deadline is None and not g.is_expired(T0 + timedelta(days=1))
+    assert morra.cancel(open_game(), A, T0).deadline is None
+
+
+def test_expire():
+    with pytest.raises(MorraError, match="non è scaduta"):
+        morra.expire(playing(), T0)
+    g = morra.expire(playing(), T0 + timedelta(seconds=60))
+    assert (g.status, g.deadline) == (morra.EXPIRED, None)
+    assert morra.expired_notice(g) == "Partita annullata: tempo scaduto per la mossa"
+    assert morra.expired_notice(open_game()) == "Sfida scaduta: nessuno ha accettato in tempo"
+    with pytest.raises(MorraError, match="tempo scaduto"):
+        morra.choose(g, A, ROCK, T0)
 
 
 def test_mossa_sconosciuta():

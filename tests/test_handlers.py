@@ -567,15 +567,52 @@ async def test_morra_annullata(h):
     assert last_answer(h) == "Sfida annullata"
 
 
-async def test_morra_scaduta(h):
+async def test_morra_scaduta_al_click_cancella_il_messaggio(h):
     from datetime import datetime, timedelta
     from zoneinfo import ZoneInfo
 
-    old = datetime.now(ZoneInfo("Europe/Rome")) - timedelta(minutes=11)
+    old = datetime.now(ZoneInfo("Europe/Rome")) - timedelta(minutes=6)
     game = await h.storage.create_morra(CHAT, 1, "Alice", None, None, old)
     await h.click(f"morra:{game.id}:a", user=BOB)
-    assert "scaduta" in last_answer(h)
-    assert "⌛ Sfida scaduta." in h.api.last("editMessageText").params["text"]
+    assert last_answer(h) == "Sfida scaduta: nessuno ha accettato in tempo"
+    assert h.api.last("deleteMessage").params == {"chat_id": CHAT, "message_id": 77}
+    assert (await h.storage.get_morra(game.id)).status == "expired"
+    await h.click(f"morra:{game.id}:a", user=BOB)
+    assert last_answer(h) == "Sfida scaduta: nessuno ha accettato in tempo"
+
+
+async def test_morra_timer_cancella_i_messaggi_scaduti(h):
+    from datetime import timedelta
+
+    from abreveilverdetto import morra
+    from abreveilverdetto.commands.morra import expire_due_games
+
+    d = h.app.bot_data["deps"]
+    await h.click("menu:morra")  # sfida aperta nel messaggio 77
+    await h.text("/morra")  # sfida aperta in un nuovo messaggio del bot
+    assert await h.storage.expire_morra(d.now()) == []  # niente di scaduto ancora
+
+    later = d.now() + morra.ACCEPT_TIMEOUT + timedelta(seconds=1)
+    assert await expire_due_games(h.app.bot, d, later) is None
+    deleted = [c.params["message_id"] for c in h.api.calls if c.method == "deleteMessage"]
+    assert len(deleted) == 2 and 77 in deleted
+
+
+async def test_morra_messaggio_non_cancellabile_diventa_avviso(h):
+    from datetime import timedelta
+
+    from abreveilverdetto import morra
+    from abreveilverdetto.commands.morra import expire_due_games
+
+    d = h.app.bot_data["deps"]
+    await h.click("menu:morra")
+    accept = morra_buttons(h)[0]
+    await h.click(accept, user=BOB)  # partita iniziata: 60 secondi per muovere
+    h.api.fail["deleteMessage"] = "Bad Request: message can't be deleted"
+    await expire_due_games(h.app.bot, d, d.now() + morra.MOVE_TIMEOUT + timedelta(seconds=1))
+    edited = h.api.last("editMessageText").params
+    assert edited["message_id"] == 77
+    assert "⌛ Partita annullata: tempo scaduto per la mossa." in edited["text"]
 
 
 async def test_morra_in_chat_privata(h):

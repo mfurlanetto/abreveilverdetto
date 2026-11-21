@@ -64,6 +64,14 @@ CREATE TABLE IF NOT EXISTS morra_games (
     updated_at        TIMESTAMPTZ NOT NULL
 );
 CREATE INDEX IF NOT EXISTS morra_games_created_at_idx ON morra_games (created_at);
+-- Scadenza della prossima azione e messaggio da cancellare (aggiunte dopo: ALTER idempotenti).
+ALTER TABLE morra_games ADD COLUMN IF NOT EXISTS deadline TIMESTAMPTZ;
+ALTER TABLE morra_games ADD COLUMN IF NOT EXISTS message_id BIGINT;
+-- Partite aperte create prima delle scadenze: valeva "10 minuti dall'ultima mossa".
+UPDATE morra_games SET deadline = updated_at + INTERVAL '10 minutes'
+    WHERE deadline IS NULL AND status IN ('open', 'playing');
+CREATE INDEX IF NOT EXISTS morra_games_deadline_idx ON morra_games (deadline)
+    WHERE status IN ('open', 'playing');
 
 -- Morra cinese: vittorie e sconfitte per utente e chat (per /bravitutti).
 CREATE TABLE IF NOT EXISTS morra_stats (

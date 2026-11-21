@@ -15,7 +15,7 @@ from importlib import resources
 from typing import Any, Protocol
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from .morra import FINISHED, OPEN, MorraError, MorraGame, RoundResult
+from .morra import ACCEPT_TIMEOUT, EXPIRED, FINISHED, OPEN, MorraError, MorraGame, RoundResult
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +91,9 @@ class Storage(Protocol):
     async def get_morra(self, game_id: int) -> MorraGame | None: ...
     async def apply_morra(self, game_id: int, action: MorraAction) -> tuple[MorraGame, RoundResult | None]: ...
     async def morra_leaderboard(self, chat_id: int, limit: int = 20) -> list[tuple[str, int, int]]: ...
+    async def set_morra_message(self, game_id: int, message_id: int) -> None: ...
+    async def expire_morra(self, now: datetime) -> list[MorraGame]: ...
+    async def next_morra_deadline(self) -> datetime | None: ...
 
 
 # --------------------------------------------------------------------------------------
@@ -204,6 +207,7 @@ class MemoryStorage:
                 updated_at=now,
                 target_id=target_id,
                 target_name=target_name,
+                deadline=now + ACCEPT_TIMEOUT,
             )
             self._next_morra += 1
             self._morra[game.id] = game
@@ -235,6 +239,24 @@ class MemoryStorage:
         rows = [v for (cid, _), v in self._morra_stats.items() if cid == chat_id]
         rows.sort(key=lambda r: (-r[1], r[2], r[0]))
         return rows[:limit]
+
+    async def set_morra_message(self, game_id: int, message_id: int) -> None:
+        async with self._lock:
+            if game_id in self._morra:
+                self._morra[game_id] = replace(self._morra[game_id], message_id=message_id)
+
+    async def expire_morra(self, now: datetime) -> list[MorraGame]:
+        async with self._lock:
+            expired = []
+            for gid, game in self._morra.items():
+                if game.is_active and game.deadline is not None and game.deadline <= now:
+                    self._morra[gid] = replace(game, status=EXPIRED, updated_at=now, deadline=None)
+                    expired.append(self._morra[gid])
+            return expired
+
+    async def next_morra_deadline(self) -> datetime | None:
+        deadlines = [g.deadline for g in self._morra.values() if g.is_active and g.deadline is not None]
+        return min(deadlines, default=None)
 
     async def get_file_id(self, key: str) -> str | None:
         return self._file_ids.get(key)
@@ -422,8 +444,9 @@ class PostgresStorage:
         row = await self.pool.fetchrow(
             """
             INSERT INTO morra_games
-                (chat_id, challenger_id, challenger_name, target_id, target_name, status, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+                (chat_id, challenger_id, challenger_name, target_id, target_name, status,
+                 created_at, updated_at, deadline)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $7, $8)
             RETURNING *
             """,
             chat_id,
@@ -433,6 +456,7 @@ class PostgresStorage:
             target_name,
             OPEN,
             now,
+            now + ACCEPT_TIMEOUT,
         )
         return _morra_from_row(row)
 
@@ -453,7 +477,8 @@ class PostgresStorage:
                 UPDATE morra_games SET
                     status = $2, opponent_id = $3, opponent_name = $4,
                     challenger_choice = $5, opponent_choice = $6,
-                    challenger_score = $7, opponent_score = $8, history = $9, updated_at = $10
+                    challenger_score = $7, opponent_score = $8, history = $9, updated_at = $10,
+                    deadline = $11
                 WHERE id = $1
                 """,
                 game_id,
@@ -466,6 +491,7 @@ class PostgresStorage:
                 new.opponent_score,
                 new.history,
                 new.updated_at,
+                new.deadline,
             )
             if game.status != FINISHED and new.status == FINISHED:
                 (wid, wname), (lid, lname) = new.winner, new.loser
@@ -497,6 +523,25 @@ class PostgresStorage:
             limit,
         )
         return [(r["user_name"], r["wins"], r["losses"]) for r in rows]
+
+    async def set_morra_message(self, game_id: int, message_id: int) -> None:
+        await self.pool.execute("UPDATE morra_games SET message_id = $2 WHERE id = $1", game_id, message_id)
+
+    async def expire_morra(self, now: datetime) -> list[MorraGame]:
+        # Un solo UPDATE atomico: con più worker ogni partita scade (e viene cancellata) una volta.
+        rows = await self.pool.fetch(
+            """
+            UPDATE morra_games SET status = $2, updated_at = $1, deadline = NULL
+            WHERE status IN ('open', 'playing') AND deadline <= $1
+            RETURNING *
+            """,
+            now,
+            EXPIRED,
+        )
+        return [_morra_from_row(r) for r in rows]
+
+    async def next_morra_deadline(self) -> datetime | None:
+        return await self.pool.fetchval("SELECT min(deadline) FROM morra_games WHERE status IN ('open', 'playing')")
 
     async def get_file_id(self, key: str) -> str | None:
         return await self.pool.fetchval("SELECT file_id FROM media_file_ids WHERE media_key = $1", key)

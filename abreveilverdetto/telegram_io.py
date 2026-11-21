@@ -16,6 +16,7 @@ from telegram.error import BadRequest, TelegramError
 from telegram.ext import ContextTypes
 
 from .content import Content
+from .deadlines import DeadlineTimer
 from .services import Services
 from .settings import Settings
 from .storage import Storage
@@ -33,6 +34,8 @@ class Deps:
     storage: Storage
     services: Services
     rng: random.Random
+    # Svegliato a ogni nuova scadenza della morra (vedi deadlines.py); None nei contesti senza timer.
+    morra_timer: DeadlineTimer | None = None
 
     def now(self) -> datetime:
         return datetime.now(self.settings.timezone)
