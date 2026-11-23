@@ -20,7 +20,7 @@ Regola: ogni funzione è un pulsante; i comandi slash restano solo dove un pulsa
 | Comando | |
 |---|---|
 | `/start`, `/menu` | Apre il menu a bottoni |
-| `/bravitutti` | Classifiche della chat: vittorie a 💯💯💯, vittorie/sconfitte a morra cinese e duello (solo slash, per scelta) |
+| `/bravitutti` | Classifiche della chat: vittorie a 💯💯💯, vittorie/sconfitte a morra cinese e duello, top 10 dei "diti più veloci" del duello (solo slash, per scelta) |
 | (testo con "15" e "18") | Risposta sulla briscola |
 
 ### ✊ Morra cinese
@@ -53,6 +53,8 @@ solo dopo che il via è stato registrato, e il bottone porta il numero del round
 non conta come falsa partenza nel round successivo. Il "FUOCO!" vale solo dopo essere stato mostrato:
 se il messaggio non si può modificare il round non parte e il timer riprova dopo 2 secondi. Conta l'ordine di arrivo dei click al server, quindi
 anche la rete di ognuno. Battute finali in `data/duello_battute.json`.
+Ogni colpo valido aggiorna il record personale di reazione (anche se il duello poi viene annullato):
+`/bravitutti` mostra la top 10 "DITI PIÙ VELOCI" della chat. Le falsi partenze non hanno un tempo.
 
 ### 💯💯💯
 Ogni tiro vale un multiplo di 5 tra 5 e 100. Dopo il primo tiro si può tentare un secondo giro:

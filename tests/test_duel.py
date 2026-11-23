@@ -136,3 +136,11 @@ def test_annulla():
 @pytest.mark.parametrize("r", [Round(1, duel.SHOT, 420), Round(2, duel.FALSE_START), Round(2, duel.SHOT, 0)])
 def test_round_encode_decode(r):
     assert Round.decode(r.encode()) == r
+
+
+def test_sezione_diti_piu_veloci():
+    from abreveilverdetto.commands.centocento import _fastest
+
+    text = _fastest([("Alice", 182), ("Bob <3", 1450)])
+    assert text.startswith("<b>DITI PIÙ VELOCI 🔫</b>")
+    assert " 1. Alice:   0,182 s" in text and " 2. Bob &lt;3:  1,450 s" in text

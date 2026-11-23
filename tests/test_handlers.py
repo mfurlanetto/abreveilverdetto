@@ -645,6 +645,7 @@ async def test_duello_partita_completa_falsa_partenza_e_classifica(h):
     await h.text("/bravitutti")
     board = h.api.last("sendMessage").params["text"]
     assert "<b>DUELLO 🔫</b> (V vinte, S perse)" in board and "Bob &lt;3:" in board
+    assert "<b>DITI PIÙ VELOCI 🔫</b>" in board and " 1. Bob &lt;3:" in board
 
 
 async def test_duello_nessuno_spara_cancella_il_messaggio(h):
