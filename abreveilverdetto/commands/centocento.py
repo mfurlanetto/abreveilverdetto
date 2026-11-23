@@ -113,7 +113,8 @@ async def bravitutti(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     c100 = await d.storage.leaderboard(chat_id)
     morra = await d.storage.morra_leaderboard(chat_id)
     duels = await d.storage.duel_leaderboard(chat_id)
-    if not c100 and not morra and not duels:
+    fastest = await d.storage.fastest_fingers(chat_id)
+    if not c100 and not morra and not duels and not fastest:
         await update.effective_message.reply_text("Nessuna vittoria registrata in questa chat. Ancora.")
         return
 
@@ -127,7 +128,20 @@ async def bravitutti(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         sections.append(_wins_losses("MORRA CINESE ✊✋✌️", morra))
     if duels:
         sections.append(_wins_losses("DUELLO 🔫", duels))
+    if fastest:
+        sections.append(_fastest(fastest))
     await update.effective_message.reply_text("\n\n".join(sections), parse_mode=HTML)
+
+
+def _fastest(rows: list[tuple[str, int]]) -> str:
+    """Top 10 dei record di reazione al "FUOCO!" del duello."""
+    names = [_short(name) for name, _ in rows]
+    width = max(len(n) for n in names) + 2
+    seconds = [f"{ms / 1000:.3f}".replace(".", ",") for _, ms in rows]
+    lines = [
+        f"{i:>2}. {n + ':':<{width}}{sec:>6} s" for i, (n, sec) in enumerate(zip(names, seconds, strict=True), start=1)
+    ]
+    return f"<b>DITI PIÙ VELOCI 🔫</b> (record di reazione al FUOCO!)\n<pre>{esc(chr(10).join(lines))}</pre>"
 
 
 def _wins_losses(title: str, rows: list[tuple[str, int, int]]) -> str:

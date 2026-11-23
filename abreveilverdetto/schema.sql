@@ -116,3 +116,5 @@ CREATE TABLE IF NOT EXISTS duel_stats (
     losses    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (chat_id, user_id)
 );
+-- Record personale di reazione al "FUOCO!" (ms), per "DITI PIÙ VELOCI" in /bravitutti.
+ALTER TABLE duel_stats ADD COLUMN IF NOT EXISTS best_ms INTEGER;

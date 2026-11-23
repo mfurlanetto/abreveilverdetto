@@ -204,3 +204,34 @@ async def test_duello_purge(storage):
     old = await storage.create_duel(CHAT, 1, "Ada", None, None, NOW - timedelta(days=10))
     await storage.purge_games(NOW - timedelta(days=7))
     assert await storage.get_duel(old.id) is None
+
+
+async def test_duello_diti_piu_veloci(storage):
+    from abreveilverdetto import duel
+
+    delay = timedelta(seconds=5)
+
+    async def round_won(game, shooter, ms):
+        fire_at = game.deadline
+        game, _ = await storage.apply_duel(game.id, lambda x: (duel.tick(x, fire_at), None))
+        shot_at = fire_at + timedelta(milliseconds=ms)
+        game, _ = await storage.apply_duel(game.id, lambda x: duel.shoot(x, shooter, x.round, shot_at, delay))
+        return game
+
+    g = await storage.create_duel(CHAT, 1, "Ada", None, None, NOW)
+    g, _ = await storage.apply_duel(g.id, lambda x: (duel.accept(x, 2, "Bob", NOW, delay), None))
+    g = await round_won(g, 1, 450)
+    assert await storage.fastest_fingers(CHAT) == [("Ada", 450)]
+    assert await storage.duel_leaderboard(CHAT) == []  # duello non finito: niente vittorie, ma il record c'è
+    g, _ = await storage.apply_duel(g.id, lambda x: duel.shoot(x, 2, x.round, NOW, delay))  # falsa partenza di Bob
+    assert await storage.fastest_fingers(CHAT) == [("Ada", 450)]  # i punti regalati non hanno un tempo
+    assert g.status == duel.FINISHED
+
+    g2 = await storage.create_duel(CHAT, 2, "Bob", None, None, NOW)
+    g2, _ = await storage.apply_duel(g2.id, lambda x: (duel.accept(x, 1, "Ada", NOW, delay), None))
+    g2 = await round_won(g2, 1, 900)  # più lento del record: resta 450
+    g2 = await round_won(g2, 2, 210)
+    assert await storage.fastest_fingers(CHAT) == [("Bob", 210), ("Ada", 450)]
+    assert await storage.fastest_fingers(CHAT, limit=1) == [("Bob", 210)]
+    assert await storage.fastest_fingers(CHAT + 1) == []
+    assert await storage.duel_leaderboard(CHAT) == [("Ada", 1, 0), ("Bob", 0, 1)]

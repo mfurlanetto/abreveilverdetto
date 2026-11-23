@@ -113,6 +113,7 @@ class Storage(Protocol):
     async def due_duels(self, now: datetime) -> list[DuelGame]: ...
     async def next_duel_deadline(self) -> datetime | None: ...
     async def duel_leaderboard(self, chat_id: int, limit: int = 20) -> list[tuple[str, int, int]]: ...
+    async def fastest_fingers(self, chat_id: int, limit: int = 10) -> list[tuple[str, int]]: ...
 
 
 # --------------------------------------------------------------------------------------
@@ -139,7 +140,8 @@ class MemoryStorage:
         self._duels: dict[int, DuelGame] = {}
         self._duel_created: dict[int, datetime] = {}
         self._next_duel = 1
-        self._duel_stats: dict[tuple[int, int], tuple[str, int, int]] = {}
+        # (chat_id, user_id) -> [nome, vittorie, sconfitte, record ms o None]
+        self._duel_stats: dict[tuple[int, int], list] = {}
 
     async def setup(self) -> None:
         logger.warning("DATABASE_URL non impostato: uso storage in memoria (dati persi al riavvio)")
@@ -321,12 +323,16 @@ class MemoryStorage:
                 raise DuelError("Duello non trovato")
             new, result = action(game)
             self._duels[game_id] = new
+            shot = _valid_shot(new, result)
+            if shot is not None:
+                uid, name, ms = shot
+                row = self._duel_stats.setdefault((new.chat_id, uid), [name, 0, 0, None])
+                row[0], row[3] = name, ms if row[3] is None else min(row[3], ms)
             if game.status != duel.FINISHED and new.status == duel.FINISHED:
                 (wid, wname), (lid, lname) = new.winner, new.loser
-                _, w, l_ = self._duel_stats.get((new.chat_id, wid), (wname, 0, 0))
-                self._duel_stats[(new.chat_id, wid)] = (wname, w + 1, l_)
-                _, w, l_ = self._duel_stats.get((new.chat_id, lid), (lname, 0, 0))
-                self._duel_stats[(new.chat_id, lid)] = (lname, w, l_ + 1)
+                for uid, name, win, loss in ((wid, wname, 1, 0), (lid, lname, 0, 1)):
+                    row = self._duel_stats.setdefault((new.chat_id, uid), [name, 0, 0, None])
+                    row[0], row[1], row[2] = name, row[1] + win, row[2] + loss
             return new, result
 
     async def set_duel_message(self, game_id: int, message_id: int) -> None:
@@ -342,8 +348,13 @@ class MemoryStorage:
         return min(deadlines, default=None)
 
     async def duel_leaderboard(self, chat_id: int, limit: int = 20) -> list[tuple[str, int, int]]:
-        rows = [v for (cid, _), v in self._duel_stats.items() if cid == chat_id]
+        rows = [(n, w, lo) for (cid, _), (n, w, lo, _) in self._duel_stats.items() if cid == chat_id and w + lo > 0]
         rows.sort(key=lambda r: (-r[1], r[2], r[0]))
+        return rows[:limit]
+
+    async def fastest_fingers(self, chat_id: int, limit: int = 10) -> list[tuple[str, int]]:
+        rows = [(n, ms) for (cid, _), (n, _, _, ms) in self._duel_stats.items() if cid == chat_id and ms is not None]
+        rows.sort(key=lambda r: (r[1], r[0]))
         return rows[:limit]
 
     async def get_file_id(self, key: str) -> str | None:
@@ -691,6 +702,21 @@ class PostgresStorage:
                 new.deadline,
                 new.updated_at,
             )
+            shot = _valid_shot(new, result)
+            if shot is not None:
+                uid, name, ms = shot
+                await conn.execute(
+                    """
+                    INSERT INTO duel_stats AS d (chat_id, user_id, user_name, best_ms) VALUES ($1, $2, $3, $4)
+                    ON CONFLICT (chat_id, user_id) DO UPDATE SET
+                        user_name = EXCLUDED.user_name,
+                        best_ms = LEAST(d.best_ms, EXCLUDED.best_ms)
+                    """,
+                    new.chat_id,
+                    uid,
+                    name,
+                    ms,
+                )
             if game.status != duel.FINISHED and new.status == duel.FINISHED:
                 (wid, wname), (lid, lname) = new.winner, new.loser
                 for uid, name, win, loss in ((wid, wname, 1, 0), (lid, lname, 0, 1)):
@@ -731,12 +757,23 @@ class PostgresStorage:
         rows = await self.pool.fetch(
             """
             SELECT user_name, wins, losses FROM duel_stats
-            WHERE chat_id = $1 ORDER BY wins DESC, losses, user_name LIMIT $2
+            WHERE chat_id = $1 AND wins + losses > 0 ORDER BY wins DESC, losses, user_name LIMIT $2
             """,
             chat_id,
             limit,
         )
         return [(r["user_name"], r["wins"], r["losses"]) for r in rows]
+
+    async def fastest_fingers(self, chat_id: int, limit: int = 10) -> list[tuple[str, int]]:
+        rows = await self.pool.fetch(
+            """
+            SELECT user_name, best_ms FROM duel_stats
+            WHERE chat_id = $1 AND best_ms IS NOT NULL ORDER BY best_ms, user_name LIMIT $2
+            """,
+            chat_id,
+            limit,
+        )
+        return [(r["user_name"], r["best_ms"]) for r in rows]
 
     async def get_file_id(self, key: str) -> str | None:
         return await self.pool.fetchval("SELECT file_id FROM media_file_ids WHERE media_key = $1", key)
@@ -759,6 +796,14 @@ def _morra_from_row(row: Any) -> MorraGame:
     data = dict(row)
     data.pop("created_at", None)
     return MorraGame(**data)
+
+
+def _valid_shot(game: DuelGame, result: duel.Round | None) -> tuple[int, str, int] | None:
+    """(user_id, nome, ms) di chi ha appena colpito dopo il "FUOCO!", per il record personale."""
+    if result is None or result.kind != duel.SHOT or result.reaction_ms is None:
+        return None
+    uid = game.challenger_id if result.winner == 1 else game.opponent_id
+    return uid, game.name(result.winner), result.reaction_ms
 
 
 def _duel_from_row(row: Any) -> DuelGame:
