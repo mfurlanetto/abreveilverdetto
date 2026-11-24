@@ -143,4 +143,16 @@ def test_sezione_diti_piu_veloci():
 
     text = _fastest([("Alice", 182), ("Bob <3", 1450)])
     assert text.startswith("<b>DITI PIÙ VELOCI 🔫</b>")
-    assert " 1. Alice:   0,182 s" in text and " 2. Bob &lt;3:  1,450 s" in text
+    assert "1. Alice:   0,182 s\n2. Bob &lt;3:  1,450 s" in text
+
+
+def test_diti_piu_veloci_allineati_senza_spazi_iniziali():
+    import re
+
+    from abreveilverdetto.commands.centocento import _fastest
+
+    rows = [(f"Giocatore {i}", 100 * i) for i in range(1, 12)]
+    body = re.search(r"<pre>(.*)</pre>", _fastest(rows), re.S).group(1).split("\n")
+    assert all(not line[0].isspace() for line in body)
+    assert len({line.index("Giocatore") for line in body}) == 1
+    assert len({len(line) for line in body}) == 1

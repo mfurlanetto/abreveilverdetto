@@ -138,8 +138,11 @@ def _fastest(rows: list[tuple[str, int]]) -> str:
     names = [_short(name) for name, _ in rows]
     width = max(len(n) for n in names) + 2
     seconds = [f"{ms / 1000:.3f}".replace(".", ",") for _, ms in rows]
+    # Nessuno spazio a inizio riga: Telegram può toglierlo e disallineare la colonna ("1." vs "10.").
+    rank = len(f"{len(rows)}.") + 1
     lines = [
-        f"{i:>2}. {n + ':':<{width}}{sec:>6} s" for i, (n, sec) in enumerate(zip(names, seconds, strict=True), start=1)
+        f"{f'{i}.':<{rank}}{n + ':':<{width}}{sec:>6} s"
+        for i, (n, sec) in enumerate(zip(names, seconds, strict=True), start=1)
     ]
     return f"<b>DITI PIÙ VELOCI 🔫</b> (record di reazione al FUOCO!)\n<pre>{esc(chr(10).join(lines))}</pre>"
 
